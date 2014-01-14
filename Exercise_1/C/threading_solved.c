@@ -9,7 +9,10 @@ void* add()
     for( int i = 0; i < 1000000; i++ )
     {
         if(semaphore != 1)
-            i--; continue;
+	{
+            i--; 
+	    continue;
+	}
         semaphore--;
         x++;
         semaphore++;
@@ -22,7 +25,10 @@ void* sub()
     for( int i = 0; i < 1000000; i++ )
     {
         if(semaphore != 1)
-            i--; continue;
+	{
+            i--; 
+	    continue;
+	}
         semaphore--;
         x--;
         semaphore++;
