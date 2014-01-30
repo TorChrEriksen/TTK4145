@@ -8,7 +8,9 @@ import (
 	"./src/TCPConn"
 )
 
-func tryConnect(addr string) {
+func tryConnect(addr string, identifier string) {
+
+    fmt.Println("Running: ", identifier)
 
 	result, tcpAddress := TCPConn.InitComm(addr)
 
@@ -17,8 +19,9 @@ func tryConnect(addr string) {
 	} else {
 		result, conn := TCPConn.OpenComm(*tcpAddress)
 		if result == -1 {
-			fmt.Println("Error connecting to host")
+			fmt.Println(identifier, ": Error connecting to host")
 		} else {
+<<<<<<< HEAD
 			for {
 				time.Sleep(1000 * time.Millisecond)
 				result := TCPConn.TestComm(*conn)
@@ -28,15 +31,23 @@ func tryConnect(addr string) {
 					fmt.Println("Connect to host correctly")
 				}
 			}
+=======
+			fmt.Println(identifier, ": Connection terminated correctly")
+>>>>>>> f590b83071033f72b780739a9f82129c500f9906
 		}
 	}
 }
 
 func main() {
 
+<<<<<<< HEAD
 	go tryConnect("129.241.187.153:12345") // Faulty connection
 	go tryConnect("129.241.187.156:12345") // Correct connection
 //	go tryConnect("129.241.187.161:33546") // Correct connection
+=======
+	go tryConnect("129.241.187.153:12345", "Connection_1") // Faulty connection
+	go tryConnect("129.241.187.156:12345", "Connection_2") // Correct connection
+>>>>>>> f590b83071033f72b780739a9f82129c500f9906
 
 	fmt.Println("press 1 to quit:")
 
