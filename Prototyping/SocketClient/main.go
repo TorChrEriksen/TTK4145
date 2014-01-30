@@ -10,24 +10,33 @@ import (
 
 func tryConnect(addr string) {
 
-	for {
-		time.Sleep(1000 * time.Millisecond)
+	result, tcpAddress := TCPConn.InitComm(addr)
 
-		result := TCPConn.TestComm(addr)
-
+	if result == -1 {
+		fmt.Println("Error connecting to host")
+	} else {
+		result, conn := TCPConn.OpenComm(*tcpAddress)
 		if result == -1 {
 			fmt.Println("Error connecting to host")
 		} else {
-			fmt.Println("Connection terminated correctly")
+			for {
+				time.Sleep(1000 * time.Millisecond)
+				result := TCPConn.TestComm(*conn)
+				if result == -1 {
+					fmt.Println("Error connecting to host")
+				} else {
+					fmt.Println("Connect to host correctly")
+				}
+			}
 		}
 	}
-
 }
 
 func main() {
 
 	go tryConnect("129.241.187.153:12345") // Faulty connection
 	go tryConnect("129.241.187.156:12345") // Correct connection
+//	go tryConnect("129.241.187.161:33546") // Correct connection
 
 	fmt.Println("press 1 to quit:")
 
