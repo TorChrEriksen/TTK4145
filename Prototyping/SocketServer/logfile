@@ -70,3 +70,5 @@
 2014/01/30 16:44:42.512765 main.go:13: Success: Connection accepted from  129.241.187.156:45968
 2014/01/30 16:46:10.492659 main.go:13: Success: Connection accepted from  129.241.187.156:45970
 2014/01/30 16:46:28.956401 main.go:13: Success: Connection accepted from  129.241.187.156:45972
+2014/01/30 17:00:05.299034 main.go:33: Listening for new connections...
+2014/01/30 17:00:10.957216 main.go:13: Success: Connection accepted from  129.241.187.156:46076
