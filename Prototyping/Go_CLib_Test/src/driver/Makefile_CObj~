@@ -1,0 +1,33 @@
+# Compiler to use.
+#CC = gcc
+
+# Compiler flags go here.
+CFLAGS = -std=c99 -g -Wall -O2 -I . -MMD
+
+# Linker flags go here.
+LDFLAGS = -lpthread -lcomedi -g -lm
+
+# list of sources
+ELEVSRC = elev.c io.c
+
+# top-level rule, to compile everything.
+all: gcc $(CFLAGS) $(LDFLAGS) $(ELEVSRC) -c $< -o $@
+
+# Define all object files.
+#ELEVOBJ = $(ELEVSRC:.c=.o)
+
+# rule to link the program
+#$(TARGET): $(ELEVOBJ)
+	#gcc $^ -o $@ $(LDFLAGS)
+
+# Compile: create object files from C source files.
+#%.o : %.c
+#	gcc $(CFLAGS) -c  $< -o $@ 
+
+
+# rule for cleaning re-compilable files.
+#clean:
+	#rm -f $(TARGET) $(ELEVOBJ) $(DEPS)
+
+#Martin Korsgaard, 2006
+#Edited by Anders Petersen, 2014
