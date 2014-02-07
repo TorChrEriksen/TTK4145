@@ -14,14 +14,14 @@ else
     echo "Writing config to $FILE:"
 fi
 
-echo "syntax on" | tee -a $HOME/.vimrc
-echo "filetype plugin on" | tee -a $HOME/.vimrc
-echo "filetype indent on" | tee -a $HOME/.vimrc
-echo "set smartindent" | tee -a $HOME/.vimrc
-echo "set tabstop=4" | tee -a $HOME/.vimrc
-echo "set shiftwidth=4" | tee -a $HOME/.vimrc
-echo "set softtabstop=4" | tee -a $HOME/.vimrc
-echo "set expandtab" | tee -a $HOME/.vimrc
+echo "syntax on" | tee -a $FILE
+echo "filetype plugin on" | tee -a $FILE
+echo "filetype indent on" | tee -a $FILE
+echo "set smartindent" | tee -a $FILE
+echo "set tabstop=4" | tee -a $FILE
+echo "set shiftwidth=4" | tee -a $FILE
+echo "set softtabstop=4" | tee -a $FILE
+echo "set expandtab" | tee -a $FILE
 
 echo "Creating symbolic links..."
 ln -s /usr/local/go/misc/vim/autoload/go/complete.vim $HOME/.vim/autoload/go
