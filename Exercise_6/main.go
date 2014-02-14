@@ -25,6 +25,7 @@ const (
 var PRINT_INFO bool = false
 var TIMEOUT = time.Duration(time.Second * 5)
 
+// Only for debugging/testing
 func killProc() {
     proc, err := os.FindProcess(os.Getpid())
     if err != nil {
@@ -80,10 +81,13 @@ func waitForAlive(waiter chan int) {
     }()
 
     for sig := range ch {
-        fmt.Println("Signal received: ", sig)
+        if PRINT_INFO {
+            fmt.Println("Signal received: ", sig)
+        } else {
+            _ = sig
+        }
         timer.Reset(TIMEOUT)
     }
-
 }
 
 func spawnCopy() (*os.Process, error) {
