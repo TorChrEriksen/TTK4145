@@ -25,6 +25,7 @@ const (
 var PRINT_INFO bool = false
 var TIMEOUT = time.Duration(time.Second * 5)
 
+// killProc() is not used in main program, only used for debugging/testing.
 func killProc() {
     proc, err := os.FindProcess(os.Getpid())
     if err != nil {
@@ -71,7 +72,7 @@ func waitForAlive(waiter chan int) {
 
     timer := time.NewTimer(TIMEOUT)
     go func() {
-        <- timer.C
+        <-timer.C
         if PRINT_INFO {
             fmt.Println("Timer Expired, Secondary is taking over")
         }
