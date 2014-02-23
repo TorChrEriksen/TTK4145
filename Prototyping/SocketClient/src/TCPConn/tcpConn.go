@@ -42,10 +42,12 @@ func TerminateConn(conn net.TCPConn) int {
 }
 
 func SendData(conn net.TCPConn, a string) int {
-	fmt.Println("Here")
-	n, err := fmt.Fprintf(&conn, a)
+	fmt.Println("SendData()")
+	//n, err := fmt.Fprintf(&conn, a)
+	data := []byte(a)
+	n, err := conn.Write(data)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("Error writing to connection: ", err.Error())
 		return -1
 		/*
 				status, err := bufio.NewReader(&conn).ReadString('\n')
@@ -70,14 +72,14 @@ func TestComm(conn net.TCPConn) int {
 	status, err := bufio.NewReader(&conn).ReadString('\n')
 
 	if err != nil {
-		fmt.Println("Error: ", err.Error())
+		fmt.Println("Error testing connection: ", err.Error())
 		return -1
 	}
 	fmt.Println("Reply from server: ", status)
 
 	err = conn.Close()
 	if err != nil {
-		fmt.Println("Error: ", err.Error())
+		fmt.Println("Error closing connection: ", err.Error())
 		return -1
 	}
 

@@ -2,28 +2,36 @@
 package main
 
 import (
-	"bufio"
+	//"bufio"
 	"fmt"
 	"log"
 	"net"
 	"os"
 )
 
-func acceptConn(conn net.Conn, l log.Logger) {
-	l.Println("Success: Connection accepted from ", conn.RemoteAddr())
-	listenForData(conn, l)
+func convertData(d []byte) {
+	convertedData := make([]byte, 24)
+	for i := 0; i < n; i++ {
+		convertedData[i] = data[i]
+	}
+	if err != nil {
+		l.Println(err.Error())
+	} else {
+		//l.Println("Data from client: ", n, " --> ", convertedData)
+		fmt.Println("Data from client: ", n, " --> ", convertedData)
+		fmt.Println("Data from client: ", n, " --> ", (string)(convertedData))
+	}
 }
 
-func listenForData(conn net.Conn, l log.Logger) {
-	l.Println("listenForData")
+func acceptConn(conn net.Conn, l log.Logger) {
+	//l.Println("Success: Connection accepted from ", conn.RemoteAddr())
+	fmt.Println("Success: Connection accepted from ", conn.RemoteAddr())
 	for {
 		//io.Copy(conn, conn)
-		dataIn, err := bufio.NewReader(conn).ReadString('\x00')
-		if err != nil {
-			l.Println(err.Error())
-		} else {
-			l.Println("Data from client: ", dataIn)
-		}
+		//dataIn, err := bufio.NewReader(conn).ReadString('\x00')
+		data := make([]byte, 4096)
+		n, err := conn.Read(data)
+
 	}
 
 	// Handle timeout?!
@@ -35,6 +43,11 @@ func listenForData(conn net.Conn, l log.Logger) {
 			l.Println("Connection closed.")
 			fmt.Println("Connection closed.")
 		}*/
+}
+
+func listenForData(conn net.Conn, l log.Logger) {
+	l.Println("listenForData")
+
 }
 
 func handleData() {
@@ -63,6 +76,7 @@ func main() {
 		if err != nil {
 			l.Println(err.Error())
 		} else {
+			fmt.Println("Firing goroutine for handling connection.")
 			go acceptConn(conn, *l)
 		}
 	}
