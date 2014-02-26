@@ -22,7 +22,7 @@ func runServer(udpAddr net.UDPAddr) {
             continue
         }
 
-        fmt.Println("From: ", string(remoteAddr.IP), ":", string(remoteAddr.Port), " --> ",  string(read), string(data))
+        fmt.Println("From: ", remoteAddr.IP, ":", remoteAddr.Port, " --> ",  read, string(data))
     }
     return
 }
