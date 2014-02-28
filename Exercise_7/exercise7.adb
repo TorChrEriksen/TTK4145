@@ -108,7 +108,7 @@ procedure exercise7 is
 	    --Transaction_Manager.Finished();
 	    --accept Finished;
 	    --accept Transaction_Manager.Finished;
-	    entry Transaction_Manager;
+	    --entry Transaction_Manager;
          end if;
 
          Prev := Num;
