@@ -8,12 +8,7 @@ import (
 	"./src/TCPConn"
 )
 
-<<<<<<< HEAD
-func main() {
-	conn, err := net.Dial("tcp", "78.91.51.215:12345")
-=======
 func tryConnect(addr string, identifier string) {
->>>>>>> master
 
     fmt.Println("Running: ", identifier)
 

@@ -1,0 +1,14 @@
+package driver
+import "C" {
+/*
+#cgo CFLAGS: -std=c99 -g -Wall -O2 -I . -MMD
+#cgo LDFLAGS: -lcomedi -lm 
+#include "elev.c"
+#include "io.c"
+*/
+}
+
+
+func ElevStop(){
+    C.elev_set_speed(0)
+}
