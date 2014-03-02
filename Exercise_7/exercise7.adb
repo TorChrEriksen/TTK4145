@@ -14,6 +14,7 @@ procedure exercise7 is
       Finished_Gate_Open   : Boolean := False;
       Aborted              : Boolean := False;
       Will_Commit          : Boolean := True;
+      My_Counter	   : Integer := 0;
    end Transaction_Manager;
 
    protected body Transaction_Manager is
@@ -22,15 +23,24 @@ procedure exercise7 is
          ------------------------------------------
          -- PART 3: Complete the exit protocol here
          ------------------------------------------
+         --Put_Line("Finished count: "& Integer'Image(Finished'Count)); --<Debuggin'
          Finished_Gate_Open := True;
          --Please find debugging line below
          Put_Line("Here comes the finnished stuff");
-         if Finished'Count = 3
-	  Finished_Gate_Open := False;
-         end if
+         --if Finished'Count = 3 then
+	  --Finished_Gate_Open := False;
+	  if Aborted = True then
+	    Will_Commit := False;
+	    Aborted := False;
+	    Finished_Gate_Open := False;
+	  else
+	    Will_Commit := True;
+	    Finished_Gate_Open := False;
+	  end if;
+         --end if;
          
 	  
-	 --end if < This was here before!
+	 --end if --< This was here before!
       end Finished;
 
       procedure Signal_Abort is
@@ -46,10 +56,10 @@ procedure exercise7 is
    end Transaction_Manager;
    
    
-   
    function Unreliable_Slow_Add (x : Integer) return Integer is
    
-   Error_Rate : Constant := 0.15;  -- (between 0 and 1)
+  --Error_Rate : Constant := 0.15;  -- (between 0 and 1)
+   Error_Rate : Constant := 0.49; -- make it 50-50
    Generated_Rand : float;
    
    begin
@@ -58,7 +68,8 @@ procedure exercise7 is
       -------------------------------------------
       Generated_Rand := Random(Gen);
       
-      if Generated_Rand < Error_Rate then
+      --if Generated_Rand < Error_Rate then -- Low probability
+      if Generated_Rand > Error_Rate then -- High probability
 	delay Duration(10);
 	Put_Line("I managed to add something!"); -- <-Debuggin'
 	return x+10;
@@ -82,7 +93,7 @@ procedure exercise7 is
       Put_Line ("Worker" & Integer'Image(Initial) & " started");
 
       loop
-         --Put_Line ("Worker" & Integer'Image(Initial) & " started round" & Integer'Image(Round_Num));
+         Put_Line ("Worker" & Integer'Image(Initial) & " started round" & Integer'Image(Round_Num));
          Round_Num := Round_Num + 1;
          ---------------------------------------
          -- PART 2: Do the transaction work here          
@@ -91,11 +102,11 @@ procedure exercise7 is
 	  Num := Unreliable_Slow_Add(Num);
          exception
 	  when Count_Failed =>
-	    Put_Line("Oh noes, Oh noes, Oh noes, Oh noes, Oh noes!!!!");
+	    --Put_Line("Oh noes, Oh noes, Oh noes, Oh noes, Oh noes!!!!"); -- Debuggin'
 	    Manager.Signal_Abort;
 	 end;
          
-         
+         Manager.Finished;
          if Manager.Commit = True then
             Put_Line ("  Worker" & Integer'Image(Initial) & " comitting" & Integer'Image(Num));
          else
@@ -104,12 +115,10 @@ procedure exercise7 is
                       " to" & Integer'Image(Prev));
             -------------------------------------------
             -- PART 2: Roll back to previous value here
-            -------------------------------------------
-	    --Transaction_Manager.Finished();
-	    --accept Finished;
-	    --accept Transaction_Manager.Finished;
-	    --entry Transaction_Manager;
+            -------------------------------------------  
+            Num := Prev;
          end if;
+	 
 
          Prev := Num;
          delay 0.5;
