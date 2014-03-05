@@ -9,6 +9,8 @@ import (
 	"os"
 )
 
+type SocketClient struct {}
+
 func tryConnect(tcpAddr string, udpAddr string, identifier string) (*net.TCPConn, *net.UDPConn, int, int) {
 
 	fmt.Println("Running: ", identifier)
@@ -22,7 +24,7 @@ func tryConnect(tcpAddr string, udpAddr string, identifier string) (*net.TCPConn
 	return tcpConn, udpConn, tcpResult, udpResult
 }
 
-func Create() {
+func (sc SocketClient) Create() {
 
 	//go tryConnect("129.241.187.153:12345", "Connection_1") // Faulty connection
 	//go tryConnect("129.241.187.156:12345", "Connection_2") // Correct connection
@@ -89,3 +91,5 @@ func Create() {
 		}
 	}
 }
+
+func (sc SocketClient) Send(a string) {}
