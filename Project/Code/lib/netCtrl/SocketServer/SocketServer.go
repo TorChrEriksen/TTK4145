@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
-    "strings"
+    "./../NetServices"
 )
 
 func convertData(data []byte, n int) {
@@ -83,26 +83,6 @@ func startTCPServ(ch chan int) {
     ch <- 1
 }
 
-// TODO
-// Duplicate of SocketClient/src/NetServices/NetServices.go::FindCandidate()
-func findCandidate() (string, int) {
-    ip, err := net.InterfaceAddrs()
-    if err != nil {
-        fmt.Println("Error Lookup: ", err.Error())
-        return "", -1
-    }
-
-    for _, ipAddr := range ip {
-        if strings.Contains(ipAddr.String(), "/24") {
-            candidate := strings.TrimRight(ipAddr.String(), "/24")
-            candidate = candidate + ":12346"
-            return candidate, 1
-        }
-    }
-
-    return "", -1
-}
-
 func startUDPServ(ch chan int) {
 	f, err := os.OpenFile("UDP_Server.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -113,8 +93,8 @@ func startUDPServ(ch chan int) {
 	l := log.New(f, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
     _ = l
 
-    candidate, errInt := findCandidate()
-    if errInt == -1 {
+    candidate, errIntUDP := NetServices.FindUDPCandidate()
+    if errIntUDP == -1 {
         fmt.Println("Error: could not find any local IP address")
         return
     }

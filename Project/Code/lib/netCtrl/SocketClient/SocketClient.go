@@ -3,7 +3,7 @@ package SocketClient
 import (
 	"./TCPConn"
     "./UDPConn"
-    "./NetServices"
+    "./../NetServices"
 	"fmt"
 	"net"
 	"os"
