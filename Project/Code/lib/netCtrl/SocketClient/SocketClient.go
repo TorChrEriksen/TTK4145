@@ -1,10 +1,9 @@
-// SocketClient project main.go
-package main
+package SocketClient
 
 import (
-	"./src/TCPConn"
-    "./src/UDPConn"
-    "./src/NetServices"
+	"./TCPConn"
+    "./UDPConn"
+    "./../NetServices"
 	"fmt"
 	"net"
 	"os"
@@ -23,7 +22,7 @@ func tryConnect(tcpAddr string, udpAddr string, identifier string) (*net.TCPConn
 	return tcpConn, udpConn, tcpResult, udpResult
 }
 
-func main() {
+func Create() {
 
 	//go tryConnect("129.241.187.153:12345", "Connection_1") // Faulty connection
 	//go tryConnect("129.241.187.156:12345", "Connection_2") // Correct connection

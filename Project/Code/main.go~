@@ -1,9 +1,0 @@
-package main
-
-import(
-    "./src/driver"    
-)
-
-func main(){
-    driver.ElevStop()    
-}

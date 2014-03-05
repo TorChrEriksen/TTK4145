@@ -72,7 +72,7 @@ func waitForAlive(waiter chan int) {
 
     timer := time.NewTimer(TIMEOUT)
     go func() {
-        <- timer.C
+        <-timer.C
         if PRINT_INFO {
             fmt.Println("Timer Expired, Secondary is taking over")
         }

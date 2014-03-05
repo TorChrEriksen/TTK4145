@@ -1,13 +1,11 @@
-// SocketServer project main.go
-package main
+package SocketServer
 
 import (
 	"fmt"
 	"log"
 	"net"
 	"os"
-    "time"
-    "strings"
+    "./../NetServices"
 )
 
 func convertData(data []byte, n int) {
@@ -56,8 +54,7 @@ func handleData() {
 
 }
 
-//func startTCPServ(ch chan int) {
-func startTCPServ() {
+func startTCPServ(ch chan int) {
 	f, err := os.OpenFile("TCPServer.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("error opening file: ", err.Error())
@@ -83,31 +80,10 @@ func startTCPServ() {
 		}
 	}
 
-//    ch <- 1
+    ch <- 1
 }
 
-// TODO
-// Duplicate of SocketClient/src/NetServices/NetServices.go::FindCandidate()
-func findCandidate() (string, int) {
-    ip, err := net.InterfaceAddrs()
-    if err != nil {
-        fmt.Println("Error Lookup: ", err.Error())
-        return "", -1
-    }
-
-    for _, ipAddr := range ip {
-        if strings.Contains(ipAddr.String(), "/24") {
-            candidate := strings.TrimRight(ipAddr.String(), "/24")
-            candidate = candidate + ":12346"
-            return candidate, 1
-        }
-    }
-
-    return "", -1
-}
-
-//func startUDPServ(ch chan int) {
-func startUDPServ() {
+func startUDPServ(ch chan int) {
 	f, err := os.OpenFile("UDP_Server.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("error opening file: ", err.Error())
@@ -117,13 +93,11 @@ func startUDPServ() {
 	l := log.New(f, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
     _ = l
 
-    candidate, errInt := findCandidate()
-    if errInt == -1 {
+    candidate, errIntUDP := NetServices.FindUDPCandidate()
+    if errIntUDP == -1 {
         fmt.Println("Error: could not find any local IP address")
         return
     }
-
-//    candidate := "localhost:12346"
 
     addr, err := net.ResolveUDPAddr("udp", candidate)
     if err != nil {
@@ -147,21 +121,16 @@ func startUDPServ() {
 
         convertData(buffer, n)
 	}
-//    ch <- 1
+    ch <- 1
 }
 
-func main() {
+func Create() {
 
     // "join" threads
-//    ch := make(chan int)
+    ch := make(chan int)
 
-//    go startTCPServ(ch)
-//    go startUDPServ(ch)
+    go startTCPServ(ch)
+    go startUDPServ(ch)
 
-    go startTCPServ()
-    go startUDPServ()
-
-    time.Sleep(30 * time.Second)
-
-//    <-ch
+    <-ch
 }
