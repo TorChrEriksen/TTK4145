@@ -1,3 +1,0 @@
-2014/03/07 18:12:51.948379 SocketClient.go:48: ========== New log ==========
-2014/03/07 18:12:51.949001 SocketClient.go:110: Added TCP connection to tcpConn slice:  129.241.187.81:55558
-2014/03/07 18:12:51.949021 SocketClient.go:75: Added UDP connection to udpConn slice:  129.241.187.81:33393

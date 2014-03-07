@@ -6,18 +6,17 @@ import (
     "./SocketServer"
     "./SocketClient"
     "./NetServices"
+    "./../logger"
     "fmt"
     "time"
     "strings"
-    "log"
-    "os"
 )
 
 type NetController struct {
     // What if this is uninitialized when calling SendData
     // eg. calling SendData before Create(), or something....
-    file *os.File
-    log *log.Logger
+    Identifier string
+    al *logger.AppLogger
     localIP string
     hostList []string
     tcpClientList []string
@@ -29,34 +28,22 @@ type NetController struct {
     sc SocketClient.SocketClient
 }
 
-func (nc *NetController) Create() {
-    fileName := fmt.Sprint("log/NetController/NetController", time.Now().Format(time.RFC3339), ".log")
+func (nc *NetController) Create(a *logger.AppLogger) {
+    fileName := fmt.Sprint("log/NetController/NetController_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/NetController.log"
 
-	nc.file, _ = os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-    nc.log = log.New(nc.file, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
-
-    os.Remove(logSymLink)
-    err := os.Symlink(strings.TrimLeft(fileName, "log/"), logSymLink)
-    if err != nil {
-        nc.log.Println("Error creating symlink: ", err.Error())
-    }
-
-    nc.log.Println("========== New log ==========")
+    nc.al = a
+    nc.al.SetPackageLog(nc.Identifier, fileName, logSymLink)
 
     var intErr int
     nc.localIP, intErr = NetServices.FindLocalIP() 
     if intErr != 1 {
-        if nc.log != nil {
-            nc.log.Println("Error finding local IP")
-            // TODO: We will ahve to disable the net ctrl when we have no valid local IP
-            // Enough for detecting that we have no connection?
-            // Or do we use the heartbeat for that as well, and just ignore the local IP?
-        }
+        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error finding local IP")
+        // TODO: We will ahve to disable the net ctrl when we have no valid local IP
+        // Enough for detecting that we have no connection?
+        // Or do we use the heartbeat for that as well, and just ignore the local IP?
     } else {
-        if nc.log != nil {
-            nc.log.Println("Local IP found: ", nc.localIP)
-        }
+        nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Local IP found: ", nc.localIP))
     }
 
     nc.hostList = make([]string, 10)
@@ -70,7 +57,7 @@ func (nc *NetController) Create() {
     nc.sTCPServerChan = make(chan string)
 
 
-    nc.sc = SocketClient.SocketClient{}
+    nc.sc = SocketClient.SocketClient{Identifier: "SOCKETCLIENT"}
 }
 
 func (nc *NetController) Run() {
@@ -78,37 +65,29 @@ func (nc *NetController) Run() {
     UDP_BroadcastServer.Create(nc.bsChan)
     UDP_BroadcastClient.Create(nc.bcChan)
     SocketServer.Create(nc.sTCPServerChan, nc.sUDPServerChan)
-    nc.sc.Create()
+    nc.sc.Create(nc.al)
 
 //    go func() {
         for {
             select {
             case bClient := <-nc.bcChan :
                 // TODO: when to stop broadcasting?
-                if nc.log != nil {
-                    nc.log.Println( "Sent ", bClient, " bytes.")
-                }
+                nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Sent ", bClient, " bytes."))
 
             case bServer := <-nc.bsChan :
                 go func() {
                     if strings.EqualFold(nc.localIP, bServer) {
-                        if nc.log != nil {
-                            nc.log.Println("Ignoring broadcast from local IP: ", bServer)
-                        }
+                        nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Ignoring broadcast from local IP: ", bServer))
                         return
                     }
 
                     for _, host := range nc.hostList {
                         if strings.EqualFold(host, bServer) {
-                            if nc.log != nil {
-                                nc.log.Println("Already part of host list: ", bServer)
-                            }
+                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of host list: ", bServer))
                             return
                         }
                     }
-                    if nc.log != nil {
-                        nc.log.Println("Appending to host list: ", bServer)
-                    }
+                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to host list: ", bServer))
                     nc.hostList = append(nc.hostList, bServer)
                     nc.sc.ConnectTCP(bServer + ":12345")
                     nc.sc.ConnectUDP(bServer + ":12346")
@@ -125,15 +104,11 @@ func (nc *NetController) Run() {
                 go func() {
                     for _, client := range nc.udpClientList {
                         if strings.EqualFold(client, ssUDP) {
-                            if nc.log != nil {
-                                nc.log.Println("Already part of UDP client list: ", ssUDP)
-                            }
+                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of UDP client list: ", ssUDP))
                             return
                         }
                     }
-                    if nc.log != nil {
-                        nc.log.Println("Appending to UDP client list: ", ssUDP)
-                    }
+                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to UDP client list: ", ssUDP))
                     nc.udpClientList = append(nc.udpClientList, ssUDP)
 
                 }()
@@ -144,15 +119,11 @@ func (nc *NetController) Run() {
                 go func() {
                     for _, client := range nc.tcpClientList {
                         if strings.EqualFold(client, ssTCP) {
-                            if nc.log != nil {
-                                nc.log.Println("Already part of TCP client list: ", ssTCP)
-                            }
+                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of TCP client list: ", ssTCP))
                             return
                         }
                     }
-                    if nc.log != nil {
-                        nc.log.Println("Appending to TCP client list: ", ssTCP)
-                    }
+                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to TCP client list: ", ssTCP))
                     nc.tcpClientList = append(nc.tcpClientList, ssTCP)
 
                 }()

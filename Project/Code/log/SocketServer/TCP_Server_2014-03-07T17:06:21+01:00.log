@@ -1,3 +1,0 @@
-2014/03/07 17:06:21.892658 SocketServer.go:81: ========== New log ==========
-2014/03/07 17:06:21.892704 SocketServer.go:90: Listening for new connections...
-2014/03/07 17:06:21.893089 SocketServer.go:23: Success: Connection accepted from  129.241.187.81:55515

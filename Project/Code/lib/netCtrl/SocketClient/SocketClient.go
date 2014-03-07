@@ -3,50 +3,32 @@ package SocketClient
 import (
 	"./TCPConn"
     "./UDPConn"
+    "./../../logger"
 	"net"
-	"os"
-    "log"
     "fmt"
     "time"
     "strings"
 )
 
 type SocketClient struct {
-    file *os.File
-    log *log.Logger
+    Identifier string
+    al *logger.AppLogger
     udpConn []*net.UDPConn
     tcpConn []*net.TCPConn
     heartbeatChan chan bool
 }
 
-// Call before closing down Socket Client and or program
-func (sc *SocketClient) Destory() {
-	defer sc.file.Close()
-}
-
 // Always called before any other function in this module
-func (sc *SocketClient) Create() {
-    sc.file = nil
-    sc.log = nil
-    sc.udpConn = make([]*net.UDPConn, 10)
-    sc.tcpConn = make([]*net.TCPConn, 10)
-    sc.heartbeatChan = make(chan bool)
-
+func (sc *SocketClient) Create(a *logger.AppLogger) {
     fileName := fmt.Sprint("log/SocketClient/SocketClient_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/SocketClient.log"
 
-	sc.file, _ = os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-    sc.log = log.New(sc.file, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+    sc.al = a
+    sc.al.SetPackageLog(sc.Identifier, fileName, logSymLink)
 
-    os.Remove(logSymLink)
-    err := os.Symlink(strings.TrimLeft(fileName, "log/"), logSymLink)
-    if err != nil {
-        sc.log.Println("Error creating symlink: ", err.Error())
-    }
-
-    if sc.log != nil {
-        sc.log.Println("========== New log ==========")
-    }
+    sc.udpConn = make([]*net.UDPConn, 10)
+    sc.tcpConn = make([]*net.TCPConn, 10)
+    sc.heartbeatChan = make(chan bool)
 }
 
 // Connect to host
@@ -54,14 +36,13 @@ func (sc *SocketClient) Create() {
 func (sc *SocketClient) ConnectUDP(udpAddr string) int {
 
     // Check if socket is already connected to udpAddr
-    for n, udpConnection := range sc.udpConn {
-        if n < 1 { break }
-
-        if strings.EqualFold(udpConnection.LocalAddr().String(), udpAddr) {
-            if sc.log != nil {
-                sc.log.Println("Already connected to that address: ", udpAddr, " --> ", udpConnection.LocalAddr().String())
+    for _, udpConnection := range sc.udpConn {
+        if udpConnection != nil { //TODO Verify that this works
+            if strings.EqualFold(udpConnection.LocalAddr().String(), udpAddr) {
+                sc.al.Send_To_Log(sc.Identifier, logger.INFO,
+                    fmt.Sprint("Already connected to that address: ", udpAddr, " --> ", udpConnection.LocalAddr().String()))
+                return 1
             }
-            return 1
         }
     }
 
@@ -71,15 +52,12 @@ func (sc *SocketClient) ConnectUDP(udpAddr string) int {
     // Add udp connection to udp slice.
     if udpErr == 1 {
         sc.udpConn = append(sc.udpConn, udpConn)
-        if sc.log != nil {
-            sc.log.Println("Added UDP connection to udpConn slice: ", udpConn.LocalAddr().String())
-        }
+        sc.al.Send_To_Log(sc.Identifier, logger.INFO,
+            fmt.Sprint("Added UDP connection to udpConn slice: ", udpConn.LocalAddr().String()))
     }
 
     if udpErr != 1 {
-        if sc.log != nil {
-		    sc.log.Println("Error connecting (UDP)")
-        }
+        sc.al.Send_To_Log(sc.Identifier, logger.ERROR, fmt.Sprint("Error connecting (UDP)"))
         return -1
     } else {
         return 1 // Everything ok.
@@ -89,14 +67,13 @@ func (sc *SocketClient) ConnectUDP(udpAddr string) int {
 func (sc *SocketClient) ConnectTCP(tcpAddr string) int {
 
     // Check if socket is already connected to tcpAddr
-    for n, tcpConnection := range sc.tcpConn {
-        if n < 1 { break }
-
-        if strings.EqualFold(tcpConnection.LocalAddr().String(), tcpAddr) {
-            if sc.log != nil {
-                sc.log.Println("Already connected to that address: ", tcpAddr, " --> ", tcpConnection.LocalAddr().String())
+    for _, tcpConnection := range sc.tcpConn {
+        if tcpConnection != nil { //TODO Verify that this works
+            if strings.EqualFold(tcpConnection.LocalAddr().String(), tcpAddr) {
+                sc.al.Send_To_Log(sc.Identifier, logger.INFO,
+                    fmt.Sprint("Already connected to that address: ", tcpAddr, " --> ", tcpConnection.LocalAddr().String()))
+                return 1
             }
-            return 1
         }
     }
 
@@ -106,15 +83,12 @@ func (sc *SocketClient) ConnectTCP(tcpAddr string) int {
     // Add tcp connection to tcp slice.
     if tcpErr == 1 {
         sc.tcpConn = append(sc.tcpConn, tcpConn)
-        if sc.log != nil {
-            sc.log.Println("Added TCP connection to tcpConn slice: ", tcpConn.LocalAddr().String())
-        }
+        sc.al.Send_To_Log(sc.Identifier, logger.INFO,
+            fmt.Sprintln("Added TCP connection to tcpConn slice: ", tcpConn.LocalAddr().String()))
     }
 
 	if tcpErr != 1 {
-        if sc.log != nil {
-		    sc.log.Println("Error connecting (TCP)")
-        }
+        sc.al.Send_To_Log(sc.Identifier, logger.INFO, fmt.Sprint("Error connecting (TCP)"))
         return -1
 	} else {
         return 1
