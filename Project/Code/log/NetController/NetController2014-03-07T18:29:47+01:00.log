@@ -1,0 +1,7 @@
+2014/03/07 18:29:47.940563 netCtrl.go:45: ========== New log ==========
+2014/03/07 18:29:47.940749 netCtrl.go:58: Local IP found:  129.241.187.81
+2014/03/07 18:29:47.941156 netCtrl.go:89: Sent  48  bytes.
+2014/03/07 18:29:47.941188 netCtrl.go:154: Appending to TCP client list:  Listening for new connections...
+2014/03/07 18:29:47.941223 netCtrl.go:96: Ignoring broadcast from local IP:  129.241.187.81
+2014/03/07 18:29:52.941037 netCtrl.go:89: Sent  48  bytes.
+2014/03/07 18:29:52.941105 netCtrl.go:96: Ignoring broadcast from local IP:  129.241.187.81

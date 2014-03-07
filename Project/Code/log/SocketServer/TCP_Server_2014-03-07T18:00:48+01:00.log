@@ -1,0 +1,5 @@
+2014/03/07 18:00:48.179887 SocketServer.go:81: ========== New log ==========
+2014/03/07 18:00:48.179928 SocketServer.go:90: Listening for new connections...
+2014/03/07 18:00:48.180316 SocketServer.go:23: Success: Connection accepted from  129.241.187.81:55551
+2014/03/07 18:00:58.180481 SocketServer.go:30: Error while reading from connection:  EOF  I read  0  bytes.
+2014/03/07 18:00:58.180722 SocketServer.go:31: ALERT: Connection probably terminated???

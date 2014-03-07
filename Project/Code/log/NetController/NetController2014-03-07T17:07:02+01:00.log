@@ -1,0 +1,8 @@
+2014/03/07 17:07:02.476426 netCtrl.go:39: ========== New log ==========
+2014/03/07 17:07:02.476934 netCtrl.go:94: Appending to UDP client list:  Listening for new connections...
+2014/03/07 17:07:02.476967 netCtrl.go:74: Appending to host list:  129.241.187.81
+2014/03/07 17:07:02.477069 netCtrl.go:94: Appending to UDP client list:  Firing goroutine for handling connection.
+2014/03/07 17:07:02.477081 netCtrl.go:90: Already part of UDP client list:  Listening for new connections...
+2014/03/07 17:07:02.477091 netCtrl.go:94: Appending to UDP client list:  Success: Connection accepted from 129.241.187.81:55516
+2014/03/07 17:07:07.476773 netCtrl.go:70: Already part of host list:  129.241.187.81
+2014/03/07 17:07:12.476894 netCtrl.go:70: Already part of host list:  129.241.187.81

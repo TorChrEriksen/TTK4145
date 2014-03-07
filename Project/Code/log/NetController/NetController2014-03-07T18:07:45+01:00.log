@@ -1,0 +1,4 @@
+2014/03/07 18:07:45.390720 netCtrl.go:43: ========== New log ==========
+2014/03/07 18:07:45.391202 netCtrl.go:72: Sent  48  bytes.
+2014/03/07 18:07:45.391237 netCtrl.go:111: Appending to UDP client list:  Listening for new connections...
+2014/03/07 18:07:45.391270 netCtrl.go:86: Appending to host list:  129.241.187.81

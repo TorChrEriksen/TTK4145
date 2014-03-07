@@ -3,93 +3,147 @@ package SocketClient
 import (
 	"./TCPConn"
     "./UDPConn"
-    "./../NetServices"
-	"fmt"
 	"net"
 	"os"
+    "log"
+    "fmt"
+    "time"
+    "strings"
 )
 
-type SocketClient struct {}
-
-func tryConnect(tcpAddr string, udpAddr string, identifier string) (*net.TCPConn, *net.UDPConn, int, int) {
-
-	fmt.Println("Running: ", identifier)
-
-	_, tcpAddress := TCPConn.InitComm(tcpAddr)
-	tcpResult, tcpConn  := TCPConn.OpenComm(*tcpAddress)
-
-    _, udpAddress := UDPConn.InitComm(udpAddr)
-    udpResult, udpConn := UDPConn.OpenComm(*udpAddress)
-
-	return tcpConn, udpConn, tcpResult, udpResult
+type SocketClient struct {
+    file *os.File
+    log *log.Logger
+    udpConn []*net.UDPConn
+    tcpConn []*net.TCPConn
+    heartbeatChan chan bool
 }
 
-func (sc SocketClient) Create() {
+// Call before closing down Socket Client and or program
+func (sc *SocketClient) Destory() {
+	defer sc.file.Close()
+}
 
-	//go tryConnect("129.241.187.153:12345", "Connection_1") // Faulty connection
-	//go tryConnect("129.241.187.156:12345", "Connection_2") // Correct connection
-	//	go tryConnect("129.241.187.161:33546") // Correct connection
-	//var conn_2 net.TCPConn
-    localTCPAddress, errIntTCP := NetServices.FindTCPCandidate()
-    localUDPAddress, errIntUDP := NetServices.FindUDPCandidate()
-    if (errIntTCP == -1) ||  (errIntUDP == -1) {
-        fmt.Println("Error finding candidates")
-        os.Exit(1)
+// Always called before any other function in this module
+func (sc *SocketClient) Create() {
+    sc.file = nil
+    sc.log = nil
+    sc.udpConn = make([]*net.UDPConn, 10)
+    sc.tcpConn = make([]*net.TCPConn, 10)
+    sc.heartbeatChan = make(chan bool)
+
+    fileName := fmt.Sprint("log/SocketClient/SocketClient_", time.Now().Format(time.RFC3339), ".log")
+    logSymLink := "log/SocketClient.log"
+
+	sc.file, _ = os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+    sc.log = log.New(sc.file, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+
+    os.Remove(logSymLink)
+    err := os.Symlink(strings.TrimLeft(fileName, "log/"), logSymLink)
+    if err != nil {
+        sc.log.Println("Error creating symlink: ", err.Error())
     }
 
-    conn_1_TCP, conn_1_UDP, tcpErr, udpErr := tryConnect(localTCPAddress, localUDPAddress, "Connection_1") // Correct connection
-	if tcpErr == -1 {
-		fmt.Println("Error connecting (TCP)")
-		os.Exit(1)
-	}
-    if udpErr == -1 {
-		fmt.Println("Error connecting (UDP)")
-		os.Exit(1)
+    if sc.log != nil {
+        sc.log.Println("========== New log ==========")
     }
-	//go tryConnect("localhost:12346", "Connection_2", &conn_2) // Correct connection
+}
 
-	fmt.Println("press 1 to quit:")
+// Connect to host
+// Returns -1 if the connection was not successfull, in that case retry to connect
+func (sc *SocketClient) ConnectUDP(udpAddr string) int {
 
-    //Debug: remove
-    _ = conn_1_UDP
+    // Check if socket is already connected to udpAddr
+    for n, udpConnection := range sc.udpConn {
+        if n < 1 { break }
 
-	for {
-		var input int
-		fmt.Scanf("%d", &input)
+        if strings.EqualFold(udpConnection.LocalAddr().String(), udpAddr) {
+            if sc.log != nil {
+                sc.log.Println("Already connected to that address: ", udpAddr, " --> ", udpConnection.LocalAddr().String())
+            }
+            return 1
+        }
+    }
 
-		switch input {
-		case 0:
-			{
-				continue
-			}
-		case 1:
-			{
-				os.Exit(1)
-			}
+    _, udpAddress := UDPConn.InitComm(udpAddr)
+    udpErr, udpConn := UDPConn.OpenComm(*udpAddress)
+
+    // Add udp connection to udp slice.
+    if udpErr == 1 {
+        sc.udpConn = append(sc.udpConn, udpConn)
+        if sc.log != nil {
+            sc.log.Println("Added UDP connection to udpConn slice: ", udpConn.LocalAddr().String())
+        }
+    }
+
+    if udpErr != 1 {
+        if sc.log != nil {
+		    sc.log.Println("Error connecting (UDP)")
+        }
+        return -1
+    } else {
+        return 1 // Everything ok.
+    }
+}
+
+func (sc *SocketClient) ConnectTCP(tcpAddr string) int {
+
+    // Check if socket is already connected to tcpAddr
+    for n, tcpConnection := range sc.tcpConn {
+        if n < 1 { break }
+
+        if strings.EqualFold(tcpConnection.LocalAddr().String(), tcpAddr) {
+            if sc.log != nil {
+                sc.log.Println("Already connected to that address: ", tcpAddr, " --> ", tcpConnection.LocalAddr().String())
+            }
+            return 1
+        }
+    }
+
+	_, tcpAddress := TCPConn.InitComm(tcpAddr)
+	tcpErr, tcpConn  := TCPConn.OpenComm(*tcpAddress)
+
+    // Add tcp connection to tcp slice.
+    if tcpErr == 1 {
+        sc.tcpConn = append(sc.tcpConn, tcpConn)
+        if sc.log != nil {
+            sc.log.Println("Added TCP connection to tcpConn slice: ", tcpConn.LocalAddr().String())
+        }
+    }
+
+	if tcpErr != 1 {
+        if sc.log != nil {
+		    sc.log.Println("Error connecting (TCP)")
+        }
+        return -1
+	} else {
+        return 1
+    }
+
+
+    /*
 		case 2:
 			{
-				TCPConn.TerminateConn(*conn_1_TCP)
+				TCPConn.TerminateConn(*tcpConn)
 			}
-		case 3:
-			{
-				fmt.Println(input)
-			}
+
 		case 4:
 			{
 				//TCPConn.SendData(conn_1, "This is data from conn_1\x00")
-                TCPConn.SendData(*conn_1_TCP, "Here is something mongo!£@11!: ¤¤¤ %%% Ni Hao!! END-not-here-but-here")
+                TCPConn.SendData(*tcpConn, "Here is something mongo!£@11!: ¤¤¤ %%% Ni Hao!! END-not-here-but-here")
 				//TCPConn.SendData(conn_2, "This is data from conn_2\r\n\r\n")
 			}
-        case 5:
-            {
-                go UDPConn.SendHeartbeat(*conn_1_UDP, "Im aliiiiiiiiiiiive!!")
-            }
-		default:
-			{
-				continue
-			}
+
+
 		}
 	}
+    */
 }
 
-func (sc SocketClient) Send(a string) {}
+func (sc *SocketClient) Send(a string) {
+}
+
+func (sc *SocketClient) SendHeartbeat() {
+    sc.heartbeatChan <- true
+    UDPConn.SendHeartbeat(sc.udpConn, "Im aliiiiiive!", sc.heartbeatChan)
+}

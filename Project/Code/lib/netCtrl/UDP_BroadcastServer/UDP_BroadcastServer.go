@@ -15,14 +15,15 @@ func runServer(udpAddr net.UDPAddr, ch chan string) {
 
     for {
         data := make([]byte, 4096)
-        read, remoteAddr, err := socket.ReadFromUDP(data)
+        _, remoteAddr, err := socket.ReadFromUDP(data)
 
         if err != nil {
             //fmt.Println("Error: ", err.Error())
             continue
         }
 
-        ch <- fmt.Sprint("From: ", remoteAddr.IP, ":", remoteAddr.Port, " --> ", read, " bytes: ", string(data))
+//        ch <- fmt.Sprint("From: ", remoteAddr.IP, ":", remoteAddr.Port, " --> ", read, " bytes: ", string(data))
+        ch <- fmt.Sprint(remoteAddr.IP)
     }
     return
 }
