@@ -118,6 +118,19 @@ func (sc *SocketClient) Send(a string) {
 }
 
 func (sc *SocketClient) SendHeartbeat() {
-    sc.heartbeatChan <- true
-    UDPConn.SendHeartbeat(sc.udpConn, "Im aliiiiiive!", sc.heartbeatChan)
+    // TODO: need to stop the heartbeat?
+    // sc.heartbeatChan <- true
+    callback := make(chan string)
+    go UDPConn.SendHeartbeat(sc.udpConn, "Im aliiiiiive!", sc.heartbeatChan, callback)
+    go func() {
+        for data := range callback {
+            switch data {
+            case "quit" :
+                return
+            default:
+                sc.al.Send_To_Log(sc.Identifier, logger.INFO, fmt.Sprint(data))
+
+            }
+        }
+    }()
 }
