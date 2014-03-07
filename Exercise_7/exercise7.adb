@@ -26,7 +26,7 @@ procedure exercise7 is
          --Put_Line("Finished count: "& Integer'Image(Finished'Count)); --<Debuggin'
          Finished_Gate_Open := True;
          --Please find debugging line below
-         Put_Line("Here comes the finnished stuff");
+         --Put_Line("Here comes the finnished stuff");
          --if Finished'Count = 3 then
 	  --Finished_Gate_Open := False;
 	  if Aborted = True then
@@ -58,8 +58,8 @@ procedure exercise7 is
    
    function Unreliable_Slow_Add (x : Integer) return Integer is
    
-  --Error_Rate : Constant := 0.15;  -- (between 0 and 1)
-   Error_Rate : Constant := 0.49; -- make it 50-50
+  Error_Rate : Constant := 0.15;  -- (between 0 and 1)
+   --Error_Rate : Constant := 0.49; -- make it 50-50
    Generated_Rand : float;
    
    begin

@@ -41,15 +41,26 @@ func createButtonListener(ch chan int) {
 	}
 }
 
+//TODO Implement all input functions
+func SetButtonLamp(btn C.elev_button_type_t,floor int, value int){
+  C.elev_set_button_lamp(btn, floor, value){
+}
 
+func SetSpeed(speed int){
+  C.elev_set_speed(speed)
+}
 
+func Init(){
+  C.elev_init()
+}
 
+func SetStopLamp(value int){
+  C.elev_stop_lamp(value)
+}
 
-
-
-
-
-
+func SetDoorLamp(value int){
+  C.elev_set_door_open_lamp(value)  
+}
 
 
 /* start: testcode
