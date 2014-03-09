@@ -1,0 +1,17 @@
+What GetButtonSignal() returns when some button is pressed:
+STOP = 10
+INT_BTN_1 = 11
+INT_BTN_2 = 12
+INT_BTN_3 = 13
+INT_BTN_4 = 14
+EXT_BTN_1_UP = 21
+EXT_BTN_2_UP = 22
+EXT_BTN_2_DOWN = 23
+EXT_BTN_3_UP = 24
+EXT_BTN_3_DOWN = 25
+EXT_BTN_4_DOWN = 26
+FLOOR_NO = 30
+FLOOR_1 = 31
+FLOOR_2 = 32
+FLOOR_3 = 33
+FLOOR_4 = 34
