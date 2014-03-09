@@ -78,29 +78,15 @@ func GetObstructionSignal() int{
    return int(C.elev_get_obstruction_signal())
 }
 
-//TODO start wondering why executing this command in createButtonListener
-//resulted in controller crashing
-//func GetButtonSignal() int{
-    /*
-    if int(C.io_read_bit(STOP)) == 1{
-    return 10    
-    }else if{
-    ...
-    }
-    */
-   //C.elev_get_button_signal(elev_button_type_t button, int floor)
-   //return int(C.io_read_bit(STOP))
-//}
-// end:  real driver functions.
-
 // Parameters: all the different channels we need like:
 // Create(buttonChannel, floorChannel, stopChannel, ....)
 
-func Create(intBtChan chan int, floorChan chan int, stopChan chan int, extBtChan chan int) {
+func Create(intBtChan chan int, floorChan chan int, stopChan chan int, extBtChan chan int, timeoutChan chan int) {
 	go createIntButtonListener(intBtChan)
     go createFloorListener(floorChan)
     go createStopListener(stopChan)
     go createExtButtonListener(extBtChan)
+    go createTimeoutListener(timeoutChan)
 }
 
 const INT_BTN_1 int  = 11
@@ -274,6 +260,13 @@ func createExtButtonListener(ch chan int){
     }
 }
 
+//TODO Ask how can we check if hardware was turned off
+func createTimeoutListener(ch chan int) {
+    for{    
+        ch <- int(C.elev_get_floor_sensor_signal())
+        time.Sleep(time.Second * 1)
+    }
+}
 /* start: testcode
 
     // Initialize hardware

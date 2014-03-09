@@ -39,18 +39,17 @@ func main(){
     extButtonChannel := make(chan int)
     floorChannel := make(chan int)
     stopChannel := make(chan int)
-//intBtChan chan int, floorChan chan int, stopChan chan int, extBtChan chan int
-	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel)
+    timeoutChannel := make(chan int)
+	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel, timeoutChannel)
 	
 	//driverInterface.SetSpeed(-300)
 	
 	//Test of all functions
 	//driverInterface.SetFloorLamp(3)   //works for values <0,3>
-	//driverInterface.SetStopLamp(1)    //does not seem to be working on arbeidsplass 16
+	//driverInterface.SetStopLamp(1)    //OK!
 	//driverInterface.SetDoorLamp(1)    //OK!
 	//driverInterface.SetButtonLamp("DOWN",2,1) //OK! (Panic mode also implemented)
 
-	
 	for {
 		select {
 			case intButtonSignal := <- intButtonChannel :
@@ -70,6 +69,10 @@ func main(){
             case extButtonSignal := <- extButtonChannel :
                 go func() {
                     fmt.Println(extButtonSignal)
+                }()
+            case floorTimeout := <- timeoutChannel :
+                go func() {
+                    fmt.Println("From timeout channel: ", floorTimeout)
                 }()
 		}
 	}
