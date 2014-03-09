@@ -1,0 +1,2 @@
+2014/03/09 15:22:17.509286 logger.go:87: ========== New log ==========
+2014/03/09 15:22:17.509822 logger.go:94: ERROR:  NETCONTROLLER  :  Error finding local IP

@@ -7,6 +7,7 @@ import (
 	"os"
     "strings"
     "time"
+    "./../../DataStore"
     "./../NetServices"
 )
 
@@ -19,7 +20,7 @@ func convertData(data []byte, n int) string {
 	return fmt.Sprint("Data from client: ", n, " --> ", (string)(convertedData))
 }
 
-func acceptConn(conn net.Conn, l log.Logger, ch chan string) {
+func acceptConn(conn net.Conn, l log.Logger, ch chan DataStore.Order_Message) {
 	l.Println("Success: Connection accepted from ", conn.RemoteAddr())
 	for {
 		data := make([]byte, 4096)
@@ -34,7 +35,7 @@ func acceptConn(conn net.Conn, l log.Logger, ch chan string) {
         convData := convertData(data, n)
         convData = fmt.Sprint("Number of bytes read: ", n, " | Data: ", convData)
         l.Println(convData)
-        ch <- convData
+        ch <- DataStore.Order_Message{(string)(convData)}
 	}
 
 	// Handle timeout?!
@@ -59,7 +60,7 @@ func handleData() {
 }
 */
 
-func startTCPServ(ch chan string) {
+func startTCPServ(ch chan DataStore.Order_Message) {
     fileName := fmt.Sprint("log/SocketServer/TCP_Server_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/TCP_Server.log"
 
@@ -96,10 +97,10 @@ func startTCPServ(ch chan string) {
 		}
 	}
 
-    ch <- "-1"
+    close(ch)
 }
 
-func startUDPServ(ch chan string) {
+func startUDPServ(ch chan DataStore.Heartbeat_Message) {
     fileName := fmt.Sprint("log/SocketServer/UDP_Server_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/UDP_Server.log"
 
@@ -139,7 +140,7 @@ func startUDPServ(ch chan string) {
 
     buffer := make([]byte, 4096)
 	for {
-        n, _, err := listener.ReadFromUDP(buffer)
+        n, netInfo, err := listener.ReadFromUDP(buffer)
         if err != nil {
             l.Println("Error reading from UDP: ", err.Error())
         }
@@ -149,16 +150,15 @@ func startUDPServ(ch chan string) {
         convData := convertData(buffer, n)
         convData = fmt.Sprint("Number of bytes read: ", n, " | Data: ", convData)
         l.Println(convData)
-        ch <- convData
+        ch <- DataStore.Heartbeat_Message{IP: (string)(netInfo.IP), Message: convData}
 
         l.Println("Converting seems successfull.")
 	}
 
-    ch <- "-1"
-
+    close(ch)
 }
 
-func Create(tcpChan chan string, udpChan chan string) {
+func Create(tcpChan chan DataStore.Order_Message, udpChan chan DataStore.Heartbeat_Message) {
     go startTCPServ(tcpChan)
     go startUDPServ(udpChan)
 }

@@ -2,10 +2,11 @@ package UDP_BroadcastServer
 
 import (
     "net"
-    "fmt"
+//    "fmt"
+    "./../../DataStore"
 )
 
-func runServer(udpAddr net.UDPAddr, ch chan string) {
+func runServer(udpAddr net.UDPAddr, ch chan DataStore.Broadcast_Message) {
     socket, err := net.ListenUDP("udp4", &udpAddr)
 
     if err != nil {
@@ -21,14 +22,13 @@ func runServer(udpAddr net.UDPAddr, ch chan string) {
             //fmt.Println("Error: ", err.Error())
             continue
         }
-
-//        ch <- fmt.Sprint("From: ", remoteAddr.IP, ":", remoteAddr.Port, " --> ", read, " bytes: ", string(data))
-        ch <- fmt.Sprint(remoteAddr.IP)
+_ = remoteAddr
+//        ch <- fmt.Sprint(remoteAddr.IP)
     }
     return
 }
 
-func Create(ch chan string) {
+func Create(ch chan DataStore.Broadcast_Message) {
     ipv4_broadcast := net.IPv4(255, 255, 255, 255)
     udpAddr := net.UDPAddr{IP : ipv4_broadcast, Port: 12345}
 

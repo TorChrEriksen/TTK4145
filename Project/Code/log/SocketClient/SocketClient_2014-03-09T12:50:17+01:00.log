@@ -1,0 +1,37 @@
+2014/03/09 12:50:17.931608 logger.go:87: ========== New log ==========
+2014/03/09 12:50:17.933204 logger.go:87: Added TCP connection to tcpConn slice:  78.91.50.186:53124
+
+2014/03/09 12:50:17.933235 logger.go:87: Added UDP connection to udpConn slice: 78.91.50.186:34505
+2014/03/09 12:50:17.933278 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:18.933539 logger.go:87: Error writing to connection: (UDP)write udp 78.91.50.186:12346: connection refused
+2014/03/09 12:50:18.933595 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:19.933939 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:20.934168 logger.go:87: Error writing to connection: (UDP)write udp 78.91.50.186:12346: connection refused
+2014/03/09 12:50:20.934232 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:21.934558 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:22.934765 logger.go:87: Error writing to connection: (UDP)write udp 78.91.50.186:12346: connection refused
+2014/03/09 12:50:22.934809 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:23.935130 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:24.935390 logger.go:87: Error writing to connection: (UDP)write udp 78.91.50.186:12346: connection refused
+2014/03/09 12:50:24.935430 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:25.935749 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:26.936025 logger.go:87: Error writing to connection: (UDP)write udp 78.91.50.186:12346: connection refused
+2014/03/09 12:50:26.936075 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:27.936402 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:28.936621 logger.go:87: Error writing to connection: (UDP)write udp 78.91.50.186:12346: connection refused
+2014/03/09 12:50:28.936661 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:29.936968 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:30.937165 logger.go:87: Error writing to connection: (UDP)write udp 78.91.50.186:12346: connection refused
+2014/03/09 12:50:30.937202 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:31.937468 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:32.937722 logger.go:87: Error writing to connection: (UDP)write udp 78.91.50.186:12346: connection refused
+2014/03/09 12:50:32.937767 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:33.938106 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:34.938341 logger.go:87: Error writing to connection: (UDP)write udp 78.91.50.186:12346: connection refused
+2014/03/09 12:50:34.938393 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:35.938723 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:36.938929 logger.go:87: Error writing to connection: (UDP)write udp 78.91.50.186:12346: connection refused
+2014/03/09 12:50:36.938967 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:37.939317 logger.go:87: Sent a heartbeat
+2014/03/09 12:50:38.939559 logger.go:87: Error writing to connection: (UDP)write udp 78.91.50.186:12346: connection refused
+2014/03/09 12:50:38.939603 logger.go:87: Sent a heartbeat

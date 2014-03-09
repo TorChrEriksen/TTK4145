@@ -1,0 +1,2 @@
+2014/03/09 15:30:02.649220 SocketServer.go:121: ========== New log ==========
+2014/03/09 15:30:02.650214 SocketServer.go:125: Error: could not find any local IP address

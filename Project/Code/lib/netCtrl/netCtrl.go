@@ -6,6 +6,7 @@ import (
     "./SocketServer"
     "./SocketClient"
     "./NetServices"
+    "./../DataStore"
     "./../logger"
     "fmt"
     "time"
@@ -19,13 +20,14 @@ type NetController struct {
     al *logger.AppLogger
     localIP string
     hostList []string
-    tcpClientList []string
-    udpClientList []string
-    bsChan chan string
-    bcChan chan int
-    sUDPServerChan chan string
-    sTCPServerChan chan string
+//    tcpClientList []string
+    clientList []DataStore.Client
+    broadcastChan chan DataStore.Broadcast_Message
+    heartbeatChan chan DataStore.Heartbeat_Message
+    orderChan chan DataStore.Order_Message
+
     sc SocketClient.SocketClient
+    bcChan chan int
 }
 
 func (nc *NetController) Create(a *logger.AppLogger) {
@@ -47,14 +49,14 @@ func (nc *NetController) Create(a *logger.AppLogger) {
     }
 
     nc.hostList = make([]string, 10)
-    nc.tcpClientList = make([]string, 10)
-    nc.udpClientList = make([]string, 10)
+//    nc.tcpClientList = make([]string, 10)
+    nc.clientList = make([]DataStore.Client, 10)
 
-    nc.bsChan = make(chan string)
+    nc.broadcastChan = make(chan DataStore.Broadcast_Message)
+    nc.heartbeatChan = make(chan DataStore.Heartbeat_Message)
     nc.bcChan = make(chan int)
 
-    nc.sUDPServerChan = make(chan string)
-    nc.sTCPServerChan = make(chan string)
+    nc.orderChan = make(chan DataStore.Order_Message)
 
 
     nc.sc = SocketClient.SocketClient{Identifier: "SOCKETCLIENT"}
@@ -62,9 +64,9 @@ func (nc *NetController) Create(a *logger.AppLogger) {
 
 func (nc *NetController) Run() {
 
-    UDP_BroadcastServer.Create(nc.bsChan)
+    UDP_BroadcastServer.Create(nc.broadcastChan)
     UDP_BroadcastClient.Create(nc.bcChan)
-    SocketServer.Create(nc.sTCPServerChan, nc.sUDPServerChan)
+    SocketServer.Create(nc.orderChan, nc.heartbeatChan)
     nc.sc.Create(nc.al)
 
 //    go func() {
@@ -74,49 +76,52 @@ func (nc *NetController) Run() {
                 // TODO: when to stop broadcasting?
                 nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Sent ", bClient, " bytes."))
 
-            case bServer := <-nc.bsChan :
+            // Received a broadcast, check if its a new elevator or old
+            case broadcastMessage := <-nc.broadcastChan :
                 go func() {
-                    if strings.EqualFold(nc.localIP, bServer) {
-                        nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Ignoring broadcast from local IP: ", bServer))
+                    if strings.EqualFold(nc.localIP, broadcastMessage.IP) {
+                        nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Ignoring broadcast from local IP: ", broadcastMessage))
                         return
                     }
 
                     for _, host := range nc.hostList {
-                        if strings.EqualFold(host, bServer) {
-                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of host list: ", bServer))
+                        if strings.EqualFold(host, broadcastMessage.IP) {
+                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of host list: ", broadcastMessage))
                             return
                         }
                     }
-                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to host list: ", bServer))
-                    nc.hostList = append(nc.hostList, bServer)
-                    nc.sc.ConnectTCP(bServer + ":12345")
-                    nc.sc.ConnectUDP(bServer + ":12346")
+                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to host list: ", broadcastMessage))
+                    nc.hostList = append(nc.hostList, broadcastMessage.IP)
+                    nc.sc.ConnectTCP(broadcastMessage.IP + ":12345")
+                    nc.sc.ConnectUDP(broadcastMessage.IP + ":12346")
                     nc.sc.SendHeartbeat()
                 }()
 
                 // Check if we are connected to this computer
                 // Connect if not
 
-            case ssUDP := <-nc.sUDPServerChan :
+            case heartbeat := <-nc.heartbeatChan :
                 //fmt.Println(ssUDP)
                 // Update heartbeat, or not... Client should do that!?
 
                 go func() {
-                    for _, client := range nc.udpClientList {
-                        if strings.EqualFold(client, ssUDP) {
-                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of UDP client list: ", ssUDP))
+                    for _, client := range nc.clientList {
+                        if strings.EqualFold(client.IP, heartbeat.IP) {
+                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of UDP client list: ", heartbeat.IP))
                             return
                         }
                     }
-                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to UDP client list: ", ssUDP))
-                    nc.udpClientList = append(nc.udpClientList, ssUDP)
+                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to UDP client list: ", heartbeat.IP))
+                    nc.clientList = append(nc.clientList, DataStore.Client{IP : heartbeat.IP, Ticks : 0})
 
                 }()
 
-            case ssTCP := <-nc.sTCPServerChan :
+            case orderMsg := <-nc.orderChan :
                 //fmt.Println(ssTCP)
 
+                // We dont need a client list? Or?
                 go func() {
+/*
                     for _, client := range nc.tcpClientList {
                         if strings.EqualFold(client, ssTCP) {
                             nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of TCP client list: ", ssTCP))
@@ -125,30 +130,26 @@ func (nc *NetController) Run() {
                     }
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to TCP client list: ", ssTCP))
                     nc.tcpClientList = append(nc.tcpClientList, ssTCP)
+*/
+                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client: ", orderMsg.Message))
 
                 }()
-
-                // Check if this is a first time connect.
-                // Connect back if yes
             }
         }
-//    }()
-/*
-    go func() {
-        for {
-            select {
-            case :
-            case :
-            }
-        }
-    } 
-    */
+}
 
+// TODO: Verify
+// TODO: Need to sync the data! 
+func (nc *NetController) validateConnections() {
+    for _, client := range nc.clientList {
+//        if client != nil { // TODO Verify that this works
+            client.Ticks = client.Ticks + 1
+//        }
+    }
 }
 
 // Parameter is not to be a string, but serialized data.
 // TODO Waiting for structure.
-func(nc *NetController) SendData(a string) {
+func (nc *NetController) SendData(a string) {
     nc.sc.Send(a)
 }
-
