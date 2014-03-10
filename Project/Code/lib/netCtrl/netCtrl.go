@@ -164,14 +164,15 @@ func (nc *NetController) SendData(data DataStore.Order_Message) {
     convData := nc.marshal(data)
     if convData != nil {
         nc.sc.Send(convData)
+        return
     }
-    nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Eror while sending data: *NetController.SendData()."))
+    nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while sending data: *NetController.SendData()."))
 }
 
 func (nc *NetController) marshal(data DataStore.Order_Message) []byte {
     convData, err := json.Marshal(data)
     if err != nil {
-        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Eror while marshalling: ", err.Error()))
+        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while marshalling: ", err.Error()))
         return nil
     }
     return convData
@@ -181,7 +182,7 @@ func (nc *NetController) unmarshal(data []byte) (DataStore.Order_Message, int) {
     convData := DataStore.Order_Message{}
     err := json.Unmarshal(data, &convData)
     if err != nil {
-        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Eror while unmarshalling: ", err.Error()))
+        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while unmarshalling: ", err.Error()))
         return convData, -1
     }
     return convData, 1
