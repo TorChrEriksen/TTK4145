@@ -20,7 +20,7 @@ func convertData(data []byte, n int) string {
 	return fmt.Sprint("Data from client: ", n, " --> ", (string)(convertedData))
 }
 
-func acceptConn(conn net.Conn, l log.Logger, ch chan DataStore.Order_Message) {
+func acceptConn(conn net.Conn, l log.Logger, ch chan []byte) {
 	l.Println("Success: Connection accepted from ", conn.RemoteAddr())
 	for {
 		data := make([]byte, 4096)
@@ -32,10 +32,10 @@ func acceptConn(conn net.Conn, l log.Logger, ch chan DataStore.Order_Message) {
             return
         }
 
-        convData := convertData(data, n)
-        convData = fmt.Sprint("Number of bytes read: ", n, " | Data: ", convData)
-        l.Println(convData)
-        ch <- DataStore.Order_Message{(string)(convData)}
+//        convData := convertData(data, n)
+//        convData = fmt.Sprint("Number of bytes read: ", n, " | Data: ", convData)
+//        l.Println(convData)
+        ch <- data
 	}
 
 	// Handle timeout?!
@@ -60,7 +60,7 @@ func handleData() {
 }
 */
 
-func startTCPServ(ch chan DataStore.Order_Message) {
+func startTCPServ(ch chan []byte) {
     fileName := fmt.Sprint("log/SocketServer/TCP_Server_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/TCP_Server.log"
 
@@ -158,7 +158,7 @@ func startUDPServ(ch chan DataStore.Heartbeat_Message) {
     close(ch)
 }
 
-func Create(tcpChan chan DataStore.Order_Message, udpChan chan DataStore.Heartbeat_Message) {
+func Create(tcpChan chan []byte, udpChan chan DataStore.Heartbeat_Message) {
     go startTCPServ(tcpChan)
     go startUDPServ(udpChan)
 }

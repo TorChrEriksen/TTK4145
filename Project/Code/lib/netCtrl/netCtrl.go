@@ -27,7 +27,7 @@ type NetController struct {
     clientList []DataStore.Client
     broadcastChan chan DataStore.Broadcast_Message
     heartbeatChan chan DataStore.Heartbeat_Message
-    orderChan chan DataStore.Order_Message
+    orderChan chan []byte 
 
     sc SocketClient.SocketClient
     bcChan chan int
@@ -59,7 +59,7 @@ func (nc *NetController) Create(a *logger.AppLogger) {
     nc.heartbeatChan = make(chan DataStore.Heartbeat_Message)
     nc.bcChan = make(chan int)
 
-    nc.orderChan = make(chan DataStore.Order_Message)
+    nc.orderChan = make(chan []byte)
 
 
     nc.sc = SocketClient.SocketClient{Identifier: "SOCKETCLIENT"}
@@ -140,7 +140,13 @@ func (nc *NetController) Run() {
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to TCP client list: ", ssTCP))
                     nc.tcpClientList = append(nc.tcpClientList, ssTCP)
 */
-                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client: ", orderMsg.Message))
+                    convData, errInt := nc.unmarshal(orderMsg)
+                    if errInt == -1 {
+                        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Cannot read message, somrthing went wrong unmarshaling."))
+                        return
+                    }
+
+                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client: ", convData.Message))
 
                 }()
             }
