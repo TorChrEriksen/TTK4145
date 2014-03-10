@@ -80,7 +80,7 @@ func (nc *NetController) Run() {
             case broadcastMessage := <-nc.broadcastChan :
                 go func() {
                     if strings.EqualFold(nc.localIP, broadcastMessage.IP) {
-                        nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Ignoring broadcast from local IP: ", broadcastMessage))
+                        nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Ignoring broadcast from local IP: ", broadcastMessage.IP))
                         return
                     }
 

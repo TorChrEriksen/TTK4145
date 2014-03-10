@@ -2,15 +2,17 @@ package UDP_BroadcastServer
 
 import (
     "net"
-//    "fmt"
+    "fmt"
     "./../../DataStore"
 )
+
+// TODO: Implement logger, so we dont have to return and check for errors.....
 
 func runServer(udpAddr net.UDPAddr, ch chan DataStore.Broadcast_Message) {
     socket, err := net.ListenUDP("udp4", &udpAddr)
 
     if err != nil {
-        //fmt.Println("Error: ", err.Error())
+        fmt.Println("Error: ", err.Error()) // TODO
         return
     }
 
@@ -19,11 +21,10 @@ func runServer(udpAddr net.UDPAddr, ch chan DataStore.Broadcast_Message) {
         _, remoteAddr, err := socket.ReadFromUDP(data)
 
         if err != nil {
-            //fmt.Println("Error: ", err.Error())
+            fmt.Println("Error: ", err.Error()) // TODO
             continue
         }
-_ = remoteAddr
-//        ch <- fmt.Sprint(remoteAddr.IP)
+        ch <- DataStore.Broadcast_Message{IP: string(remoteAddr.IP), Message: "Received a broadcast message"}
     }
     return
 }
