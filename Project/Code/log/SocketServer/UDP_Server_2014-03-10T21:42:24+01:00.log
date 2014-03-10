@@ -1,0 +1,34 @@
+2014/03/10 21:42:24.647751 SocketServer.go:121: ========== New log ==========
+2014/03/10 21:42:26.137386 SocketServer.go:148: Received UDP data, converting.
+2014/03/10 21:42:26.137425 SocketServer.go:152: Number of bytes read: 14 | Data: Data from client: 14 --> Im aliiiiiive!
+2014/03/10 21:42:26.137436 SocketServer.go:155: Converting seems successfull.
+2014/03/10 21:42:27.137477 SocketServer.go:148: Received UDP data, converting.
+2014/03/10 21:42:27.137514 SocketServer.go:152: Number of bytes read: 14 | Data: Data from client: 14 --> Im aliiiiiive!
+2014/03/10 21:42:27.137525 SocketServer.go:155: Converting seems successfull.
+2014/03/10 21:42:28.137583 SocketServer.go:148: Received UDP data, converting.
+2014/03/10 21:42:28.137621 SocketServer.go:152: Number of bytes read: 14 | Data: Data from client: 14 --> Im aliiiiiive!
+2014/03/10 21:42:28.137632 SocketServer.go:155: Converting seems successfull.
+2014/03/10 21:42:29.137703 SocketServer.go:148: Received UDP data, converting.
+2014/03/10 21:42:29.137734 SocketServer.go:152: Number of bytes read: 14 | Data: Data from client: 14 --> Im aliiiiiive!
+2014/03/10 21:42:29.137752 SocketServer.go:155: Converting seems successfull.
+2014/03/10 21:42:30.137811 SocketServer.go:148: Received UDP data, converting.
+2014/03/10 21:42:30.137843 SocketServer.go:152: Number of bytes read: 14 | Data: Data from client: 14 --> Im aliiiiiive!
+2014/03/10 21:42:30.137853 SocketServer.go:155: Converting seems successfull.
+2014/03/10 21:42:31.137916 SocketServer.go:148: Received UDP data, converting.
+2014/03/10 21:42:31.137946 SocketServer.go:152: Number of bytes read: 14 | Data: Data from client: 14 --> Im aliiiiiive!
+2014/03/10 21:42:31.137961 SocketServer.go:155: Converting seems successfull.
+2014/03/10 21:42:32.138055 SocketServer.go:148: Received UDP data, converting.
+2014/03/10 21:42:32.138089 SocketServer.go:152: Number of bytes read: 14 | Data: Data from client: 14 --> Im aliiiiiive!
+2014/03/10 21:42:32.143098 SocketServer.go:155: Converting seems successfull.
+2014/03/10 21:42:33.138152 SocketServer.go:148: Received UDP data, converting.
+2014/03/10 21:42:33.138199 SocketServer.go:152: Number of bytes read: 14 | Data: Data from client: 14 --> Im aliiiiiive!
+2014/03/10 21:42:33.138210 SocketServer.go:155: Converting seems successfull.
+2014/03/10 21:42:34.138282 SocketServer.go:148: Received UDP data, converting.
+2014/03/10 21:42:34.138312 SocketServer.go:152: Number of bytes read: 14 | Data: Data from client: 14 --> Im aliiiiiive!
+2014/03/10 21:42:34.138331 SocketServer.go:155: Converting seems successfull.
+2014/03/10 21:42:35.138358 SocketServer.go:148: Received UDP data, converting.
+2014/03/10 21:42:35.138397 SocketServer.go:152: Number of bytes read: 14 | Data: Data from client: 14 --> Im aliiiiiive!
+2014/03/10 21:42:35.138407 SocketServer.go:155: Converting seems successfull.
+2014/03/10 21:42:36.138485 SocketServer.go:148: Received UDP data, converting.
+2014/03/10 21:42:36.138522 SocketServer.go:152: Number of bytes read: 14 | Data: Data from client: 14 --> Im aliiiiiive!
+2014/03/10 21:42:36.138532 SocketServer.go:155: Converting seems successfull.

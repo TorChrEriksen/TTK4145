@@ -31,6 +31,8 @@ type NetController struct {
 
     sc SocketClient.SocketClient
     bcChan chan int
+
+    sendOrderChannel chan []byte
 }
 
 func (nc *NetController) Create(a *logger.AppLogger) {
@@ -61,16 +63,16 @@ func (nc *NetController) Create(a *logger.AppLogger) {
 
     nc.orderChan = make(chan []byte)
 
-
+    nc.sendOrderChannel = make(chan []byte)
     nc.sc = SocketClient.SocketClient{Identifier: "SOCKETCLIENT"}
+    nc.sc.Create(nc.al, nc.sendOrderChannel)
 }
 
 func (nc *NetController) Run() {
 
-    UDP_BroadcastServer.Create(nc.broadcastChan)
-    UDP_BroadcastClient.Create(nc.bcChan)
-    SocketServer.Create(nc.orderChan, nc.heartbeatChan)
-    nc.sc.Create(nc.al)
+    UDP_BroadcastServer.Run(nc.broadcastChan)
+    UDP_BroadcastClient.Run(nc.bcChan)
+    SocketServer.Run(nc.orderChan, nc.heartbeatChan)
 
     go func() {
         for {
@@ -169,7 +171,7 @@ func (nc *NetController) validateConnections() {
 func (nc *NetController) SendData(data DataStore.Order_Message) {
     convData := nc.marshal(data)
     if convData != nil {
-        nc.sc.Send(convData)
+        nc.sendOrderChannel <- convData
         return
     }
     nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while sending data: *NetController.SendData()."))

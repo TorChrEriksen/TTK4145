@@ -45,6 +45,8 @@ func SendData(conn *net.TCPConn, data []byte) int {
 	//data := make([]byte, 4096)
     //data = []byte(a)
 
+    fmt.Println("ni hao")
+
 	n, err := conn.Write(data)
 	if err != nil {
 		fmt.Println("Error writing to connection: (TCP)", err.Error())

@@ -27,7 +27,7 @@ func runClient(udpAddr net.UDPAddr, ch chan int) {
     ch <- -1
 }
 
-func Create(ch chan int) {
+func Run(ch chan int) {
 
     ipv4_broadcast := net.IPv4(255, 255, 255, 255)
     udpAddr := net.UDPAddr{IP : ipv4_broadcast, Port: 12345}

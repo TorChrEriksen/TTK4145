@@ -39,6 +39,7 @@ func main() {
 
 func sendEggData(nc netCtrl.NetController) {
     dataForTheEgg := DataStore.Order_Message{Message : "(╯°□°）╯︵ ┻━┻)"}
+    time.Sleep(time.Second * 10)
     for {
         nc.SendData(dataForTheEgg)
         time.Sleep(time.Second * 1)

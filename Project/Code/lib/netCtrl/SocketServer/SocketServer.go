@@ -158,7 +158,7 @@ func startUDPServ(ch chan DataStore.Heartbeat_Message) {
     close(ch)
 }
 
-func Create(tcpChan chan []byte, udpChan chan DataStore.Heartbeat_Message) {
+func Run(tcpChan chan []byte, udpChan chan DataStore.Heartbeat_Message) {
     go startTCPServ(tcpChan)
     go startUDPServ(udpChan)
 }

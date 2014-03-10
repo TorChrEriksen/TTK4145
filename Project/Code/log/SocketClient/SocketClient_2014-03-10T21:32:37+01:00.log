@@ -1,0 +1,31 @@
+2014/03/10 21:32:37.367499 logger.go:87: ========== New log ==========
+2014/03/10 21:32:41.650067 logger.go:87: Added TCP connection to tcpConn slice:  129.241.187.81:47303
+
+2014/03/10 21:32:41.650119 logger.go:87: Added UDP connection to udpConn slice: 129.241.187.81:51702
+2014/03/10 21:32:41.650144 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:42.650269 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:43.650383 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:44.650533 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:45.650643 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:46.650752 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:47.650857 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:48.650979 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:49.651110 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:50.651232 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:51.651340 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:52.651461 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:53.651598 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:54.651707 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:55.651822 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:56.651935 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:57.652042 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:58.652157 logger.go:87: Sent a heartbeat
+2014/03/10 21:32:59.652273 logger.go:87: Sent a heartbeat
+2014/03/10 21:33:00.652408 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.155:12346: connection refused
+2014/03/10 21:33:00.652429 logger.go:87: Sent a heartbeat
+2014/03/10 21:33:01.652557 logger.go:87: Sent a heartbeat
+2014/03/10 21:33:02.652671 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.155:12346: connection refused
+2014/03/10 21:33:02.652699 logger.go:87: Sent a heartbeat
+2014/03/10 21:33:03.652845 logger.go:87: Sent a heartbeat
+2014/03/10 21:33:04.652962 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.155:12346: connection refused
+2014/03/10 21:33:04.652998 logger.go:87: Sent a heartbeat

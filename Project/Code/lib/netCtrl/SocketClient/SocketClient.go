@@ -16,10 +16,11 @@ type SocketClient struct {
     udpConn []*net.UDPConn
     tcpConn []*net.TCPConn
     heartbeatChan chan bool
+    orderChan chan []byte
 }
 
 // Always called before any other function in this module
-func (sc *SocketClient) Create(a *logger.AppLogger) {
+func (sc *SocketClient) Create(a *logger.AppLogger, ch chan []byte) {
     fileName := fmt.Sprint("log/SocketClient/SocketClient_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/SocketClient.log"
 
@@ -29,6 +30,9 @@ func (sc *SocketClient) Create(a *logger.AppLogger) {
     sc.udpConn = make([]*net.UDPConn, 10)
     sc.tcpConn = make([]*net.TCPConn, 10)
     sc.heartbeatChan = make(chan bool)
+    sc.orderChan = ch
+
+    go sc.waitForInput()
 }
 
 // Connect to host
@@ -83,6 +87,7 @@ func (sc *SocketClient) ConnectTCP(tcpAddr string) int {
     // Add tcp connection to tcp slice.
     if tcpErr == 1 {
         sc.tcpConn = append(sc.tcpConn, tcpConn)
+        fmt.Println(tcpConn)
         sc.al.Send_To_Log(sc.Identifier, logger.INFO,
             fmt.Sprintln("Added TCP connection to tcpConn slice: ", tcpConn.LocalAddr().String()))
     }
@@ -114,17 +119,6 @@ func (sc *SocketClient) ConnectTCP(tcpAddr string) int {
     */
 }
 
-// As of now, sending to every host...
-// TODO: fix!
-func (sc *SocketClient) Send(data []byte) {
-    for _, host := range sc.tcpConn {
-        if host != nil {
-            n := TCPConn.SendData(host, data) // TODO: use return value for something?
-            _ = n
-        }
-    }
-}
-
 func (sc *SocketClient) SendHeartbeat() {
     // TODO: need to stop the heartbeat?
     // sc.heartbeatChan <- true
@@ -141,4 +135,18 @@ func (sc *SocketClient) SendHeartbeat() {
             }
         }
     }()
+}
+
+// TODO: Need to make the package SocketClient only one connection, and let the netCtrl control each one of them.
+func (sc *SocketClient) waitForInput() {
+    for order := range sc.orderChan {
+        for _, host := range sc.tcpConn {
+            if host != nil {
+
+            fmt.Println("ni hao")
+                n := TCPConn.SendData(host, order) // TODO: use return value for something?
+                _ = n
+            }
+        }
+    }
 }

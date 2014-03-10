@@ -1,0 +1,10 @@
+2014/03/10 21:35:42.910775 logger.go:87: ========== New log ==========
+2014/03/10 21:35:45.667269 logger.go:87: Added TCP connection to tcpConn slice:  129.241.187.81:47307
+
+2014/03/10 21:35:45.667297 logger.go:87: Added UDP connection to udpConn slice: 129.241.187.81:36721
+2014/03/10 21:35:45.667322 logger.go:87: Sent a heartbeat
+2014/03/10 21:35:46.667441 logger.go:87: Sent a heartbeat
+2014/03/10 21:35:47.667546 logger.go:87: Sent a heartbeat
+2014/03/10 21:35:48.667665 logger.go:87: Sent a heartbeat
+2014/03/10 21:35:49.667774 logger.go:87: Sent a heartbeat
+2014/03/10 21:35:50.667877 logger.go:87: Sent a heartbeat
