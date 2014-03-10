@@ -3,9 +3,11 @@ package main
 import (
     "./lib/netCtrl"
     "./lib/logger"
+    "./lib/DataStore"
     "os"
     "os/signal"
     "fmt"
+    "time"
 )
 
 
@@ -31,4 +33,15 @@ func main() {
     netCtrl := netCtrl.NetController{Identifier: "NETCONTROLLER"}
     netCtrl.Create(&appLogger)
     netCtrl.Run()
+
+    sendEggData(netCtrl)
+}
+
+func sendEggData(nc netCtrl.NetController) {
+    dataForTheEgg := DataStore.Order_Message{Message : "(╯°□°）╯︵ ┻━┻)"}
+    for {
+        nc.SendData(dataForTheEgg)
+        time.Sleep(time.Second * 1)
+    }
+
 }

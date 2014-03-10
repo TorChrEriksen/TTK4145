@@ -40,10 +40,10 @@ func TerminateConn(conn net.TCPConn) int {
 	}
 }
 
-func SendData(conn net.TCPConn, a string) int {
+func SendData(conn *net.TCPConn, data []byte) int {
 	//fmt.Println("SendData() (UDP)")
-	data := make([]byte, 4096)
-    data = []byte(a)
+	//data := make([]byte, 4096)
+    //data = []byte(a)
 
 	n, err := conn.Write(data)
 	if err != nil {

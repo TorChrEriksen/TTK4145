@@ -1,0 +1,16 @@
+2014/03/10 21:14:07.880337 logger.go:87: ========== New log ==========
+2014/03/10 21:14:07.880696 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:08.880895 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:09.881049 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:10.881214 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:11.881373 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:12.881514 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:13.881673 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:14.881834 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:15.881999 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:16.882170 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:17.882315 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:18.882481 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:19.882645 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:20.882809 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().
+2014/03/10 21:14:21.882977 logger.go:94: ERROR:  NETCONTROLLER  :  Eror while sending data: *NetController.SendData().

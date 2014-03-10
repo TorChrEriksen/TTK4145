@@ -11,6 +11,7 @@ import (
     "fmt"
     "time"
     "strings"
+    "encoding/json"
 //    "net"
 //    "bytes"
 )
@@ -71,7 +72,7 @@ func (nc *NetController) Run() {
     SocketServer.Create(nc.orderChan, nc.heartbeatChan)
     nc.sc.Create(nc.al)
 
-//    go func() {
+    go func() {
         for {
             select {
             case bClient := <-nc.bcChan :
@@ -144,6 +145,7 @@ func (nc *NetController) Run() {
                 }()
             }
         }
+    }()
 }
 
 // TODO: Verify
@@ -158,6 +160,29 @@ func (nc *NetController) validateConnections() {
 
 // Parameter is not to be a string, but serialized data.
 // TODO Waiting for structure.
-func (nc *NetController) SendData(a string) {
-    nc.sc.Send(a)
+func (nc *NetController) SendData(data DataStore.Order_Message) {
+    convData := nc.marshal(data)
+    if convData != nil {
+        nc.sc.Send(convData)
+    }
+    nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Eror while sending data: *NetController.SendData()."))
+}
+
+func (nc *NetController) marshal(data DataStore.Order_Message) []byte {
+    convData, err := json.Marshal(data)
+    if err != nil {
+        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Eror while marshalling: ", err.Error()))
+        return nil
+    }
+    return convData
+}
+
+func (nc *NetController) unmarshal(data []byte) (DataStore.Order_Message, int) {
+    convData := DataStore.Order_Message{}
+    err := json.Unmarshal(data, &convData)
+    if err != nil {
+        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Eror while unmarshalling: ", err.Error()))
+        return convData, -1
+    }
+    return convData, 1
 }

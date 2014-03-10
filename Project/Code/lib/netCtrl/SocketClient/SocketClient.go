@@ -114,7 +114,15 @@ func (sc *SocketClient) ConnectTCP(tcpAddr string) int {
     */
 }
 
-func (sc *SocketClient) Send(a string) {
+// As of now, sending to every host...
+// TODO: fix!
+func (sc *SocketClient) Send(data []byte) {
+    for _, host := range sc.tcpConn {
+        if host != nil {
+            n := TCPConn.SendData(host, data) // TODO: use return value for something?
+            _ = n
+        }
+    }
 }
 
 func (sc *SocketClient) SendHeartbeat() {
