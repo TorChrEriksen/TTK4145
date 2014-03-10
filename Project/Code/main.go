@@ -8,21 +8,24 @@ import (
     "fmt"
 )
 
+
+// Stopping Ctrl + C kill signal
+func catchKill(appLog logger.AppLogger) {
+    killChan := make(chan os.Signal, 1)
+    signal.Notify(killChan, os.Interrupt)
+
+    for signal := range killChan {
+        appLog.Send_To_Log("", logger.ERROR, fmt.Sprint("Catched a killsignal:, ", signal))
+    }
+}
+
 func main() {
 
     // Declaring and setting up application logger
     appLogger := logger.AppLogger{}
     appLogger.Create()
 
-    // Stopping Ctrl + C kill signal
-    go func() {
-        killChan := make(chan os.Signal, 1)
-        signal.Notify(killChan, os.Interrupt)
-
-        for signal := range killChan {
-            appLogger.Send_To_Log("", logger.ERROR, fmt.Sprint("Catched a killsignal:, ", signal))
-        }
-    }()
+    //go catchKill(appLogger)
 
     // Declaring and setting up net controller
     netCtrl := netCtrl.NetController{Identifier: "NETCONTROLLER"}
