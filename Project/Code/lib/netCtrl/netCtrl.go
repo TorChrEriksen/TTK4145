@@ -11,6 +11,8 @@ import (
     "fmt"
     "time"
     "strings"
+//    "net"
+//    "bytes"
 )
 
 type NetController struct {
@@ -18,8 +20,8 @@ type NetController struct {
     // eg. calling SendData before Create(), or something....
     Identifier string
     al *logger.AppLogger
-    localIP string
-    hostList []string
+    localIP string // TODO: change this to net.IP and do byte compare
+    hostList []string //TODO : we are doing string compare, do it with bytes instead in some way
 //    tcpClientList []string
     clientList []DataStore.Client
     broadcastChan chan DataStore.Broadcast_Message
@@ -78,22 +80,27 @@ func (nc *NetController) Run() {
 
             // Received a broadcast, check if its a new elevator or old
             case broadcastMessage := <-nc.broadcastChan :
+//                fmt.Println([]byte(nc.localIP))
+//                fmt.Println([]byte(broadcastMessage.IP))
                 go func() {
-                    if strings.EqualFold(nc.localIP, broadcastMessage.IP) {
+                    if strings.EqualFold(string(nc.localIP), string(broadcastMessage.IP)) {
+//                    if bytes.Equal(nc.localIP, broadcastMessage.IP) {
                         nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Ignoring broadcast from local IP: ", broadcastMessage.IP))
                         return
                     }
 
                     for _, host := range nc.hostList {
-                        if strings.EqualFold(host, broadcastMessage.IP) {
-                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of host list: ", broadcastMessage))
+                        if strings.EqualFold(string(host), string(broadcastMessage.IP)) {
+//                    if bytes.Equal(host, broadcastMessage.IP) {
+                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of host list: ", broadcastMessage.IP))
                             return
                         }
                     }
-                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to host list: ", broadcastMessage))
+                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to host list: ", broadcastMessage.IP))
                     nc.hostList = append(nc.hostList, broadcastMessage.IP)
-                    nc.sc.ConnectTCP(broadcastMessage.IP + ":12345")
-                    nc.sc.ConnectUDP(broadcastMessage.IP + ":12346")
+
+                    nc.sc.ConnectTCP(fmt.Sprint(broadcastMessage.IP, ":12345")) //TODO: FIX
+                    nc.sc.ConnectUDP(fmt.Sprint(broadcastMessage.IP, ":12346")) //TODO: FIX
                     nc.sc.SendHeartbeat()
                 }()
 
@@ -106,7 +113,8 @@ func (nc *NetController) Run() {
 
                 go func() {
                     for _, client := range nc.clientList {
-                        if strings.EqualFold(client.IP, heartbeat.IP) {
+                        if strings.EqualFold(client.IP, heartbeat.IP) { //TODO: fix!
+//                     if bytes.Equal(client.IP, heartbeat.IP) {
                             nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of UDP client list: ", heartbeat.IP))
                             return
                         }

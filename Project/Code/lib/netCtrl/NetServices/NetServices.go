@@ -52,7 +52,7 @@ func FindLocalIP() (string, int) {
     for _, ipAddr := range ip {
         if strings.Contains(ipAddr.String(), "/24") {
             candidate := strings.TrimRight(ipAddr.String(), "/24")
-            return candidate, 1
+            return candidate, 1 //TODO: fix this nasty conversion
         }
     }
 

@@ -24,7 +24,9 @@ func runServer(udpAddr net.UDPAddr, ch chan DataStore.Broadcast_Message) {
             fmt.Println("Error: ", err.Error()) // TODO
             continue
         }
-        ch <- DataStore.Broadcast_Message{IP: string(remoteAddr.IP), Message: "Received a broadcast message"}
+        if remoteAddr.IP != nil {
+            ch <- DataStore.Broadcast_Message{IP: fmt.Sprint(remoteAddr.IP), Message: "Received a broadcast message"}
+        }
     }
     return
 }

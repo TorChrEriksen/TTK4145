@@ -1,2 +1,0 @@
-2014/03/09 15:28:47.752244 SocketServer.go:81: ========== New log ==========
-2014/03/09 15:28:47.752329 SocketServer.go:85: Error:  listen tcp :12345: bind: address already in use

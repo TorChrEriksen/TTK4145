@@ -1,4 +1,0 @@
-2014/03/09 15:25:31.343947 logger.go:87: ========== New log ==========
-2014/03/09 15:25:31.344920 logger.go:94: ERROR:  NETCONTROLLER  :  Error finding local IP
-2014/03/09 15:25:31.630424 logger.go:94: ERROR:    :  Catched a killsignal:, interrupt
-2014/03/09 15:25:33.037155 logger.go:94: ERROR:    :  Catched a killsignal:, interrupt

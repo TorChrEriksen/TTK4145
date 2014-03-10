@@ -150,7 +150,7 @@ func startUDPServ(ch chan DataStore.Heartbeat_Message) {
         convData := convertData(buffer, n)
         convData = fmt.Sprint("Number of bytes read: ", n, " | Data: ", convData)
         l.Println(convData)
-        ch <- DataStore.Heartbeat_Message{IP: (string)(netInfo.IP), Message: convData}
+        ch <- DataStore.Heartbeat_Message{IP: fmt.Sprint(netInfo.IP), Message: convData}
 
         l.Println("Converting seems successfull.")
 	}
