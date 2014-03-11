@@ -188,12 +188,16 @@ func createStopListener(ch chan int){
     }
 }
 
-const EXT_BTN_1_UP int = 21
-const EXT_BTN_2_UP int = 22
-const EXT_BTN_2_DOWN int = 23
-const EXT_BTN_3_UP int = 24
-const EXT_BTN_3_DOWN int = 25
-const EXT_BTN_4_DOWN int = 26
+//Buttons not used added to highlight pattern
+const EXT_BTN_1_UP int = 41
+//const EXT_BTN_1_DOWN int = 40
+const EXT_BTN_2_UP int = 51
+const EXT_BTN_2_DOWN int = 50
+const EXT_BTN_3_UP int = 61
+const EXT_BTN_3_DOWN int = 60
+//const EXT_BTN_4_UP int = 71
+const EXT_BTN_4_DOWN int = 70
+
 func createExtButtonListener(ch chan int){
     var prevStateExtBtn1Up int = 0
     var StateExtBtn1Up int = 0
