@@ -23,13 +23,12 @@ type NetController struct {
     al *logger.AppLogger
     localIP string // TODO: change this to net.IP and do byte compare
     hostList []string //TODO : we are doing string compare, do it with bytes instead in some way
-//    tcpClientList []string
+    tcpClients []SocketClient.SocketClient
+    udpClients []SocketClient.SocketClient
     clientList []DataStore.Client
     broadcastChan chan DataStore.Broadcast_Message
     heartbeatChan chan DataStore.Heartbeat_Message
     orderChan chan []byte 
-
-    sc SocketClient.SocketClient
     bcChan chan int
 
     sendOrderChannel chan []byte
@@ -54,7 +53,8 @@ func (nc *NetController) Create(a *logger.AppLogger) {
     }
 
     nc.hostList = make([]string, 10)
-//    nc.tcpClientList = make([]string, 10)
+    nc.tcpClients = make([]SocketClient.SocketClient, 10)
+    nc.udpClients = make([]SocketClient.SocketClient, 10)
     nc.clientList = make([]DataStore.Client, 10)
 
     nc.broadcastChan = make(chan DataStore.Broadcast_Message)
@@ -64,8 +64,65 @@ func (nc *NetController) Create(a *logger.AppLogger) {
     nc.orderChan = make(chan []byte)
 
     nc.sendOrderChannel = make(chan []byte)
-    nc.sc = SocketClient.SocketClient{Identifier: "SOCKETCLIENT"}
-    nc.sc.Create(nc.al, nc.sendOrderChannel)
+}
+
+func (nc *NetController) connectTCP(tcpAddr string) {
+
+    // Check if socket is already connected to tcpAddr
+    // TODO: need to have a flag for connected or not.
+    for _, tcpConnection := range nc.tcpClients {
+        if tcpConnection.GetTCPConn() != nil { //TODO Verify that this works
+            if strings.EqualFold(tcpConnection.GetTCPConn().LocalAddr().String(), tcpAddr) {
+                result := fmt.Sprint("Already connected to that address: ", tcpAddr, " --> ", tcpConnection.GetTCPConn().LocalAddr().String())
+                nc.al.Send_To_Log(nc.Identifier, logger.ERROR, result)
+                return
+            }
+        }
+    }
+
+    tcpClient := SocketClient.SocketClient{Identifier: "TCP_SOCKETCLIENT"}
+    tcpClient.Create(nc.al, nc.sendOrderChannel)
+    tcpErr := tcpClient.ConnectTCP(tcpAddr) //TODO: FIX
+
+    // Add tcp connection to tcp slice.
+    if tcpErr == 1 {
+        nc.tcpClients = append(nc.tcpClients, tcpClient) 
+        result := fmt.Sprint("Added connection to TCP slice: ", tcpClient.GetTCPConn().LocalAddr().String())
+        nc.al.Send_To_Log(nc.Identifier, logger.INFO, result)
+    } else {
+        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error connecting to TCP.")
+    }
+
+
+}
+
+func (nc *NetController) connectUDP(udpAddr string) {
+
+    // Check if socket is already connected to udpAddr
+    // TODO: need to have a flag for connected or not.
+    for _, udpConnection := range nc.udpClients {
+        if udpConnection.GetUDPConn() != nil { //TODO Verify that this works
+            if strings.EqualFold(udpConnection.GetUDPConn().LocalAddr().String(), udpAddr) {
+                result := fmt.Sprint("Already connected to that address: ", udpAddr, " --> ", udpConnection.GetUDPConn().LocalAddr().String())
+                nc.al.Send_To_Log(nc.Identifier, logger.ERROR, result)
+                return
+            }
+        }
+    }
+
+    udpClient := SocketClient.SocketClient{Identifier: "UDP_SOCKETCLIENT"}
+    udpClient.Create(nc.al, nc.sendOrderChannel) // TODO: one struct for UDP, one for TCP
+    udpErr := udpClient.ConnectUDP(udpAddr)
+
+    // Add udp connection to udp slice.
+    if udpErr == 1 {
+        nc.udpClients = append(nc.udpClients, udpClient)
+        result := fmt.Sprint("Added connection to UDP slice: ", udpClient.GetUDPConn().LocalAddr().String())
+        nc.al.Send_To_Log(nc.Identifier, logger.INFO, result)
+        udpClient.SendHeartbeat()
+    } else {
+        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error connecting to UDP.")
+    }
 }
 
 func (nc *NetController) Run() {
@@ -85,12 +142,17 @@ func (nc *NetController) Run() {
             case broadcastMessage := <-nc.broadcastChan :
 //                fmt.Println([]byte(nc.localIP))
 //                fmt.Println([]byte(broadcastMessage.IP))
+
                 go func() {
                     if strings.EqualFold(string(nc.localIP), string(broadcastMessage.IP)) {
 //                    if bytes.Equal(nc.localIP, broadcastMessage.IP) {
                         nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Ignoring broadcast from local IP: ", broadcastMessage.IP))
                         return
                     }
+
+                // Check if we are connected to this computer
+                // Connect if not
+                // Need more logic here
 
                     for _, host := range nc.hostList {
                         if strings.EqualFold(string(host), string(broadcastMessage.IP)) {
@@ -102,13 +164,10 @@ func (nc *NetController) Run() {
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to host list: ", broadcastMessage.IP))
                     nc.hostList = append(nc.hostList, broadcastMessage.IP)
 
-                    nc.sc.ConnectTCP(fmt.Sprint(broadcastMessage.IP, ":12345")) //TODO: FIX
-                    nc.sc.ConnectUDP(fmt.Sprint(broadcastMessage.IP, ":12346")) //TODO: FIX
-                    nc.sc.SendHeartbeat()
-                }()
 
-                // Check if we are connected to this computer
-                // Connect if not
+                    nc.connectTCP(fmt.Sprint(broadcastMessage.IP, ":12345")) //TODO: FIX
+                    nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":12346")) //TODO: FIX
+                }()
 
             case heartbeat := <-nc.heartbeatChan :
                 //fmt.Println(ssUDP)

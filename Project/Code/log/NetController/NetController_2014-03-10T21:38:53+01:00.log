@@ -1,8 +1,0 @@
-2014/03/10 21:38:53.557754 logger.go:87: ========== New log ==========
-2014/03/10 21:38:53.557941 logger.go:87: Local IP found: 129.241.187.81
-2014/03/10 21:38:53.558453 logger.go:87: Sent 48 bytes.
-2014/03/10 21:38:53.558676 logger.go:87: Ignoring broadcast from local IP: 129.241.187.81
-2014/03/10 21:38:55.110490 logger.go:87: Appending to UDP client list: 129.241.187.155
-2014/03/10 21:38:55.673352 logger.go:87: Appending to host list: 129.241.187.155
-2014/03/10 21:38:56.110613 logger.go:87: Already part of UDP client list: 129.241.187.155
-2014/03/10 21:38:57.110711 logger.go:87: Already part of UDP client list: 129.241.187.155

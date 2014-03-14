@@ -1,6 +1,0 @@
-2014/03/10 21:21:47.850284 logger.go:87: ========== New log ==========
-2014/03/10 21:21:47.850683 logger.go:94: ERROR:  NETCONTROLLER  :  Error while sending data: *NetController.SendData().
-2014/03/10 21:21:48.850908 logger.go:94: ERROR:  NETCONTROLLER  :  Error while sending data: *NetController.SendData().
-2014/03/10 21:21:49.851066 logger.go:94: ERROR:  NETCONTROLLER  :  Error while sending data: *NetController.SendData().
-2014/03/10 21:21:50.851247 logger.go:94: ERROR:  NETCONTROLLER  :  Error while sending data: *NetController.SendData().
-2014/03/10 21:21:51.851412 logger.go:94: ERROR:  NETCONTROLLER  :  Error while sending data: *NetController.SendData().

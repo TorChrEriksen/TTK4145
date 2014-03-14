@@ -7,14 +7,13 @@ import (
 	"net"
     "fmt"
     "time"
-    "strings"
 )
 
 type SocketClient struct {
     Identifier string
     al *logger.AppLogger
-    udpConn []*net.UDPConn
-    tcpConn []*net.TCPConn
+    udpConn *net.UDPConn // mod
+    tcpConn *net.TCPConn // mod
     heartbeatChan chan bool
     orderChan chan []byte
 }
@@ -27,8 +26,6 @@ func (sc *SocketClient) Create(a *logger.AppLogger, ch chan []byte) {
     sc.al = a
     sc.al.SetPackageLog(sc.Identifier, fileName, logSymLink)
 
-    sc.udpConn = make([]*net.UDPConn, 10)
-    sc.tcpConn = make([]*net.TCPConn, 10)
     sc.heartbeatChan = make(chan bool)
     sc.orderChan = ch
 
@@ -37,60 +34,11 @@ func (sc *SocketClient) Create(a *logger.AppLogger, ch chan []byte) {
 
 // Connect to host
 // Returns -1 if the connection was not successfull, in that case retry to connect
-func (sc *SocketClient) ConnectUDP(udpAddr string) int {
-
-    // Check if socket is already connected to udpAddr
-    for _, udpConnection := range sc.udpConn {
-        if udpConnection != nil { //TODO Verify that this works
-            if strings.EqualFold(udpConnection.LocalAddr().String(), udpAddr) {
-                sc.al.Send_To_Log(sc.Identifier, logger.INFO,
-                    fmt.Sprint("Already connected to that address: ", udpAddr, " --> ", udpConnection.LocalAddr().String()))
-                return 1
-            }
-        }
-    }
-
-    _, udpAddress := UDPConn.InitComm(udpAddr)
-    udpErr, udpConn := UDPConn.OpenComm(*udpAddress)
-
-    // Add udp connection to udp slice.
-    if udpErr == 1 {
-        sc.udpConn = append(sc.udpConn, udpConn)
-        sc.al.Send_To_Log(sc.Identifier, logger.INFO,
-            fmt.Sprint("Added UDP connection to udpConn slice: ", udpConn.LocalAddr().String()))
-    }
-
-    if udpErr != 1 {
-        sc.al.Send_To_Log(sc.Identifier, logger.ERROR, fmt.Sprint("Error connecting (UDP)"))
-        return -1
-    } else {
-        return 1 // Everything ok.
-    }
-}
-
 func (sc *SocketClient) ConnectTCP(tcpAddr string) int {
 
-    // Check if socket is already connected to tcpAddr
-    for _, tcpConnection := range sc.tcpConn {
-        if tcpConnection != nil { //TODO Verify that this works
-            if strings.EqualFold(tcpConnection.LocalAddr().String(), tcpAddr) {
-                sc.al.Send_To_Log(sc.Identifier, logger.INFO,
-                    fmt.Sprint("Already connected to that address: ", tcpAddr, " --> ", tcpConnection.LocalAddr().String()))
-                return 1
-            }
-        }
-    }
-
 	_, tcpAddress := TCPConn.InitComm(tcpAddr)
-	tcpErr, tcpConn  := TCPConn.OpenComm(*tcpAddress)
-
-    // Add tcp connection to tcp slice.
-    if tcpErr == 1 {
-        sc.tcpConn = append(sc.tcpConn, tcpConn)
-        fmt.Println(tcpConn)
-        sc.al.Send_To_Log(sc.Identifier, logger.INFO,
-            fmt.Sprintln("Added TCP connection to tcpConn slice: ", tcpConn.LocalAddr().String()))
-    }
+    var tcpErr int
+    tcpErr, sc.tcpConn = TCPConn.OpenComm(*tcpAddress)
 
 	if tcpErr != 1 {
         sc.al.Send_To_Log(sc.Identifier, logger.INFO, fmt.Sprint("Error connecting (TCP)"))
@@ -119,6 +67,23 @@ func (sc *SocketClient) ConnectTCP(tcpAddr string) int {
     */
 }
 
+// Connect to host
+// Returns -1 if the connection was not successfull, in that case retry to connect
+func (sc *SocketClient) ConnectUDP(udpAddr string) int {
+
+    _, udpAddress := UDPConn.InitComm(udpAddr)
+    var udpErr int
+    udpErr, sc.udpConn = UDPConn.OpenComm(*udpAddress)
+
+    if udpErr != 1 {
+        sc.al.Send_To_Log(sc.Identifier, logger.ERROR, fmt.Sprint("Error connecting (UDP)"))
+        return -1
+    } else {
+        return 1
+    }
+}
+
+
 func (sc *SocketClient) SendHeartbeat() {
     // TODO: need to stop the heartbeat?
     // sc.heartbeatChan <- true
@@ -140,13 +105,21 @@ func (sc *SocketClient) SendHeartbeat() {
 // TODO: Need to make the package SocketClient only one connection, and let the netCtrl control each one of them.
 func (sc *SocketClient) waitForInput() {
     for order := range sc.orderChan {
-        for _, host := range sc.tcpConn {
-            if host != nil {
-
+//        for _, host := range sc.tcpConn {
+//            if host != nil {
+        if sc.tcpConn != nil {
             fmt.Println("ni hao")
-                n := TCPConn.SendData(host, order) // TODO: use return value for something?
+                n := TCPConn.SendData(sc.tcpConn, order) // TODO: use return value for something?
                 _ = n
             }
-        }
+//        }
     }
+}
+
+func (sc *SocketClient) GetTCPConn() *net.TCPConn {
+    return sc.tcpConn
+}
+
+func (sc *SocketClient) GetUDPConn() *net.UDPConn {
+    return sc.udpConn
 }
