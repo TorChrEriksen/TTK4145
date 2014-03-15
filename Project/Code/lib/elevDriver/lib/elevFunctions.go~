@@ -1,0 +1,18 @@
+package elevFunctions
+
+// #cgo CFLAGS: -std=c99 -g -Wall -O2 -I .
+// #cgo LDFLAGS: -lcomedi -g -lm
+// #include "C/io.c"
+// #include "C/elev.c"
+// #include "C/runner.c"
+import "C"
+
+import (
+    "fmt"
+    "time"
+    "./driverInterface.go"
+)
+
+func GoToFloor(){
+
+}

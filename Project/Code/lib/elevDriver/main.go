@@ -7,6 +7,7 @@ package main
 import(
     "./lib"
     "fmt"
+    "./elevfunc"
     //"time"
     //"os"
 )
@@ -20,9 +21,11 @@ Floor sensors output - 30 - ...
 
 func main(){
    driverInterface.Init()
+   driverInterface.StopElevator()
    //driverInterface.GetFloorSignal()
    //driverInterface.Test_Run()
 	// Create driver with all the channels we need
+	elevfunc.GoToFloor(0)
 	intButtonChannel := make(chan int)
     extButtonChannel := make(chan int)
     floorChannel := make(chan int)
@@ -30,7 +33,7 @@ func main(){
 	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel)
 	
 	//driverInterface.SetSpeed(-300)
-	
+	//elevfunc.GoToFloor()
 	//Test of all functions
 	//driverInterface.SetFloorLamp(3)   //works for values <0,3>
 	//driverInterface.SetStopLamp(1)    //OK!
