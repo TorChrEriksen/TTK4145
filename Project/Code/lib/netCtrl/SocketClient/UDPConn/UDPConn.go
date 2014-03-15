@@ -53,17 +53,29 @@ func SendData(conn net.UDPConn, a string) int {
 	return n
 }
 
-func SendHeartbeat(conn net.UDPConn, a string) {
+func SendHeartbeat(conn *net.UDPConn, a string, quit chan bool, ch chan string) {
     data := make([]byte, 4096)
     data = []byte(a)
 
     for {
-        _, err := conn.Write(data)
-        if err != nil {
-            fmt.Println("Error writing to connection: (UDP)", err.Error())
+        select {
+        case <- quit :
+            ch <- "I was told to quit"
             return
+        default :
+//            for _, c := range conn {
+//                if c != nil {
+            if conn != nil {
+                _, err := conn.Write(data)
+                if err != nil {
+                    ch <- fmt.Sprint("Error writing to connection: (UDP)", err.Error())
+                }
+                ch <- "Sent a heartbeat"
+            }
+//            }
+            time.Sleep(time.Second)
         }
-        time.Sleep(time.Second)
     }
 }
+
 

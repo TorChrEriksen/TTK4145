@@ -6,8 +6,6 @@ import (
     "time"
 )
 
-var stopFlag bool = false
-
 func runClient(udpAddr net.UDPAddr, ch chan int) {
     socket, err := net.DialUDP("udp4", nil, &udpAddr)
     if err != nil {
@@ -15,8 +13,9 @@ func runClient(udpAddr net.UDPAddr, ch chan int) {
         return
     }
 
-    data := []byte("I cannot allow you to do that Dave.")
-    for !stopFlag {
+    data := []byte("Im new here, I cannot allow you to do that Dave.")
+
+    for {
         n, err := socket.Write(data)
         if err != nil {
             fmt.Println("Error_2: ", err.Error())
@@ -28,14 +27,10 @@ func runClient(udpAddr net.UDPAddr, ch chan int) {
     ch <- -1
 }
 
-func Create(ch chan int) {
+func Run(ch chan int, broadcastPort int) {
 
     ipv4_broadcast := net.IPv4(255, 255, 255, 255)
-    udpAddr := net.UDPAddr{IP : ipv4_broadcast, Port: 12345}
+    udpAddr := net.UDPAddr{IP : ipv4_broadcast, Port: broadcastPort}
 
     go runClient(udpAddr, ch)
-}
-
-func StopClient() {
-    stopFlag = true
 }
