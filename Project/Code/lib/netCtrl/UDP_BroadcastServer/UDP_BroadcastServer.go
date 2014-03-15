@@ -31,9 +31,9 @@ func runServer(udpAddr net.UDPAddr, ch chan DataStore.Broadcast_Message) {
     return
 }
 
-func Run(ch chan DataStore.Broadcast_Message) {
+func Run(ch chan DataStore.Broadcast_Message, broadcastPort int) {
     ipv4_broadcast := net.IPv4(255, 255, 255, 255)
-    udpAddr := net.UDPAddr{IP : ipv4_broadcast, Port: 12345}
+    udpAddr := net.UDPAddr{IP : ipv4_broadcast, Port: broadcastPort}
 
     go runServer(udpAddr, ch)
 }

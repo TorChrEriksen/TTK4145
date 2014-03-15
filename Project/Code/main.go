@@ -8,6 +8,9 @@ import (
     "os/signal"
     "fmt"
     "time"
+    "encoding/xml"
+    "io"
+    "path/filepath"
 )
 
 
@@ -27,14 +30,23 @@ func main() {
     appLogger := logger.AppLogger{}
     appLogger.Create()
 
-    //go catchKill(appLogger)
+    // Import config
+    config := importConfig("config/appConfig.xml")
+
+    // Fire up interrupt catcher|
+    if config.CatchInterrupt {
+        go catchKill(appLogger)
+    }
 
     // Declaring and setting up net controller
-    netCtrl := netCtrl.NetController{Identifier: "NETCONTROLLER"}
-    netCtrl.Create(&appLogger)
-    netCtrl.Run()
+    if !config.DebugMode {
+        netCtrl := netCtrl.NetController{Identifier: "NETCONTROLLER", TCPPort: config.PortTCP, UDPPort: config.PortUDP, BroadcastPort : config.PortBroadcast}
+        netCtrl.Create(&appLogger)
+        netCtrl.Run()
 
-    sendEggData(netCtrl)
+        // Sending some test data
+        sendEggData(netCtrl)
+    }
 }
 
 func sendEggData(nc netCtrl.NetController) {
@@ -44,5 +56,109 @@ func sendEggData(nc netCtrl.NetController) {
         nc.SendData(dataForTheEgg)
         time.Sleep(time.Second * 1)
     }
-
 }
+
+// Config declaration and import part
+
+type ImportedConfig struct {
+    CatchInterrupt bool
+    Redundant bool
+    PortTCP int
+    PortUDP int
+    PortBroadcast int
+    DebugMode bool
+}
+
+type ConfigLine struct {
+    XMLName xml.Name `xml:"config"`
+    Key string `xml:"key,attr"`
+    Value int `xml:"value,attr"`
+}
+
+type AppConfig struct {
+    XMLName xml.Name `xml:"appcnf"`
+    Conf []*ConfigLine `xml:"config"`
+}
+
+func readConf(reader io.Reader) ([]*ConfigLine, error){
+    config := &AppConfig{}
+    decoder := xml.NewDecoder(reader)
+
+    err := decoder.Decode(config)
+    if err != nil {
+        return nil, err
+    }
+
+    return config.Conf, nil
+}
+
+func importConfig(filePath string) *ImportedConfig {
+    var appConfig []*ConfigLine
+    var file *os.File
+
+    defer func() {
+        if file != nil {
+            file.Close()
+        }
+    }()
+
+    // Build the location of the straps.xml file
+    // filepath.Abs appends the file name to the default working directly
+    configFilePath, err := filepath.Abs(filePath)
+
+    if err != nil {
+        panic(err.Error())
+    }
+
+    // Open the config xml file
+    file, err = os.Open(configFilePath)
+
+    if err != nil {
+        panic(err.Error())
+    }
+
+    // Read the config file
+    appConfig, err = readConf(file)
+
+    if err != nil {
+        panic(err.Error())
+    }
+
+    // TODO: Default config?
+
+    impCnf := &ImportedConfig{}
+
+    // Nasty conversion, check out xml.unmarshall and that stuff....
+    for n, element := range appConfig {
+        switch n {
+        case 0:
+            if element.Value == 0 {
+                impCnf.CatchInterrupt = false
+            } else {
+                impCnf.CatchInterrupt = true
+            }
+        case 1:
+            if element.Value == 0 {
+                impCnf.Redundant = false
+            } else {
+                impCnf.Redundant = true
+            }
+        case 2:
+            impCnf.PortTCP = element.Value
+        case 3:
+            impCnf.PortUDP = element.Value
+        case 4:
+            impCnf.PortBroadcast = element.Value
+        case 5:
+            if element.Value == 0 {
+                impCnf.DebugMode = false
+            } else {
+                impCnf.DebugMode = true
+            }
+        }
+    }
+
+    return impCnf
+}
+
+// end Config part

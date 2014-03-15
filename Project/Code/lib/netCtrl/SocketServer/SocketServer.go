@@ -60,7 +60,7 @@ func handleData() {
 }
 */
 
-func startTCPServ(ch chan []byte) {
+func startTCPServ(ch chan []byte, port int) {
     fileName := fmt.Sprint("log/SocketServer/TCP_Server_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/TCP_Server.log"
 
@@ -80,7 +80,8 @@ func startTCPServ(ch chan []byte) {
 
     l.Println("========== New log ==========")
 
-	listener, err := net.Listen("tcp", ":12345")
+    listenPort := fmt.Sprint(":", port)
+	listener, err := net.Listen("tcp", listenPort)
 	if err != nil {
         l.Println("Error: ", err.Error())
 	}
@@ -158,7 +159,7 @@ func startUDPServ(ch chan DataStore.Heartbeat_Message) {
     close(ch)
 }
 
-func Run(tcpChan chan []byte, udpChan chan DataStore.Heartbeat_Message) {
-    go startTCPServ(tcpChan)
+func Run(tcpChan chan []byte, udpChan chan DataStore.Heartbeat_Message, tcpPort int) {
+    go startTCPServ(tcpChan, tcpPort)
     go startUDPServ(udpChan)
 }

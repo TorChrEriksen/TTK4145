@@ -20,6 +20,9 @@ type NetController struct {
     // What if this is uninitialized when calling SendData
     // eg. calling SendData before Create(), or something....
     Identifier string
+    TCPPort int
+    UDPPort int
+    BroadcastPort int
     al *logger.AppLogger
     localIP string // TODO: change this to net.IP and do byte compare
     hostList []string //TODO : we are doing string compare, do it with bytes instead in some way
@@ -28,7 +31,7 @@ type NetController struct {
     clientList []DataStore.Client
     broadcastChan chan DataStore.Broadcast_Message
     heartbeatChan chan DataStore.Heartbeat_Message
-    orderChan chan []byte 
+    orderChan chan []byte
     bcChan chan int
 
     sendOrderChannel chan []byte
@@ -42,14 +45,15 @@ func (nc *NetController) Create(a *logger.AppLogger) {
     nc.al.SetPackageLog(nc.Identifier, fileName, logSymLink)
 
     var intErr int
-    nc.localIP, intErr = NetServices.FindLocalIP() 
-    if intErr != 1 {
+    nc.localIP, intErr = NetServices.FindLocalIP()
+    if intErr == 1 {
+        nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Local IP found: ", nc.localIP))
+    } else {
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error finding local IP")
         // TODO: We will ahve to disable the net ctrl when we have no valid local IP
         // Enough for detecting that we have no connection?
         // Or do we use the heartbeat for that as well, and just ignore the local IP?
-    } else {
-        nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Local IP found: ", nc.localIP))
+
     }
 
     nc.hostList = make([]string, 10)
@@ -127,9 +131,9 @@ func (nc *NetController) connectUDP(udpAddr string) {
 
 func (nc *NetController) Run() {
 
-    UDP_BroadcastServer.Run(nc.broadcastChan)
-    UDP_BroadcastClient.Run(nc.bcChan)
-    SocketServer.Run(nc.orderChan, nc.heartbeatChan)
+    UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort)
+    UDP_BroadcastClient.Run(nc.bcChan, nc.BroadcastPort)
+    SocketServer.Run(nc.orderChan, nc.heartbeatChan, nc.TCPPort)
 
     go func() {
         for {
@@ -140,8 +144,8 @@ func (nc *NetController) Run() {
 
             // Received a broadcast, check if its a new elevator or old
             case broadcastMessage := <-nc.broadcastChan :
-//                fmt.Println([]byte(nc.localIP))
-//                fmt.Println([]byte(broadcastMessage.IP))
+                //fmt.Println([]byte(nc.localIP))
+                //fmt.Println([]byte(broadcastMessage.IP))
 
                 go func() {
                     if strings.EqualFold(string(nc.localIP), string(broadcastMessage.IP)) {
@@ -165,8 +169,8 @@ func (nc *NetController) Run() {
                     nc.hostList = append(nc.hostList, broadcastMessage.IP)
 
 
-                    nc.connectTCP(fmt.Sprint(broadcastMessage.IP, ":12345")) //TODO: FIX
-                    nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":12346")) //TODO: FIX
+                    nc.connectTCP(fmt.Sprint(broadcastMessage.IP, ":", nc.TCPPort)) //TODO fix?
+                    nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":", nc.UDPPort)) //TODO fix?
                 }()
 
             case heartbeat := <-nc.heartbeatChan :
