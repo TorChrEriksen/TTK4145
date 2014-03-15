@@ -32,6 +32,7 @@ func main() {
 
     // Import config
     config := importConfig("config/appConfig.xml")
+    fmt.Println("Loaded application config: ", *config)
 
     // Fire up interrupt catcher|
     if config.CatchInterrupt {
@@ -40,7 +41,11 @@ func main() {
 
     // Declaring and setting up net controller
     if !config.DebugMode {
-        netCtrl := netCtrl.NetController{Identifier: "NETCONTROLLER", TCPPort: config.PortTCP, UDPPort: config.PortUDP, BroadcastPort : config.PortBroadcast}
+        netCtrl := netCtrl.NetController{Identifier: "NETCONTROLLER",
+                                         TCPPort: config.PortTCP,
+                                         UDPPort: config.PortUDP,
+                                         BroadcastPort: config.PortBroadcast,
+                                         PacketSize: config.PacketSize}
         netCtrl.Create(&appLogger)
         netCtrl.Run()
 
@@ -67,6 +72,12 @@ type ImportedConfig struct {
     PortUDP int
     PortBroadcast int
     DebugMode bool
+    Floors int
+    ButtonBaseInternal int
+    ButtonBaseExternal int
+    FloorNumberBase int
+    StopButtonBase int
+    PacketSize int
 }
 
 type ConfigLine struct {
@@ -155,6 +166,18 @@ func importConfig(filePath string) *ImportedConfig {
             } else {
                 impCnf.DebugMode = true
             }
+        case 6:
+            impCnf.Floors = element.Value
+        case 7:
+            impCnf.ButtonBaseInternal = element.Value
+        case 8:
+            impCnf.ButtonBaseExternal = element.Value
+        case 9:
+            impCnf.FloorNumberBase = element.Value
+        case 10:
+            impCnf.StopButtonBase = element.Value
+        case 11:
+            impCnf.PacketSize = element.Value
         }
     }
 

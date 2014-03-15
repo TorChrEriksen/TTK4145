@@ -20,10 +20,10 @@ func convertData(data []byte, n int) string {
 	return fmt.Sprint("Data from client: ", n, " --> ", (string)(convertedData))
 }
 
-func acceptConn(conn net.Conn, l log.Logger, ch chan []byte) {
+func acceptConn(conn net.Conn, l log.Logger, ch chan []byte, packetSize int) {
 	l.Println("Success: Connection accepted from ", conn.RemoteAddr())
 	for {
-		data := make([]byte, 4096)
+		data := make([]byte, packetSize)
 		n, err := conn.Read(data)
 
         if err != nil {
@@ -60,7 +60,7 @@ func handleData() {
 }
 */
 
-func startTCPServ(ch chan []byte, port int) {
+func startTCPServ(ch chan []byte, port int, packetSize int) {
     fileName := fmt.Sprint("log/SocketServer/TCP_Server_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/TCP_Server.log"
 
@@ -94,14 +94,14 @@ func startTCPServ(ch chan []byte, port int) {
 			l.Println(err.Error())
 		} else {
 			l.Println("Firing goroutine for handling connection.")
-			go acceptConn(conn, *l, ch)
+			go acceptConn(conn, *l, ch, packetSize)
 		}
 	}
 
     close(ch)
 }
 
-func startUDPServ(ch chan DataStore.Heartbeat_Message) {
+func startUDPServ(ch chan DataStore.Heartbeat_Message, packetSize int) {
     fileName := fmt.Sprint("log/SocketServer/UDP_Server_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/UDP_Server.log"
 
@@ -139,7 +139,7 @@ func startUDPServ(ch chan DataStore.Heartbeat_Message) {
 	}
 	defer listener.Close()
 
-    buffer := make([]byte, 4096)
+    buffer := make([]byte, packetSize)
 	for {
         n, netInfo, err := listener.ReadFromUDP(buffer)
         if err != nil {
@@ -159,7 +159,7 @@ func startUDPServ(ch chan DataStore.Heartbeat_Message) {
     close(ch)
 }
 
-func Run(tcpChan chan []byte, udpChan chan DataStore.Heartbeat_Message, tcpPort int) {
-    go startTCPServ(tcpChan, tcpPort)
-    go startUDPServ(udpChan)
+func Run(tcpChan chan []byte, udpChan chan DataStore.Heartbeat_Message, tcpPort int, packetSize int) {
+    go startTCPServ(tcpChan, tcpPort, packetSize)
+    go startUDPServ(udpChan, packetSize)
 }

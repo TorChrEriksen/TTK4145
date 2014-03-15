@@ -23,6 +23,7 @@ type NetController struct {
     TCPPort int
     UDPPort int
     BroadcastPort int
+    PacketSize int
     al *logger.AppLogger
     localIP string // TODO: change this to net.IP and do byte compare
     hostList []string //TODO : we are doing string compare, do it with bytes instead in some way
@@ -131,9 +132,9 @@ func (nc *NetController) connectUDP(udpAddr string) {
 
 func (nc *NetController) Run() {
 
-    UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort)
+    UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort, nc.PacketSize)
     UDP_BroadcastClient.Run(nc.bcChan, nc.BroadcastPort)
-    SocketServer.Run(nc.orderChan, nc.heartbeatChan, nc.TCPPort)
+    SocketServer.Run(nc.orderChan, nc.heartbeatChan, nc.TCPPort, nc.PacketSize)
 
     go func() {
         for {
