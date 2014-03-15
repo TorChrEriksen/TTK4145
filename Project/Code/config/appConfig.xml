@@ -5,7 +5,7 @@
     <config key="PortTCP" value="12345" />
     <config key="PortUDP" value="12346" />
     <config key="PortBroadcast" value="12347" />
-    <config key="DebugMode" value="1" />
+    <config key="DebugMode" value="0" />
     <config key="Floors" value="4" />
     <config key="ButtonBaseInternal" value="11" />
     <config key="ButtonBaseExternal" value="50" />
