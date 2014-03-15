@@ -12,22 +12,10 @@ import(
 )
 
 /*Driver interface Signals from controller:
-STOP = 10
-INT_BTN_1 = 11
-INT_BTN_2 = 12
-INT_BTN_3 = 13
-INT_BTN_4 = 14
-EXT_BTN_1_UP = 21
-EXT_BTN_2_UP = 22
-EXT_BTN_2_DOWN = 23
-EXT_BTN_3_UP = 24
-EXT_BTN_3_DOWN = 25
-EXT_BTN_4_DOWN = 26
-FLOOR_NO = 30
-FLOOR_1 = 31
-FLOOR_2 = 32
-FLOOR_3 = 33
-FLOOR_4 = 34
+Stop button - 10
+Internal buttons - 11 - ...
+External Buttons - 50 - ...
+Floor sensors output - 30 - ...
 */
 
 func main(){
@@ -39,8 +27,7 @@ func main(){
     extButtonChannel := make(chan int)
     floorChannel := make(chan int)
     stopChannel := make(chan int)
-    timeoutChannel := make(chan int)
-	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel, timeoutChannel)
+	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel)
 	
 	//driverInterface.SetSpeed(-300)
 	
@@ -69,10 +56,6 @@ func main(){
             case extButtonSignal := <- extButtonChannel :
                 go func() {
                     fmt.Println(extButtonSignal)
-                }()
-            case floorTimeout := <- timeoutChannel :
-                go func() {
-                    fmt.Println("From timeout channel: ", floorTimeout)
                 }()
 		}
 	}

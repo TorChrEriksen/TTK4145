@@ -11,6 +11,8 @@ import (
     "fmt"
     "time"
 )
+//Number of floors
+const FLOORS int = 4
 
 // Test function for elevator
 func Test_Run() {
@@ -41,10 +43,10 @@ func StopElevator(){
 //func SetButtonLamp(btn C.elev_button_type_t,floor C.int, value C.int){
 func SetButtonLamp(direction string,floor C.int, value C.int){
   if direction == "UP"{
-      fmt.Println("goin' up")
+      //fmt.Println("goin' up") //Debug
       C.elev_set_button_lamp(C.BUTTON_CALL_UP, floor, value)
   }else if direction == "DOWN"{
-      fmt.Println("goin' down")
+      //fmt.Println("goin' down") //Debug
       C.elev_set_button_lamp(C.BUTTON_CALL_DOWN, floor, value)
   }else{
       //Trying to kick the shit out of software in case of wrong input
@@ -81,217 +83,102 @@ func GetObstructionSignal() int{
 // Parameters: all the different channels we need like:
 // Create(buttonChannel, floorChannel, stopChannel, ....)
 
-func Create(intBtChan chan int, floorChan chan int, stopChan chan int, extBtChan chan int, timeoutChan chan int) {
+func Create(intBtChan chan int, floorChan chan int, stopChan chan int, extBtChan chan int) {
 	go createIntButtonListener(intBtChan)
     go createFloorListener(floorChan)
     go createStopListener(stopChan)
     go createExtButtonListener(extBtChan)
-    go createTimeoutListener(timeoutChan)
 }
 
-const INT_BTN_1 int  = 11
-const INT_BTN_2 int  = 12
-const INT_BTN_3 int  = 13
-const INT_BTN_4 int  = 14
+const INT_BTN_BASE int = 11
 func createIntButtonListener(ch chan int) {
+	var FloorCommands = [FLOORS]C.int{C.FLOOR_COMMAND1, C.FLOOR_COMMAND2, C.FLOOR_COMMAND3, C.FLOOR_COMMAND4}
     //TODO think about fault tolerance here    
-    var prevStateIntBtn1 int = 0
-    var StateIntBtn1 int = 0
-    var prevStateIntBtn2 int = 0
-    var StateIntBtn2 int = 0
-    var prevStateIntBtn3 int = 0
-    var StateIntBtn3 int = 0
-    var prevStateIntBtn4 int = 0
-    var StateIntBtn4 int = 0
+    var prevStateIntBtn [FLOORS]int
+    var StateIntBtn [FLOORS]int
+    for i := range StateIntBtn{
+    	prevStateIntBtn[i] = 0
+    	StateIntBtn[i] = 0
+    }
+
     for{
-        time.Sleep(time.Millisecond * 10)
-        
-        StateIntBtn1 = int(C.io_read_bit(C.FLOOR_COMMAND1))
-        if StateIntBtn1 != prevStateIntBtn1{
-            prevStateIntBtn1 = StateIntBtn1
-            if StateIntBtn1 == 1{
-                ch <- INT_BTN_1            
-            }
-        }
-
-        StateIntBtn2 = int(C.io_read_bit(C.FLOOR_COMMAND2))
-        if StateIntBtn2 != prevStateIntBtn2{
-            prevStateIntBtn2 = StateIntBtn2
-            if StateIntBtn2 == 1{
-                ch <- INT_BTN_2            
-            }
-        }
-        
-        StateIntBtn3 = int(C.io_read_bit(C.FLOOR_COMMAND3))
-        if StateIntBtn3 != prevStateIntBtn3{
-            prevStateIntBtn3 = StateIntBtn3
-            if StateIntBtn3 == 1{
-                ch <- INT_BTN_3            
-            }
-        }
-
-        StateIntBtn4 = int(C.io_read_bit(C.FLOOR_COMMAND4))
-        if StateIntBtn4 != prevStateIntBtn4{
-            prevStateIntBtn4 = StateIntBtn4
-            if StateIntBtn4 == 1{
-                ch <- INT_BTN_4            
-            }
-        }
-    }	
-}
-
-const FLOOR_NO int  = 30
-const FLOOR_1 int  = 31
-const FLOOR_2 int  = 32
-const FLOOR_3 int  = 33
-const FLOOR_4 int  = 34
-func createFloorListener(ch chan int){
-    var prevStateFloor int = 0
-    var StateFloor int = 0
-    for{
-        time.Sleep(time.Millisecond * 10)
-        StateFloor = int(C.elev_get_floor_sensor_signal())
-        if StateFloor != prevStateFloor{
-            prevStateFloor = StateFloor
-            if StateFloor == -1{
-                ch <- FLOOR_NO           
-            }
-            if StateFloor == 0{
-                ch <- FLOOR_1           
-            }
-            if StateFloor == 1{
-                ch <- FLOOR_2           
-            }
-            if StateFloor == 2{
-                ch <- FLOOR_3          
-            }
-            if StateFloor == 3{
-                ch <- FLOOR_4           
-            }
-        }
+    	time.Sleep(time.Millisecond * 10)	
+    	for i := range StateIntBtn{
+    		StateIntBtn[i] = int(C.io_read_bit(FloorCommands[i]))
+    		if StateIntBtn[i] != prevStateIntBtn[i]{
+    			prevStateIntBtn[i] = StateIntBtn[i]
+    			if StateIntBtn[i] == 1{
+    				ch <- INT_BTN_BASE + i
+    			}
+    		}
+    	}
     }
 }
 
-const STOP int = 10
+const FLOOR_NO_BASE int = 31
+func createFloorListener(ch chan int){
+    var prevStateFloor int = -2
+    var StateFloor int = 0
+    var FloorOutput [FLOORS]int
+    for i := range FloorOutput{
+    	FloorOutput[i] = i
+    }
+    
+    for{
+    time.Sleep(time.Millisecond * 10)
+    StateFloor = int(C.elev_get_floor_sensor_signal())
+	if StateFloor != prevStateFloor{
+		prevStateFloor = StateFloor
+				for i:= 0; i<FLOORS; i++{
+				if i==0 && StateFloor == -1{
+					ch <- FLOOR_NO_BASE - 1
+				}
+				if StateFloor == FloorOutput[i]{
+					ch <- FLOOR_NO_BASE +i
+				}
+			}
+		}
+	}
+}
+
+const STOP_BASE int = 10
 func createStopListener(ch chan int){
    var prevStateStop int = 0
    var StateStop int = 0
+   
    for{
         time.Sleep(time.Millisecond * 10)
         StateStop = int(C.elev_get_stop_signal())
         if StateStop != prevStateStop{
             prevStateStop = StateStop
             if StateStop == 1{
-                ch <- STOP            
+                ch <- STOP_BASE            
             }
         }
     }
 }
 
-const EXT_BTN_1_UP int = 21
-const EXT_BTN_2_UP int = 22
-const EXT_BTN_2_DOWN int = 23
-const EXT_BTN_3_UP int = 24
-const EXT_BTN_3_DOWN int = 25
-const EXT_BTN_4_DOWN int = 26
+const EXT_BTN_BASE int = 50
 func createExtButtonListener(ch chan int){
-    var prevStateExtBtn1Up int = 0
-    var StateExtBtn1Up int = 0
-    var prevStateExtBtn2Up int = 0
-    var StateExtBtn2Up int = 0
-    var prevStateExtBtn2Down int = 0
-    var StateExtBtn2Down int = 0
-    var prevStateExtBtn3Up int = 0
-    var StateExtBtn3Up int = 0
-    var prevStateExtBtn3Down int = 0
-    var StateExtBtn3Down int = 0
-    var prevStateExtBtn4Down int = 0
-    var StateExtBtn4Down int = 0
+    var FloorCommands = [FLOORS+2]C.int{C.FLOOR_UP1, C.FLOOR_UP2, C.FLOOR_DOWN2, C.FLOOR_UP3, C.FLOOR_DOWN3, C.FLOOR_DOWN4}
+    var prevStateExtBtn [FLOORS+2]int
+    var StateExtBtn [FLOORS+2]int
+    for i := range StateExtBtn{
+    	prevStateExtBtn[i] = 0
+    	StateExtBtn[i] = 0
+    }
+    
     for{
-        time.Sleep(time.Millisecond * 10)
-        
-        StateExtBtn1Up = int(C.io_read_bit(C.FLOOR_UP1))
-        if StateExtBtn1Up != prevStateExtBtn1Up{
-            prevStateExtBtn1Up = StateExtBtn1Up
-            if StateExtBtn1Up == 1{
-                ch <- EXT_BTN_1_UP           
-            }
-        }
-
-        StateExtBtn2Up = int(C.io_read_bit(C.FLOOR_UP2))
-        if StateExtBtn2Up != prevStateExtBtn2Up{
-            prevStateExtBtn2Up = StateExtBtn2Up
-            if StateExtBtn2Up == 1{
-                ch <- EXT_BTN_2_UP           
-            }
-        }
-
-        StateExtBtn2Down = int(C.io_read_bit(C.FLOOR_DOWN2))
-        if StateExtBtn2Down != prevStateExtBtn2Down{
-            prevStateExtBtn2Down = StateExtBtn2Down
-            if StateExtBtn2Down == 1{
-                ch <- EXT_BTN_2_DOWN          
-            }
-        }
-
-        StateExtBtn3Up = int(C.io_read_bit(C.FLOOR_UP3))
-        if StateExtBtn3Up != prevStateExtBtn3Up{
-            prevStateExtBtn3Up = StateExtBtn3Up
-            if StateExtBtn3Up == 1{
-                ch <- EXT_BTN_3_UP           
-            }
-        }
-
-        StateExtBtn3Down = int(C.io_read_bit(C.FLOOR_DOWN3))
-        if StateExtBtn3Down != prevStateExtBtn3Down{
-            prevStateExtBtn3Down = StateExtBtn3Down
-            if StateExtBtn3Down == 1{
-                ch <- EXT_BTN_3_DOWN          
-            }
-        }
-
-        StateExtBtn4Down = int(C.io_read_bit(C.FLOOR_DOWN4))
-        if StateExtBtn4Down != prevStateExtBtn4Down{
-            prevStateExtBtn4Down = StateExtBtn4Down
-            if StateExtBtn4Down == 1{
-                ch <- EXT_BTN_4_DOWN          
-            }
-        }
+    	time.Sleep(time.Millisecond * 10)
+		for i := range StateExtBtn{
+    		StateExtBtn[i] = int(C.io_read_bit(FloorCommands[i]))
+    		if StateExtBtn[i] != prevStateExtBtn[i]{
+    			prevStateExtBtn[i] = StateExtBtn[i]
+    			if StateExtBtn[i] == 1{
+    				ch <- EXT_BTN_BASE + i
+    			}
+    		}
+    	}
     }
 }
-
-//TODO Ask how can we check if hardware was turned off
-func createTimeoutListener(ch chan int) {
-    for{    
-        ch <- int(C.elev_get_floor_sensor_signal())
-        time.Sleep(time.Second * 1)
-    }
-}
-/* start: testcode
-
-    // Initialize hardware
-    err := C.elev_init()
-    if err == 0 {
-        fmt.Println("Unable to initialize elevator hardware")
-        os.Exit(0)
-    }
-    
-    fmt.Println("Press STOP button to stop elevator and exit program.")
-    C.elev_set_speed(50)
-    
-    for {
-        
-        if C.elev_get_stop_signal() == 1 {
-            stopElevator()
-            break
-        }
-    }
-
-
-func stopElevator() {
-    fmt.Println("The elevator has come to a conclusion: stopping")
-    C.elev_set_speed(0)
-}
-
-end: testcode */
 

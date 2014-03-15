@@ -39,8 +39,7 @@ func main(){
     extButtonChannel := make(chan int)
     floorChannel := make(chan int)
     stopChannel := make(chan int)
-    timeoutChannel := make(chan int)
-	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel, timeoutChannel)
+	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel)
 	
 	//driverInterface.SetSpeed(-300)
 	
@@ -69,10 +68,6 @@ func main(){
             case extButtonSignal := <- extButtonChannel :
                 go func() {
                     fmt.Println(extButtonSignal)
-                }()
-            case floorTimeout := <- timeoutChannel :
-                go func() {
-                    fmt.Println("From timeout channel: ", floorTimeout)
                 }()
 		}
 	}
