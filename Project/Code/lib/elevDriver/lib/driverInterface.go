@@ -80,9 +80,6 @@ func GetObstructionSignal() int{
    return int(C.elev_get_obstruction_signal())
 }
 
-// Parameters: all the different channels we need like:
-// Create(buttonChannel, floorChannel, stopChannel, ....)
-
 func Create(intBtChan chan int, floorChan chan int, stopChan chan int, extBtChan chan int) {
 	go createIntButtonListener(intBtChan)
     go createFloorListener(floorChan)
@@ -181,4 +178,3 @@ func createExtButtonListener(ch chan int){
     	}
     }
 }
-
