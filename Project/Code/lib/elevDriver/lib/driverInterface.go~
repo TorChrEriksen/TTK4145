@@ -80,10 +80,8 @@ func GetObstructionSignal() int{
    return int(C.elev_get_obstruction_signal())
 }
 
-// Parameters: all the different channels we need like:
-// Create(buttonChannel, floorChannel, stopChannel, ....)
-
 func Create(intBtChan chan int, floorChan chan int, stopChan chan int, extBtChan chan int) {
+	fmt.Println("driverinterface create!")
 	go createIntButtonListener(intBtChan)
     go createFloorListener(floorChan)
     go createStopListener(stopChan)
@@ -92,6 +90,7 @@ func Create(intBtChan chan int, floorChan chan int, stopChan chan int, extBtChan
 
 const INT_BTN_BASE int = 11
 func createIntButtonListener(ch chan int) {
+	fmt.Println("createIntButtonListener")
 	var FloorCommands = [FLOORS]C.int{C.FLOOR_COMMAND1, C.FLOOR_COMMAND2, C.FLOOR_COMMAND3, C.FLOOR_COMMAND4}
     //TODO think about fault tolerance here    
     var prevStateIntBtn [FLOORS]int
@@ -181,4 +180,3 @@ func createExtButtonListener(ch chan int){
     	}
     }
 }
-
