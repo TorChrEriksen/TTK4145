@@ -18,7 +18,7 @@ type gatherCost struct {
 	origin int
 	recipient int
 }
-
+//works
 func state(direction string){
 	switch	{
 	case direction == "DOWN":
@@ -34,6 +34,7 @@ func state(direction string){
 	}
 }
 
+//TOMORROW FIRST THING: MERGE RUN AND MANAGE, ADD STOP AND CURRENT FLOOR SIGNALS, SETUP INFO CHANN STRUCT.
 func run(currentOrder int, currentFloor int, dir string){
 	switch {
 	case currentOrder < currentFloor:
@@ -71,7 +72,7 @@ func manageOrders(ordersIn chan int, orderList []int, afterOrders []int, current
 		}()
 	case len(orderList)==0 && len(afterOrders)!=0:
 		orderList, afterOrders = afterOrders, nil
-	case len(orderList)==0&&len(afterOrders)==0:
+	case len(orderList)==0 && len(afterOrders)==0:
 		state("IDLE")
 	}
 	
@@ -100,42 +101,69 @@ func manageOrders(ordersIn chan int, orderList []int, afterOrders []int, current
 
 }
 
-func getSignals(intButtonChannel chan int, extButtonChannel chan int, orderInChan chan int, timeoutChannel chan int, floorChan chan int, currentFloor int, stopChan chan int, direction string, CURRENT_ID int, costIN chan gatherCost, costOUT chan gatherCost){
 
-	select {
-	case floor := <- floorChan:
-		go func (){
-			currentFloor = floor - 30
-		}()
-
-	case stop := <- stopChan:
-		go func(){
-		    if stop != 0{
-    			state("STOP")
-	    		direction = "STOP"
-	    		}
-		}()
-	case iOrder := <-intButtonChannel:
-		go func(){
-			orderInChan <- iOrder-10
-		}()
-	case exOrder := <-extButtonChannel:
-		go func(){
-			a := gatherCost{floor:((exOrder-(exOrder%2)-30)/10), origin:CURRENT_ID, recipient:3}
-			if exOrder%2==0{
-				a.direction="down"
-			}else{
-				a.direction="up"
-			}
-			orderInChan <- a.floor
-		}()
-	case floorTimeout := <- timeoutChannel:
-		go func(){
-			fmt.Println("From the timeout channel: ", floorTimeout)
-		}()
-	}
+//this method works, send orders through chann's, TOMORROW: extHandling
+func getSignals(intButtonChannel chan int, xBSignal chan int, orderChannel chan int){
+   	select {
+        case buttonSignal := <-intButtonChannel :
+        go func() {
+            buttonSignal = buttonSignal-10
+            fmt.Println(buttonSignal)
+            orderChannel <- buttonSignal
+        }()
+        case extOrder := <- xBSignal:
+            go func(){
+                extOrder = ((extOrder-(extOrder%2)-30)/10)
+                fmt.Println(extOrder)
+                orderChannel <- extOrder
+            }()
+       	    
+    }
 }
+   	
+   	
+   	
+   	/*
+   	select {
+       	case floor := <- floorChan:
+       		go func (){
+       			fmt.Println("Current floor: ", currentFloor)
+       			currentFloor = floor - 30
+       		}()
+       
+   	    case stop := <- stopChan:
+   	    	go func(){
+       		    if stop != 0{
+           			fmt.Println("STOPPING")
+           			state("STOP")
+       	    		direction = "STOP"
+       	    		
+       	    		}
+       		}()
+       	case iOrder := <-intButtonChannel:
+       		go func(){
+       			fmt.Println("Internal order: ", iOrder - 10)
+       			orderInChan <- iOrder-10
+       			
+       		}()
+       	case exOrder := <-extButtonChannel:
+       		go func(){
+       			a := gatherCost{floor:((exOrder-(exOrder%2)-30)/10), origin:CURRENT_ID, recipient:3}
+       			if exOrder%2==0{
+       				a.direction="down"
+       			}else{
+       				a.direction="up"
+       			}
+       			orderInChan <- a.floor
+       		}()
+       	case floorTimeout := <- timeoutChannel:
+       		go func(){
+       			fmt.Println("From the timeout channel: ", floorTimeout)
+      		}()
+	}
 
+}
+*/
 //add afterOrderList to eq.
 func cost(orderList []int, afterOrderList int, currPos int, dir_now int, new_order int, new_order_dir int) float64{
     var squared float64
@@ -178,38 +206,38 @@ func main() {
 	timeoutChannel 		:= make(chan int)
 
 	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel, timeoutChannel)
-    /*
-	var orderList 		[]int
-	var afterOrders 	[]int
-	var status 			string
+    
+	//var orderList 		[]int
+	//var afterOrders 	[]int
+	//var status 			string
 	var currentFloor 	int
+	//var lastFloor       int
+    //var direction       string
+    
+	//reapCost 	:= make(chan gatherCost)
+	//replyCost	:= make(chan gatherCost)
     /*
-	gatherCost 	:= make(chan struct)
-	replyCost	:= make(chan struct)
-
 	pollCost	:= make(chan struct)
 	recieveCost	:= make(chan struct)
-    /*
+    */
 	ordersChann := make(chan int)
-	*/
+	
     fmt.Println("testing, testing")
-
-	//test 1: 		Get signals correct
-	//test 1.1	 	Create internal orders correctly
-	//test 1.2:		Create ext. orders correctly
-
-	//test 2: 		Drive
-	//test 2.1: 	Exchange afterOrders
-
-	//test 3:		Send for external orders
-	//test 3.1:		Cost function
-	//test 3.2:		Pollhandling for cost
-
-	//test 4:		Stop routine
-	//test 5:		Init routine
-	//test 6: 		Obstruct routine
-
-
-
-	// test 3:		
+    //lastFloor = 0
+    for {
+        time.Sleep(10*time.Millisecond)
+        go getSignals(intButtonChannel, extButtonChannel, ordersChann)
+        
+        go func(){
+            select{
+                case newst := <- ordersChann:
+                    fmt.Println("Got order to: ", newst)
+                case next_floor:= <- floorChannel:
+                    currentFloor = next_floor - 30
+                    fmt.Println(currentFloor)
+                case stop := <-stopChannel:
+                    fmt.Println("STOP")
+            }
+        }()
+    }
 }
