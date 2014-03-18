@@ -95,5 +95,5 @@ func main(){
 	
 	for{
 		time.Sleep(time.Second*1)
-	}go run 
+	}i 
 }
