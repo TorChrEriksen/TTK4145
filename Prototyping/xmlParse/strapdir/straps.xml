@@ -1,0 +1,10 @@
+<!-- Config file for the elevator application  -->
+<appcnf>
+    <config key="CatchInterrupt" value="false" />
+    <config key="Redundant" value="true" />
+    <config key="PortTCP" value="12345" />
+    <config key="PortUDP" value="12346" />
+    <config key="PortBroadcast" value="12347" />
+    <config key="DebugMode" value="true" />
+</appcnf>
+<!-- End-of-File -->

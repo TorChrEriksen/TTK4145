@@ -78,6 +78,7 @@ type ImportedConfig struct {
     FloorNumberBase int
     StopButtonBase int
     PacketSize int
+    ElevID int
 }
 
 type ConfigLine struct {
@@ -178,6 +179,8 @@ func importConfig(filePath string) *ImportedConfig {
             impCnf.StopButtonBase = element.Value
         case 11:
             impCnf.PacketSize = element.Value
+        case 12:
+            impCnf.ElevID = element.Value
         }
     }
 

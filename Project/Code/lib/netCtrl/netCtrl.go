@@ -233,12 +233,19 @@ func (nc *NetController) validateConnections() {
 // Parameter is not to be a string, but serialized data.
 // TODO Waiting for structure.
 func (nc *NetController) SendData(data DataStore.Order_Message) {
+
+    // Send to all hosts
     convData := nc.marshal(data)
     if convData != nil {
         nc.sendOrderChannel <- convData
         return
     }
     nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while sending data: *NetController.SendData()."))
+}
+
+func (nc *NetController) SendData_SingleRecepient(data DataStore.Order_Message) {
+
+    // TODO: Send to single recepient
 }
 
 func (nc *NetController) marshal(data DataStore.Order_Message) []byte {
