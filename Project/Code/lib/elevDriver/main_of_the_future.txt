@@ -1,0 +1,365 @@
+package main
+
+import (
+	"./lib"
+	"fmt"
+	"math"
+	//"sort"
+	"time"
+)
+
+type order struct{
+	floor 	int
+	dir		int	//0: DOWN, 1: UP, 2: INT
+	clear	bool
+}
+
+type exOrder struct{
+	floor 		int
+	dir			int
+	recipient 	int //?
+	origin		int
+	cost		float64
+}
+
+type exLights struct{
+	floor		int
+	dir			int
+	value		int
+}
+
+
+const DOWN 		int = 0
+const UP		int = 1
+const INT		int = 2
+const N_FLOORS 	int = 4
+const THIS_ID	int = 1337
+
+func state(status string) {
+	switch {
+	case status == "DOWN":
+		driverInterface.SetSpeed(-300)
+	case status == "UP":
+		driverInterface.SetSpeed(300)
+	case status == "STOP":
+		driverInterface.SetSpeed(300)
+		driverInterface.SetSpeed(-300)
+		driverInterface.SetSpeed(0)
+	case status == "OPEN":
+		driverInterface.SetDoorLamp(1)
+		time.Sleep(2 * time.Second)
+		driverInterface.SetDoorLamp(0)
+	case status == "IDLE":
+		
+	}
+}
+
+func contains(a order, list []order) bool {
+	for _, i := range list {
+		if i == a {
+			return true
+		}
+	}
+	return false
+}
+
+func cost(orderList []int, afterOrderList []int, currPos int, dir_now int, new_order int, new_order_dir int) float64 {
+	var squared float64
+	squared = 2.0
+	switch {
+	case dir_now == 1 && new_order_dir == 1:
+		if currPos < new_order {
+			return math.Pow(float64((new_order-currPos)+len(orderList)), squared)
+		} else {
+			return math.Pow(float64(((2*orderList[len(orderList)-1])-new_order-currPos)+len(orderList)), squared)
+		}
+
+	case dir_now == 0 && new_order_dir == 0:
+		if new_order < currPos {
+			return math.Pow(float64((currPos-new_order)+len(orderList)), squared)
+		} else {
+			return math.Pow(float64(new_order+currPos-orderList[0]+len(orderList)), squared)
+		}
+
+	case dir_now == 1 && new_order_dir == 0:
+		return math.Pow(float64(2*orderList[len(orderList)-1]-currPos-new_order+len(orderList)), squared)
+
+	case dir_now == 0 && new_order_dir == 1:
+		return math.Pow(float64(currPos+new_order-orderList[0]+len(orderList)), squared)
+	}
+	return 0.0
+}
+
+func getSignals(intButtonChannel chan int, xBSignal chan int, orderChannel chan order, ){
+	for {
+		select {
+			case outsideO := <-delegate:
+				go func(){
+					GOL <- something{floor, dir, THIS_ID}
+			case buttonSignal := <- intButtonChannel:
+				go func(){
+					incommingI := order{floor: buttonSignal-10, dir: INT}
+					orderChannel <- incommingI
+				}()
+			case extSignal := <- xBSignal:
+				go func(){
+					setOtherLights <- c{floor: ((extSignal - (extSignal % 2) - 30) / 10), dir: extSignal%2==0, value: 1}
+					min := cost()
+					//send to all
+					costRequestOut <- exOrder{floor: ((extSignal - (extSignal % 2) - 30) / 10), dir: extSignal%2==0, origin: THIS_ID}
+//					wait on costResponseIn
+//					within timeframe evaluate and take lowest
+					delegate <- {floor, dir, recipient}
+				
+				
+			case req := <- costRequestIn:
+				go func(){
+					mine = cost()
+					costResponseOut <- exOrder{floor, dir, cost, recipient, origin etc..}
+				}
+				/*
+				var incommingE order
+					if extSignal%2==0{
+						incommingE = order{floor:((extSignal - (extSignal % 2) - 30) / 10),dir:DOWN}
+					}else{
+						incommingE = order{floor:((extSignal - (extSignal % 2) - 30) / 10),dir:UP}
+					}
+					orderChannel <- incommingE
+					*/
+					
+					
+				}()
+		}
+	}
+}
+
+func main(){
+	driverInterface.Init()
+	
+	intButtonChannel := make(chan int)
+	extButtonChannel := make(chan int)
+	floorChannel := make(chan int)
+	stopChannel := make(chan int)
+	timeoutChannel := make(chan int)
+	
+	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel, timeoutChannel)
+
+	ordersChann := make(chan order)
+	updateCurrentOrder := make(chan bool)
+	updatePos := make(chan bool)
+	
+	costRequestIn := make(chan exOrder)
+	costRequestOut := make(chan exOrder)
+	
+	costResponsIn := make(chan exOrder)
+	costResponsOut := make(chan exOrder)	
+	
+	delegate := make(chan exOrder)
+	
+	setOtherLights := make(chan exLights) 
+	
+	var orderList 	[N_FLOORS][3]bool
+//	var afterOrders	[N_FLOORS][3]bool
+
+	var currentOrder [2] int
+	
+	var currentFloor 	int
+	var lastFloor		int
+	
+	var status			string
+//	var direction		string
+	
+	go getSignals(intButtonChannel, extButtonChannel, ordersChann)
+	go func(){
+		for{
+			select{
+				case floor := <-floorChannel:
+					go func() {
+						floor = floor - 30 //REMEMBER TO ADJUST FOR N_FLOORS
+						currentFloor = floor
+						if currentFloor != 0{
+							lastFloor = currentFloor
+							updatePos <- true
+						}
+						
+//						fmt.Println(currentFloor, lastFloor)
+					}() 
+			}
+		}
+	}()
+	if currentFloor != 1{
+		state("DOWN")
+		for currentFloor!= 1{time.Sleep(time.Millisecond*200)}
+		state("STOP")
+	}
+	
+	go func(){
+		for {
+			select{
+/*
+				case floor := <-floorChannel:
+					go func() {
+						floor = floor - 30 //REMEMBER TO ADJUST FOR N_FLOORS
+						currentFloor = floor
+						if currentFloor != 0{
+							lastFloor = currentFloor
+						}
+
+						fmt.Println(currentFloor, lastFloor)
+					}() 
+*/
+				case stop := <-stopChannel:
+					go func(){
+						if stop > 0 {
+							fmt.Println("STOP")
+						}
+					}()
+				
+				case newPos := <-updatePos:
+					go func(){
+						newPos=newPos
+						if currentOrder[0]==0{
+							if status == "UP" || status == "DOWN"{
+								state("STOP")
+							}						
+						}
+						switch{
+							case lastFloor<currentOrder[0]:
+								go func(){
+									status="UP"
+									state("UP")
+								}()
+							case lastFloor>currentOrder[0]&&currentOrder[0]!=0:
+								go func(){
+									status="DOWN"
+									state("DOWN")
+								}()
+							case currentFloor==currentOrder[0]:	
+									fmt.Println("GOT TO THE ORDER")
+									state("STOP")
+									state("OPEN")
+									fmt.Println(orderList)
+									n := order{floor: currentOrder[0], dir:currentOrder[1], clear:true}
+									ordersChann <- n
+									updateCurrentOrder <- true
+									updatePos <- true
+						}
+					}()
+				
+				case new_order := <-ordersChann:
+					go func(){
+					fmt.Println(new_order)
+						if new_order.clear{
+							orderList[new_order.floor-1][new_order.dir]=false
+						updateCurrentOrder <- true							
+						}else if !orderList[new_order.floor-1][new_order.dir]{
+							orderList[new_order.floor-1][new_order.dir]=true
+//							fmt.Println(orderList)
+						updateCurrentOrder <- true
+						}
+					}()
+				
+				
+//					HURRHURRHURRBURRGHHH YES! IT HAS TO BE REWRITTEN!! AGAIN! these followup acts are endless...				
+				case a := <-updateCurrentOrder:
+					go func(){
+						a = false
+						fmt.Println(currentOrder, orderList)
+						if status == "DOWN"{
+							for i:=lastFloor; i>0;i--{
+								if orderList[i-1][DOWN] || orderList[i-1][INT]{
+									currentOrder[0], currentOrder[1] = i, DOWN
+									break
+								}
+							}/*
+							for i:=lastFloor; i<=N_FLOORS;i++{
+								if orderList[i-1][UP] || orderList[i-1][INT]{
+									currentOrder[0], currentOrder[1] = i, 1
+									break
+								}
+							}*/
+						}else if status == "UP"{
+							
+							for i:=lastFloor; i<=N_FLOORS;i++{
+								if orderList[i-1][UP] || orderList[i-1][INT]{
+									currentOrder[0], currentOrder[1] = i, 1
+									break
+								}
+							}
+							for i:=lastFloor; i>0;i--{
+								if orderList[i-1][DOWN] || orderList[i-1][INT]{
+									currentOrder[0], currentOrder[1] = i, 0
+									break
+								}
+							}
+						}else{
+							if lastFloor<2{
+								for i:=1; i<=N_FLOORS;i++{
+									if orderList[i-1][UP] || orderList[i-1][INT]{
+										currentOrder[0], currentOrder[1] = i, 1
+										break
+									}
+								}
+								for i:=1; i<=N_FLOORS;i++{
+									if orderList[i-1][DOWN] || orderList[i-1][INT]{
+										currentOrder[0], currentOrder[1] = i, 0
+										break
+									}
+								}
+							}else{
+							
+								for i:=1; i<=N_FLOORS;i++{
+									if orderList[i-1][DOWN] || orderList[i-1][INT]{
+										currentOrder[0], currentOrder[1] = i, 0
+										break
+									}
+								}
+								for i:=1; i<=N_FLOORS;i++{
+									if orderList[i-1][UP] || orderList[i-1][INT]{
+										currentOrder[0], currentOrder[1] = i, 1
+										break
+									}
+								}
+							}
+						}
+				}()
+				
+			}
+		}
+		
+	}()
+	
+	
+	
+	go func(){
+		for{
+			
+			time.Sleep(time.Millisecond*50)
+		}
+	}()
+	
+	
+	go func(){
+		for{
+			select {
+			/*
+				case newst := <-ordersChann:
+					go func(){
+						fmt.Println("Got order to: ", newst)
+					}()
+					
+				case next_floor := <-floorChannel:
+					go func (){//currentFloor = next_floor - 30
+						fmt.Println("Current floor: ", next_floor)
+					}()
+					*/
+
+			}
+			
+		}
+	}()
+	
+	for{
+		time.Sleep(time.Second*1)
+	} 
+}
