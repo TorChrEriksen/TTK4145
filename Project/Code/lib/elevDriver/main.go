@@ -16,11 +16,11 @@ type order struct{
 }
 
 type exOrder struct{
-	floor	int
-	dir 	int
+	floor		int
+	dir 		int
 	recipient	int
-	origin	int
-	cost	float64
+	origin		int
+	cost		float64
 }
 
 type exLights struct{
@@ -67,6 +67,34 @@ func state(direction string) {
 	}
 }
 
+func cost(orderList []order, afterOrderList []order, currPos int, dir_now string, new_order int, new_order_dir string) float64 {
+	var squared float64
+	squared = 2.0
+	switch {
+	case dir_now == "UP" && new_order_dir == "UP":
+		if currPos < new_order {
+			return math.Pow(float64((new_order-currPos)+len(orderList)), squared)
+		} else {
+			return math.Pow(float64(((2*orderList[len(orderList)-1])-new_order-currPos)+len(orderList)), squared)
+		}
+
+	case dir_now == "DOWN" && new_order_dir == "DOWN":
+		if new_order < currPos {
+			return math.Pow(float64((currPos-new_order)+len(orderList)), squared)
+		} else {
+			return math.Pow(float64(new_order+currPos-orderList[0]+len(orderList)), squared)
+		}
+
+	case dir_now == "UP" && new_order_dir == "DOWN":
+		return math.Pow(float64(2*orderList[len(orderList)-1]-currPos-new_order+len(orderList)), squared)
+
+	case dir_now == "DOWN" && new_order_dir == "UP":
+		return math.Pow(float64(currPos+new_order-orderList[0]+len(orderList)), squared)
+	}
+	return -1.0
+}
+
+
 func main(){
 	driverInterface.Init()
 	intButtonChannel 	:= make(chan int)
@@ -81,6 +109,15 @@ func main(){
 	updateCurrentOrder 	:= make(chan bool)
 	updatePos 			:= make(chan order)
 	
+	costRequestIn 	:= make(chan exOrder)
+	costRequestOut 	:= make(chan exOrder)
+	costResponsIn 	:= make(chan exOrder)
+	costResponsOut 	:= make(chan exOrder)	
+	
+	delegate := make(chan exOrder)
+	
+	setOtherLights := make(chan exLights) 
+
 	var currentFloor 	int
 	var lastFloor 		int
 	var orderList 		[]order
@@ -176,14 +213,23 @@ func main(){
 
 				case extSig := <- extButtonChannel:
 					go func(){
-						var incommingE order
+						setOtherLights <- exLights{((extSignal - (extSignal % 2) - 30) / 10), (extSignal % 2), 1}
 						if extSignal%2==0{
-							incommingE = order{((extSignal - (extSignal % 2) - 30) / 10),"DOWN", false}
+							extSig = order{((extSignal - (extSignal % 2) - 30) / 10),"DOWN", false}
 						}else{
-							incommingE = order{((extSignal - (extSignal % 2) - 30) / 10),"UP", false}
+							extSig = order{((extSignal - (extSignal % 2) - 30) / 10),"UP", false}
 						}
-						orderChannel <- incommingE
+//						orderChannel <- incommingE				
+						costRequestOut <- extOrder{floor: extSig.floor, direction: extSig.dir, origin: THIS_ID}
+						min := cost(orderList, afterOrders, lastFloor, status, extSig.floor, extSig.dir)
+						//wait for cost responses for 2 sek, whilst updating min
+						delegate <-
 					}()
+				case  costReq := <-costRequestIn:
+					go func(){
+							costResponsOut <- extOrder{floor: costReq.floor, dir: costReq.dir, recipient: THIS_ID, origin: costReq.origin, cost: cost(orderList, afterOrders, lastFloor, status, costReq.floor, costReq.dir)}
+						}()
+
 				case floor := <-floorChannel:
 					go func() {
 						floor = floor - 30 //REMEMBER TO ADJUST FOR N_FLOORS
@@ -191,6 +237,7 @@ func main(){
 						if currentFloor != 0{
 							lastFloor = currentFloor
 						}
+						driverInterface.SetFloorSignal(lastFloor)
 						updatePos <- currentOrder
 					}()
 
