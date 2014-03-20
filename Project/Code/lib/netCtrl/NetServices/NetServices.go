@@ -41,12 +41,13 @@ func FindUDPCandidate() (string, int) {
 
     return "", -1
 }
-
+/*
 orderQueue []int
 
     executeOrder(orderQueue[0])
 
     // Run elev
+*/
 
 func FindLocalIP() (string, int) {
     addrs, err := net.InterfaceAddrs()
