@@ -1,4 +1,12 @@
 package main
+/*
+// #cgo CFLAGS: -std=c99 -g -Wall -O2 -I .
+// #cgo LDFLAGS: -lcomedi -g -lm
+// #include "./lib/C/io.c"
+// #include "./lib/C/elev.c"
+// #include "./lib/C/runner.c"
+import "C"
+*/
 
 import (
 	"./lib"
@@ -68,13 +76,13 @@ func (a ByFloor) Less(i, j int) bool { return a[i].floor < a[j].floor }
 func state(direction string) {
 	switch {
 	case direction == "DOWN":
-		fmt.Println("DOWN")
+//		fmt.Println("DOWN")
 		driverInterface.SetSpeed(-300)
 	case direction == "UP":
-		fmt.Println("UP")
+//		fmt.Println("UP")
 		driverInterface.SetSpeed(300)
 	case direction == "STOP":
-		fmt.Println("STOP")
+//		fmt.Println("STOP")
 		driverInterface.SetSpeed(300)
 		driverInterface.SetSpeed(-300)
 		driverInterface.SetSpeed(0)
@@ -152,7 +160,7 @@ func main(){
 
 						floor = floor - 30 //REMEMBER TO ADJUST FOR N_FLOORS
 						currentFloor = floor
-						fmt.Println(currentFloor)
+//						fmt.Println(currentFloor)
 						if currentFloor != 0{
 							lastFloor = currentFloor
 						}
@@ -165,7 +173,12 @@ func main(){
 
 	if currentFloor != 1{
 		state("DOWN")
-		for currentFloor!= 1{time.Sleep(time.Millisecond*200)}
+		for currentFloor!= 1{
+			time.Sleep(time.Millisecond*200)
+			if currentFloor!=0{
+//				driverInterface.SetFloorLamp(currentFloor-1)
+			}
+		}
 		state("STOP")
 		status = "IDLE"
 	}
@@ -193,42 +206,42 @@ func main(){
 			
 				case buttonSignal := <- intButtonChannel:
 					go func(){
-						fmt.Println("INT: ", buttonSignal)
+//						fmt.Println("INT: ", buttonSignal)
 						incommingI := order{floor: buttonSignal-10, dir: "INT"}
 						ordersChann <- incommingI
 					}()
 
 				case new_order := <- ordersChann:
 					go func (){
-						fmt.Println("new order: ",new_order)
+//						fmt.Println("new order: ",new_order)
 						test := order{-1, "NO", false}
 						if new_order==test&&len(orderList)==0{
-							fmt.Println(orderList, afterOrders)
+//							fmt.Println(orderList, afterOrders)
 							orderList = afterOrders
 							afterOrders = nil
-							fmt.Println(orderList, afterOrders)
+//							fmt.Println(orderList, afterOrders)
 							updateCurrentOrder <- true
 						}else if new_order.clear{
-							fmt.Println("REMOVING ",orderList)
+//							fmt.Println("REMOVING ",orderList)
 							orderList = remove(order{new_order.floor, new_order.dir, false},orderList)
-							fmt.Println("REMOVED: ",new_order, orderList)
-							fmt.Println(orderList)
+///							fmt.Println("REMOVED: ",new_order, orderList)
+//							fmt.Println(orderList)
 							updateCurrentOrder <- true
 						
 						}else if !contains(new_order, orderList) && new_order.dir != "NO" {
 							if status == "UP" {
-								if (new_order.floor < currentFloor && currentFloor==lastFloor) || (new_order.floor < lastFloor+1&&currentFloor==0) {
+								if (new_order.floor < currentFloor && currentFloor==lastFloor) || (new_order.floor < lastFloor+1&&currentFloor==0)||new_order.dir=="DOWN" {
 									afterOrders = append(afterOrders, new_order)
 									sort.Sort(ByFloor(afterOrders))
-									fmt.Println("yay!")
+//									fmt.Println("yay!")
 								} else {
 									orderList = append(orderList, new_order)
 									sort.Sort(ByFloor(orderList))
 									updateCurrentOrder <- true
-									fmt.Println("nan!")
+///									fmt.Println("nan!")
 								}
 							} else if status == "DOWN" {
-								if (new_order.floor > currentFloor) || (new_order.floor > lastFloor-1) {
+								if (new_order.floor > currentFloor) || (new_order.floor > lastFloor-1)||new_order.dir=="UP" {
 									afterOrders = append(afterOrders, new_order)
 									sort.Sort(ByFloor(afterOrders))
 								} else {
@@ -243,14 +256,14 @@ func main(){
 								updateCurrentOrder <- true
 							}
 						}
-						fmt.Println("OL: ",orderList)						
+//						fmt.Println("OL: ",orderList)						
 					}()
 
 
 
 				case new_stuff := <- updatePos:
 					go func(){
-						fmt.Println("proposed order: ",new_stuff)
+//						fmt.Println("proposed order: ",new_stuff)
 						if !new_stuff.clear||new_stuff.dir!="NO"{
 							currentOrder = new_stuff
 						}
@@ -269,22 +282,24 @@ func main(){
 						}else if currentOrder.floor==currentFloor{
 							state("STOP")
 							state("OPEN")
-							fmt.Println("GOT TO FLOOR")
+//							fmt.Println("GOT TO FLOOR")
 							ordersChann <- order{currentOrder.floor, currentOrder.dir, true}
 							updateCurrentOrder <- true
 						}
-						fmt.Println("current order:", currentOrder)						
+//						fmt.Println("current order:", currentOrder)						
 					}()
 
 				case extSig := <- extButtonChannel:
 					go func(){
 //						setOtherLights <- exLights{((extSignal - (extSignal % 2) - 30) / 10), (extSignal % 2), 1}
+						
 						var extOrder order
 						if extSig%2==0{
 							extOrder = order{((extSig - (extSig % 2) - 30) / 10),"DOWN", false}
 						}else{
 							extOrder = order{((extSig - (extSig % 2) - 30) / 10),"UP", false}
 						}
+						fmt.Println(cost(orderList, afterOrders, lastFloor, status, extOrder.floor, extOrder.dir))
 						ordersChann <- extOrder				
 //						costRequestOut <- extOrder{floor: extSig.floor, direction: extSig.dir, origin: THIS_ID}
 //						min := cost(orderList, afterOrders, lastFloor, status, extSig.floor, extSig.dir)
