@@ -1,0 +1,10 @@
+2014/03/21 16:38:23.242305 logger.go:87: ========== New log ==========
+2014/03/21 16:38:23.242481 logger.go:87: Local IP found: 129.241.187.140
+2014/03/21 16:38:23.243182 logger.go:87: Sent 48 bytes.
+2014/03/21 16:38:23.243214 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/21 16:38:28.243304 logger.go:87: Sent 48 bytes.
+2014/03/21 16:38:28.243342 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/21 16:38:33.243396 logger.go:87: Sent 48 bytes.
+2014/03/21 16:38:33.243439 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/21 16:38:38.243524 logger.go:87: Sent 48 bytes.
+2014/03/21 16:38:38.243596 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140

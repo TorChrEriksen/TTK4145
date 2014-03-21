@@ -16,18 +16,11 @@ import (
     "bufio"
     "strings"
 )
-// TODO: Remove 2 and 3?
+
+// Application parameter args[1]
 const (
     START_PRIMARY = 0
     START_SECONDARY = 1
-	WD_ALIVE = 2
-	WD_OFFLINE = 3
-)
-
-// TODO: Remove and use config flag to log
-const (
-    NO_INFO = 0
-    INFO = 1
 )
 
 var TIMEOUT = time.Duration(time.Second * 5)
@@ -43,7 +36,7 @@ func waitForAliveFromWD(signalChan chan os.Signal, obsChan chan int) {
 
         // Restart WD if it times out
         obsChan <- -1
-        fmt.Println("WD timed out!")
+        fmt.Println("Watch Dog timed out!")
     }()
 
     for sig := range signalChan {
@@ -63,48 +56,23 @@ func waitForWdCommand(upgChan chan bool) {
 
     for sig := range ch {
 
-        fmt.Println("Secondary: RECEIVED COMMAND from WD: ", sig)
+        //fmt.Println("Secondary: RECEIVED COMMAND from WD: ", sig)
 
         switch sig {
         case syscall.SIGUSR1:
             close(ch)
             upgChan <- true
         default:
-            fmt.Println("Unknown command received from WD")
+            fmt.Println("Unknown command received from Watch Dog")
         }
     }
 
-    fmt.Println("waitForWdCommand() finished")
+    //fmt.Println("waitForWdCommand() finished")
 }
-
-
-/*
-func waitForAliveFromPrimary() {
-
-    fmt.Println("Secondary: waiting for signal from Primary")
-
-    ch := make(chan os.Signal, 1)
-    signal.Notify(ch, syscall.SIGHUP)
-
-    timer := time.NewTimer(TIMEOUT)
-    go func() {
-        <-timer.C
-
-        close(ch)
-//        takeOver()
-    }()
-
-    for sig := range ch {
-
-        fmt.Println("Secondary: signal received from Primary: ", sig)
-        timer.Reset(TIMEOUT)
-    }
-}
-*/
 
 func spawnCopy(wdPID int) (*os.Process, error) {
 
-    // fmt.Println("spawning copy")
+    fmt.Println("Spawning copy of Primary")
 
     argv := []string{os.Args[0], strconv.Itoa(START_SECONDARY), strconv.Itoa(wdPID)}
     attr := new(os.ProcAttr)
@@ -115,7 +83,7 @@ func spawnCopy(wdPID int) (*os.Process, error) {
 
 func spawnWD(priPID int) (*os.Process, error) {
 
-    // fmt.Println("spawning WD")
+    fmt.Println("Spawning Watch Dog")
 
     argv := []string{"wd", strconv.Itoa(priPID)}
     attr := new(os.ProcAttr)
@@ -138,9 +106,7 @@ func notifyPrimaryAlive(p *os.Process, ch chan bool) {
             break
         }
         time.Sleep(time.Second)
-//        fmt.Println("Primary alive, sending signal")
         p.Signal(syscall.SIGHUP) // Signal from primary
-//        p2.Signal(syscall.SIGHUP) // Signal from primary
     }
 }
 
@@ -159,7 +125,6 @@ func notifySecondaryAlive(p *os.Process, ch chan bool) {
             break
         }
         time.Sleep(time.Second)
-//        fmt.Println("Secondary alive, sending signal")
         p.Signal(syscall.SIGFPE)
     }
 }
@@ -175,14 +140,14 @@ func writePidToFile(filename string) {
     }
 
     pid := strconv.Itoa(os.Getpid())
-    n, err := file.Write([]byte(pid))
+    _, err = file.Write([]byte(pid))
 
     if err != nil {
         fmt.Println("Error writing pid to file: ", err.Error())
         os.Exit(0)
     }
 
-    fmt.Println("Wrote ", n, " bytes to file.")
+    // fmt.Println("Wrote ", n, " bytes to file.")
     defer file.Close()
 
 }
@@ -260,22 +225,6 @@ func main() {
                     os.Exit(0)
                 }
 
-                /*
-                if arg2 == NO_INFO {
-                    PRINT_INFO = false
-                } else if arg2 == INFO {
-                    PRINT_INFO = true
-                } else {
-                    fmt.Println("Invalid argument (2)")
-                    os.Exit(0)
-                }
-
-                if PRINT_INFO {
-                    fmt.Println("Primary")
-                }
-                */
-
-                // Nasty that program is still alive if main thread dies?
                 ch := make(chan int)
                 haltChan := make(chan bool)
 
@@ -285,75 +234,9 @@ func main() {
 
                 go run()
                 go notifyPrimaryAlive(wd, haltChan)
+                go waitForFailure(wdChan, wdSignalChan, haltChan)
 
-                go func() {
-                    for {
-                        go waitForAliveFromWD(wdSignalChan, wdChan)
-                        <-wdChan
-
-                        fmt.Println("Primary: WD DIED!!")
-                        haltChan <- true
-
-                        // WD died, halt notify WD, kill secondary, restart WD, restard secondary.
-
-                        // Open file and read PID so that we can kill secondary
-                        file, err := os.Open("secondaryPID")
-                        if err != nil {
-                            fmt.Println("There was an error opening the SECONDARY PID file")
-                            //break
-                            os.Exit(0) // Remove all os.Exit's?
-                        } else {
-                            reader := bufio.NewReader(file)
-                            val, _ := reader.ReadString('\n')
-                            val = strings.Trim(val, "\n")
-                            pid, err := strconv.Atoi(val)
-
-                            if err != nil {
-                                fmt.Println("There was an error converting the data to an int")
-                            } else {
-
-                                // We got the PID for secondary
-                                proc, err := os.FindProcess(pid)
-                                if err != nil {
-                                    fmt.Println("Error finding the process for secondary PID: ", pid, ". Error: ", err.Error())
-                                    os.Exit(0)
-                                }
-
-                                // Kill secondary
-                                err = proc.Kill()
-                                if err != nil {
-                                    fmt.Println("Error killing secondary process: ",  err.Error())
-                                    os.Exit(0)
-                                }
-                            }
-                        }
-                        defer file.Close()
-
-                        // Restart WD
-                        wd, err := spawnWD(os.Getpid())
-                        if err != nil {
-                            fmt.Println("Error restarting WD: ", err.Error())
-                            os.Exit(0) // Remove all os.Exit's ?
-                        }
-                        fmt.Println("Primary: WD RESTARTED")
-
-                        // Restart secondary
-                        _, err = spawnCopy(wd.Pid)
-                        if err != nil {
-                            fmt.Println("Error main() -> spawnCopy(): ", err.Error())
-                            os.Exit(0)
-                        }
-                        fmt.Println("Primary: SECONDARY RESTARTED")
-
-                        // Restart notification
-                        go notifyPrimaryAlive(wd, haltChan)
-                    }
-                }()
-
-                for i := range ch {
-                    fmt.Println(i)
-                }
-
+                <-ch
             }
         }
     } else if len(os.Args) == 3 { // Should be secondary
@@ -368,21 +251,6 @@ func main() {
         } else {
             if arg1 == START_SECONDARY {
 
-                /*
-                if arg2 == NO_INFO {
-                    PRINT_INFO = false
-                } else if arg2 == INFO {
-                    PRINT_INFO = true
-                } else {
-                    fmt.Println("Invalid argument (2)")
-                    os.Exit(0)
-                }
-
-                if PRINT_INFO {
-                    fmt.Println("Secondary")
-                }
-                */
-
                 writePidToFile("secondaryPID")
 
                 wd, err := os.FindProcess(wdPID)
@@ -394,13 +262,12 @@ func main() {
                 stopNotifyChan := make(chan bool)
                 upgChan := make(chan bool)
 
-//                go waitForAliveFromPrimary()
                 go notifySecondaryAlive(wd, stopNotifyChan)
                 go waitForWdCommand(upgChan)
 
                 for upgraded := range upgChan {
 
-                    // Use upgraded?
+                    // Upgrading secondary
                     _ = upgraded
 
                     stopNotifyChan <- true
@@ -415,75 +282,9 @@ func main() {
 
                     go run() // TODO: what more to do when secondary takes over?
                     go notifyPrimaryAlive(wd, haltChan)
+                    go waitForFailure(wdChan, wdSignalChan, haltChan)
 
-                    go func() {
-                        for {
-                            go waitForAliveFromWD(wdSignalChan, wdChan)
-                            <-wdChan
-
-                            fmt.Println("Primary: WD DIED!!")
-                            haltChan <- true
-
-                            // WD died, halt notify WD, kill secondary, restart WD, restard secondary.
-
-                            // Open file and read PID so that we can kill secondary
-                            file, err := os.Open("secondaryPID")
-                            if err != nil {
-                                fmt.Println("There was an error opening the SECONDARY PID file")
-                                //break
-                                os.Exit(0) // Remove all os.Exit's?
-                            } else {
-                                reader := bufio.NewReader(file)
-                                val, _ := reader.ReadString('\n')
-                                val = strings.Trim(val, "\n")
-                                pid, err := strconv.Atoi(val)
-
-                                if err != nil {
-                                    fmt.Println("There was an error converting the data to an int")
-                                } else {
-
-                                    // We got the PID for secondary
-                                    proc, err := os.FindProcess(pid)
-                                    if err != nil {
-                                        fmt.Println("Error finding the process for secondary PID: ", pid, ". Error: ", err.Error())
-                                        os.Exit(0)
-                                    }
-
-                                    // Kill secondary
-                                    err = proc.Kill()
-                                    if err != nil {
-                                        fmt.Println("Error killing secondary process: ",  err.Error())
-                                        os.Exit(0)
-                                    }
-                                }
-                            }
-                            defer file.Close()
-
-                            // Restart WD
-                            wd, err := spawnWD(os.Getpid())
-                            if err != nil {
-                                fmt.Println("Error restarting WD: ", err.Error())
-                                os.Exit(0) // Remove all os.Exit's ?
-                            }
-                            fmt.Println("Primary: WD RESTARTED")
-
-                            // Restart secondary
-                            _, err = spawnCopy(wd.Pid)
-                            if err != nil {
-                                fmt.Println("Error main() -> spawnCopy(): ", err.Error())
-                                os.Exit(0)
-                            }
-                            fmt.Println("Primary: SECONDARY RESTARTED")
-
-                            // Restart notification
-                            go notifyPrimaryAlive(wd, haltChan)
-                        }
-                    }()
-
-                    for i := range ch {
-                        fmt.Println(i)
-                    }
-
+                    <-ch
                 }
 
             } else {
@@ -495,6 +296,70 @@ func main() {
     } else {
         fmt.Println("Invalid number of arguments")
         os.Exit(0)
+    }
+}
+
+// Waiting for Watch Dog to die
+// Halt notify WD, kill secondary, restart WD, restard secondary.
+func waitForFailure(wdChan chan int, wdSignalChan chan os.Signal, haltChan chan bool) {
+    for {
+        go waitForAliveFromWD(wdSignalChan, wdChan)
+        <-wdChan
+
+        fmt.Println("Primary: Watch Dog DIED!!")
+        haltChan <- true
+
+        // Open file and read PID so that we can kill secondary
+        file, err := os.Open("secondaryPID")
+        if err != nil {
+            fmt.Println("There was an error opening the SECONDARY PID file")
+            //break
+            os.Exit(0) // Remove all os.Exit's?
+        } else {
+            reader := bufio.NewReader(file)
+            val, _ := reader.ReadString('\n')
+            val = strings.Trim(val, "\n")
+            pid, err := strconv.Atoi(val)
+
+            if err != nil {
+                fmt.Println("There was an error converting the data to an int")
+            } else {
+
+                // We got the PID for secondary
+                proc, err := os.FindProcess(pid)
+                if err != nil {
+                    fmt.Println("Error finding the process for secondary PID: ", pid, ". Error: ", err.Error())
+                    os.Exit(0)
+                }
+
+                // Kill secondary
+                err = proc.Kill()
+                if err != nil {
+                    fmt.Println("Error killing secondary process: ",  err.Error())
+                    os.Exit(0)
+                }
+            }
+        }
+        defer file.Close()
+
+        // Restart WD
+        wd, err := spawnWD(os.Getpid())
+        if err != nil {
+            fmt.Println("Error restarting Watch Dog: ", err.Error())
+            os.Exit(0) // Remove all os.Exit's ?
+        }
+        fmt.Println("Primary: Watch Dog RESTARTED")
+
+        // Restart secondary
+        _, err = spawnCopy(wd.Pid)
+        if err != nil {
+            fmt.Println("Error main() -> spawnCopy(): ", err.Error())
+            os.Exit(0)
+        }
+        fmt.Println("Primary: SECONDARY RESTARTED")
+
+        // Restart notification
+        go notifyPrimaryAlive(wd, haltChan)
     }
 }
 
@@ -548,6 +413,24 @@ func readConf(reader io.Reader) ([]*ConfigLine, error){
     return config.Conf, nil
 }
 
+func loadDefaultConfig() *ImportedConfig {
+    cnf := &ImportedConfig{}
+    cnf.CatchInterrupt = false
+    cnf.Redundant = true
+    cnf.PortTCP = 12345
+    cnf.PortUDP = 12346
+    cnf.PortBroadcast = 12347
+    cnf.DebugMode = false
+    cnf.Floors = 4
+    cnf.ButtonBaseInternal = 11
+    cnf.ButtonBaseExternal = 50
+    cnf.FloorNumberBase = 31
+    cnf.StopButtonBase = 10
+    cnf.PacketSize = 4096
+    cnf.ElevID = -1 // Run orders locally
+    return cnf
+}
+
 func importConfig(filePath string) *ImportedConfig {
     var appConfig []*ConfigLine
     var file *os.File
@@ -563,24 +446,29 @@ func importConfig(filePath string) *ImportedConfig {
     configFilePath, err := filepath.Abs(filePath)
 
     if err != nil {
-        panic(err.Error())
+        //panic(err.Error())
+        fmt.Println("Error loading config: ", err.Error())
+        fmt.Println("Loading default config")
+        return loadDefaultConfig()
     }
 
     // Open the config xml file
     file, err = os.Open(configFilePath)
 
     if err != nil {
-        panic(err.Error())
+        fmt.Println("Error loading config: ", err.Error())
+        fmt.Println("Loading default config")
+        return loadDefaultConfig()
     }
 
     // Read the config file
     appConfig, err = readConf(file)
 
     if err != nil {
-        panic(err.Error())
+        fmt.Println("Error loading config: ", err.Error())
+        fmt.Println("Loading default config")
+        return loadDefaultConfig()
     }
-
-    // TODO: Default config?
 
     impCnf := &ImportedConfig{}
 

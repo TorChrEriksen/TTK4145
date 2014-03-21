@@ -34,7 +34,7 @@ func restartSecondary(wdPID int) (*os.Process, error) {
 func upgradeSecondary(secPid int) {
     proc, err := os.FindProcess(secPid)
     if err != nil {
-        fmt.Println("Upgrade: there was an error finding the Secondary process: ", err.Error())
+        fmt.Println("Watch Dog: there was an error finding the Secondary process to upgrade it: ", err.Error())
         return
     }
 
@@ -65,7 +65,7 @@ func waitForAliveFromPrimary(signalChan chan os.Signal, obsChan chan int) {
         timer.Reset(TIMEOUT)
     }
 
-    fmt.Println("WD: Exited waitForAliveFromPrimary, SWAG!!!")
+    //fmt.Println("WD: Exited waitForAliveFromPrimary, SWAG!!!")
 }
 
 func waitForAliveFromSecondary(signalChan chan os.Signal, obsChan chan int) {
@@ -104,7 +104,7 @@ func waitForAliveFromSecondary(signalChan chan os.Signal, obsChan chan int) {
         defer file.Close()
     }
 
-    fmt.Println("WD: Exited waitForAliveFromSecondary, YOLO!!!")
+    //fmt.Println("WD: Exited waitForAliveFromSecondary, YOLO!!!")
 }
 
 func notifyAlive(priPID int, ch chan bool) {
@@ -147,12 +147,11 @@ func main() {
             os.Exit(1)
         }
 
-        fmt.Println("Received Primary PID: ", procIDs.Primary)
-
         procIDs.Self = os.Getpid()
         fmt.Println("WatchDog PID: ", procIDs.Self)
 
         procIDs.Primary = primary
+        fmt.Println("Watch Dog: received Primary PID: ", procIDs.Primary)
 
         priChan := make(chan int)
         secChan := make(chan int)
@@ -211,112 +210,20 @@ func main() {
                             procIDs.Secondary = proc.Pid
                         }
                     } else { // Set PID
-                        fmt.Println("Setting secondary PID: ", secondary)
+                        //fmt.Println("Setting secondary PID: ", secondary)
                         procIDs.Secondary = secondary
                     }
                 }
             }
         }()
 
-        /*
-    case 3:
-        primary, priErr := strconv.Atoi(os.Args[1])
-        if priErr != nil {
-            fmt.Println("Error getting primary PID: ", priErr.Error())
-            os.Exit(1)
-        }
-
-        fmt.Println("Received Primary PID: ", procIDs.Primary) 
-
-        secondary, secErr := strconv.Atoi(os.Args[2])
-        if secErr != nil {
-            fmt.Println("Error getting primary PID: ", priErr.Error())
-            os.Exit(1)
-        }
-
-        fmt.Println("Received Secondary PID: ", procIDs.Secondary)
-
-        procIDs.Self = os.Getpid()
-        fmt.Println("WatchDog PID: ", procIDs.Self)
-
-        procIDs.Primary = primary
-        procIDs.Secondary = secondary
-        */
-
     default:
         procIDs.Self = os.Getpid()
         fmt.Println("WatchDog PID: ", procIDs.Self)
     }
-
-    // Receive heartbeat from Primary
-
-    // Receive heartbeat from Secondary
-
-		// Check if application was terminated correctly
 
 		// Debug code
 		for {
 			time.Sleep(time.Second * 2)
 		}
 }
-
-/*
-func continueOperation() {
-
-    // Check if file is available
-    file, err := os.Open("testfile")
-    if err != nil {
-        fmt.Println("Error os.Open(): ", err.Error())
-    }
-
-    reader := bufio.NewReader(file)
-    lastValue, _ := reader.ReadString('\n')
-    lastValue = strings.Trim(lastValue, "\n")
-
-    pwd, err := os.Getwd()
-    if err != nil {
-        fmt.Println("Error os.Getwd(): ", err.Error())
-        return
-    }
-
-    app := "sh"
-    arg0 := pwd + "/test.sh"
-
-    for {
-        i++
-        arg1 := strconv.Itoa(i)
-        cmd := exec.Command(app, arg0, arg1)
-        _, err := cmd.Output()
-        if err != nil {
-            fmt.Println("Error cmd.Output(): ", err.Error())
-        }
-        fmt.Println(i)
-        time.Sleep(time.Second)
-    }
-
-}
-
-func operate() {
-    var i int = 0
-    pwd, err := os.Getwd()
-    if err != nil {
-        fmt.Println("Error Getwd(): ", err.Error())
-        return
-    }
-
-    app := "sh"
-    arg0 := pwd + "/test.sh"
-
-    for {
-        i++
-        arg1 := strconv.Itoa(i)
-        cmd := exec.Command(app, arg0, arg1)
-        _, err := cmd.Output()
-        if err != nil {
-            fmt.Println("Error Command(): ", err.Error())
-        }
-        fmt.Println(i)
-        time.Sleep(time.Second)
-    }
-}
-*/
