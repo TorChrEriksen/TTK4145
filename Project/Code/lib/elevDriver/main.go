@@ -14,7 +14,7 @@ import (
 	"math"
 	"time"
 	"sort"
-	"io/ioutil"
+//	"io/ioutil"
 )
 
 type ByFloor []order
@@ -90,7 +90,7 @@ func state(direction string) {
 		driverInterface.SetSpeed(0)
 	case direction == "OPEN":
 		driverInterface.SetDoorLamp(1)
-		time.Sleep(2 * time.Second)
+		time.Sleep(250 * time.Millisecond)
 		driverInterface.SetDoorLamp(0)
 	}
 }
@@ -139,13 +139,13 @@ func main(){
 
 //	costRequestIn 		:= make(chan exOrder)
 //	costRequestOut 		:= make(chan exOrder)
-	costResponsIn 		:= make(chan exOrder)
+//	costResponsIn 		:= make(chan exOrder)
 //	costResponsOut 		:= make(chan exOrder)	
 //	delegate 			:= make(chan exOrder)
 //	aquire				:= make(chan exOrder)
-	toOne				:= make(chan exOrder)
-	toAll				:= make(chan exOrder)
-	recieve				:= make(chan exOrder)
+//	toOne				:= make(chan exOrder)
+//	toAll				:= make(chan exOrder)
+//	recieve				:= make(chan exOrder)
 
 //	setOtherLights := make(chan exLights) 
 
@@ -156,7 +156,8 @@ func main(){
 	var afterOrders 	[]order
 	var status			string
 
-	
+//	currentFloor = int(driverInterface.GetFloorSignal())+1
+//	fmt.Println(currentFloor)
 	go func(){
 		for{
 			select{	
@@ -165,7 +166,7 @@ func main(){
 
 						floor = floor - 30 //REMEMBER TO ADJUST FOR N_FLOORS
 						currentFloor = floor
-//						fmt.Println(currentFloor)
+						fmt.Println(currentFloor)
 						if currentFloor != 0{
 							lastFloor = currentFloor
 						}
@@ -191,8 +192,6 @@ func main(){
 		for{
 			select{
 
-				case 
-
 				case a:=<-updateCurrentOrder:
 					go func(){
 						a=a
@@ -203,6 +202,7 @@ func main(){
 							ordersChann <- order{-1, "NO", false}
 
 						}else if status == "IDLE" || status=="UP"{
+							sort.Sort(ByFloor(afterOrders))
 							updatePos <- orderList[0]
 						}else if status=="DOWN"{
 							updatePos <- orderList[len(orderList)-1]
@@ -228,7 +228,6 @@ func main(){
 //							fmt.Println(orderList, afterOrders)
 							updateCurrentOrder <- true
 						}else if new_order.clear{
-//							fmt.Println("REMOVING ",orderList)
 							orderList = remove(order{new_order.floor, new_order.dir, false},orderList)
 ///							fmt.Println("REMOVED: ",new_order, orderList)
 //							fmt.Println(orderList)
@@ -247,7 +246,7 @@ func main(){
 ///									fmt.Println("nan!")
 								}
 							} else if status == "DOWN" {
-								if (new_order.floor > currentFloor) || (new_order.floor > lastFloor-1)||new_order.dir=="UP" {
+								if (new_order.floor > currentFloor && currentFloor==lastFloor) || (new_order.floor > lastFloor-1&&currentFloor==0)||new_order.dir=="UP" {
 									afterOrders = append(afterOrders, new_order)
 									sort.Sort(ByFloor(afterOrders))
 								} else {
@@ -268,6 +267,7 @@ func main(){
 				case new_stuff := <- updatePos:
 					go func(){
 //						fmt.Println("proposed order: ",new_stuff)
+//						fmt.Println(status)
 						if !new_stuff.clear||new_stuff.dir!="NO"{
 							currentOrder = new_stuff
 						}
@@ -277,18 +277,28 @@ func main(){
 							}
 							status = "IDLE"
 //							state("STOP")
-						}else if currentOrder.floor>lastFloor{
-							state("UP")
-							status="UP"
-						}else if currentOrder.floor<lastFloor && currentOrder.floor!=0{
-							state("DOWN")
-							status="DOWN"
+						}else if len(orderList)==0 && len(afterOrders)==0{
+							state("IDLE")
 						}else if currentOrder.floor==currentFloor{
 							state("STOP")
 							state("OPEN")
 //							fmt.Println("GOT TO FLOOR")
+							if currentFloor==1{
+								status="UP"
+							}else if currentFloor==N_FLOOR{
+								status="DOWN"
+							}
 							ordersChann <- order{currentOrder.floor, currentOrder.dir, true}
 							updateCurrentOrder <- true
+						
+						}else if currentOrder.floor>lastFloor{
+							state("UP")
+							status="UP"
+
+						}else if (currentOrder.floor<lastFloor && currentOrder.floor!=0){
+							state("DOWN")
+							status="DOWN"
+						
 						}
 //						fmt.Println("current order:", currentOrder)						
 					}()
@@ -303,10 +313,14 @@ func main(){
 						}else{
 							extOrder = order{((extSig - (extSig % 2) - 30) / 10),"UP", false}
 						}
-						fmt.Println(cost(orderList, afterOrders, lastFloor, status, extOrder.floor, extOrder.dir))
-						//ordersChann <- extOrder				
-//*						
-						if !contains(extOrder, orderList)/*&& THIS_ID!=-1*/{
+//						fmt.Println(cost(orderList, afterOrders, lastFloor, status, extOrder.floor, extOrder.dir))
+						ordersChann <- extOrder
+					}()
+				}
+			}
+		}()				
+/*						
+						if !contains(extOrder, orderList)&& THIS_ID!=-1{
 							min:=exOrder(floor:extOrder.floor, dir:extOrder.dir, origin:THIS_ID, cost:cost(orderList, afterOrders, lastFloor, status, extOrder.floor, extOrder.dir), recipient:THIS_ID, what: "COST_REQ") 
 							var got exOrder
 							toAll <- min
@@ -333,8 +347,8 @@ func main(){
 						}
 
 					}()
-//*/
-//*
+*/
+/*
 				case input := <- recieve:
 					go func(){
 						if input.what=="COST_REQ"{
@@ -345,10 +359,10 @@ func main(){
 							ordersChann <- order(input.floor, input.dir, false)
 						}
 						}()
-//*/
+			}()
 			}
-		}
-	}()
+		}()
+	*/
 	
 	for {
 		time.Sleep(time.Second)
