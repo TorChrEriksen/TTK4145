@@ -157,15 +157,19 @@ func createFloorListener(ch chan int){
                 ch <- FLOOR_NO           
             }
             if StateFloor == 0{
-                ch <- FLOOR_1           
+                ch <- FLOOR_1
+                SetFloorLamp(0)           
             }
             if StateFloor == 1{
-                ch <- FLOOR_2           
+                ch <- FLOOR_2
+                SetFloorLamp(1)           
             }
             if StateFloor == 2{
-                ch <- FLOOR_3          
+                ch <- FLOOR_3
+                SetFloorLamp(2)          
             }
             if StateFloor == 3{
+            	SetFloorLamp(3)
                 ch <- FLOOR_4           
             }
         }
