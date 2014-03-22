@@ -27,7 +27,6 @@ var TIMEOUT = time.Duration(time.Second * 5)
 
 // start redundant related functions
 func waitForAliveFromWD(signalChan chan os.Signal, obsChan chan int) {
-
     fmt.Println("Primary: waiting for signal from WD")
 
     timer := time.NewTimer(TIMEOUT)
@@ -147,9 +146,7 @@ func writePidToFile(filename string) {
         os.Exit(0)
     }
 
-    // fmt.Println("Wrote ", n, " bytes to file.")
     defer file.Close()
-
 }
 // end redundant related functions
 
@@ -201,9 +198,6 @@ func main() {
         if err1 != nil {
             fmt.Println("Primary: Invalid argument (1)")
             os.Exit(0)
-//        } else if err2 != nil {
-//            fmt.Println("Invalid argument (2)")
-//            os.Exit(0)
         } else {
             if arg1 == START_PRIMARY {
 

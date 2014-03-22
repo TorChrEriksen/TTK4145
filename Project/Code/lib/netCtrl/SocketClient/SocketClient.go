@@ -46,25 +46,6 @@ func (sc *SocketClient) ConnectTCP(tcpAddr string) int {
 	} else {
         return 1
     }
-
-
-    /*
-		case 2:
-			{
-				TCPConn.TerminateConn(*tcpConn)
-			}
-
-		case 4:
-			{
-				//TCPConn.SendData(conn_1, "This is data from conn_1\x00")
-                TCPConn.SendData(*tcpConn, "Here is something mongo!£@11!: ¤¤¤ %%% Ni Hao!! END-not-here-but-here")
-				//TCPConn.SendData(conn_2, "This is data from conn_2\r\n\r\n")
-			}
-
-
-		}
-	}
-    */
 }
 
 // Connect to host
@@ -122,7 +103,6 @@ func (sc *SocketClient) waitForInput() {
 //        for _, host := range sc.tcpConn {
 //            if host != nil {
         if sc.tcpConn != nil {
-            fmt.Println("ni hao")
                 n := TCPConn.SendData(sc.tcpConn, order) // TODO: use return value for something?
                 _ = n
             }

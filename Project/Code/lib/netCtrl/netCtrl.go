@@ -134,9 +134,10 @@ func (nc *NetController) Run() {
     go func() {
         for {
             select {
+
             case bClient := <-nc.bcChan :
                 // TODO: when to stop broadcasting, never? :)
-                nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Sent ", bClient, " bytes."))
+                nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Sent a heartbeat with ", bClient, " bytes."))
 
             // Received a broadcast, check if its a new elevator or old
             case broadcastMessage := <-nc.broadcastChan :
@@ -170,6 +171,7 @@ func (nc *NetController) Run() {
                     nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":", nc.UDPPort)) //TODO fix?
                 }()
 
+            // Received a heartbeat
             case heartbeat := <-nc.heartbeatChan :
                 go func() {
                     for _, client := range nc.clientList {
@@ -189,19 +191,9 @@ func (nc *NetController) Run() {
 
                 }()
 
+            // Received an order
             case orderMsg := <-nc.orderChan :
-                // We dont need a client list? Or?
                 go func() {
-/*
-                    for _, client := range nc.tcpClientList {
-                        if strings.EqualFold(client, ssTCP) {
-                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of TCP client list: ", ssTCP))
-                            return
-                        }
-                    }
-                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to TCP client list: ", ssTCP))
-                    nc.tcpClientList = append(nc.tcpClientList, ssTCP)
-*/
                     convData, errInt := nc.unmarshal(orderMsg)
                     if errInt == -1 {
                         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Cannot read message, somrthing went wrong unmarshaling."))

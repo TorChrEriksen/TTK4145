@@ -35,7 +35,7 @@ func acceptConn(conn net.Conn, l log.Logger, ch chan []byte, packetSize int) {
 //        convData := convertData(data, n)
 //        convData = fmt.Sprint("Number of bytes read: ", n, " | Data: ", convData)
 //        l.Println(convData)
-        ch <- data
+        ch <- data[:n]
 	}
 
 	// Handle timeout?!
