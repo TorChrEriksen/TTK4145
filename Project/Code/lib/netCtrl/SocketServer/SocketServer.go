@@ -36,7 +36,8 @@ func acceptConn(conn net.Conn, l log.Logger, ch chan []byte, packetSize int) {
 //        convData := convertData(data, n)
 //        convData = fmt.Sprint("Number of bytes read: ", n, " | Data: ", convData)
 //        l.Println(convData)
-        fmt.Println("Received some data, sending it on channel")
+        fmt.Println("Data before we resliced: ", data)
+        fmt.Println("Received some data: ", data[:n], " -> sending it on channel")
         ch <- data[:n]
 	}
 
