@@ -27,41 +27,14 @@ func acceptConn(conn net.Conn, l log.Logger, ch chan []byte, packetSize int) {
 		n, err := conn.Read(data)
 
         if err != nil {
-            fmt.Println("HURP A DURP A LURP") // TODO remove
             l.Println("Error while reading from connection: ", err.Error(), " I read ", n, " bytes.")
             l.Println("ALERT: Connection probably terminated???")
             return
         }
 
-//        convData := convertData(data, n)
-//        convData = fmt.Sprint("Number of bytes read: ", n, " | Data: ", convData)
-//        l.Println(convData)
-        fmt.Println("Data before we resliced: ", data)
-        fmt.Println("Received some data: ", data[:n], " -> sending it on channel")
         ch <- data[:n]
 	}
-
-	// Handle timeout?!
-	/*
-		err := conn.Close()
-		if err != nil {
-			l.Println(err.Error())
-		} else {
-			l.Println("Connection closed.")
-			fmt.Println("Connection closed.")
-		}*/
 }
-
-/* Durp remove?
-func listenForData(conn net.Conn, l log.Logger) {
-	l.Println("listenForData")
-
-}
-
-func handleData() {
-
-}
-*/
 
 func startTCPServ(ch chan []byte, port int, packetSize int) {
     fileName := fmt.Sprint("log/SocketServer/TCP_Server_", time.Now().Format(time.RFC3339), ".log")
