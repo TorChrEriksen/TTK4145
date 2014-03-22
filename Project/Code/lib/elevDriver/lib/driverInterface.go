@@ -30,9 +30,9 @@ func Init(){
   C.elev_init()
 }
 
-func SetSpeed(speed C.int){
+func SetSpeed(speed int){
   //fmt.Println("Attmepting to set speed to ", speed)
-  C.elev_set_speed(speed)
+  C.elev_set_speed(C.int(speed))
 }
 
 func StopElevator(){
@@ -41,13 +41,13 @@ func StopElevator(){
 
 //TODO Consider using const UP = 1 instead of strings
 //func SetButtonLamp(btn C.elev_button_type_t,floor C.int, value C.int){
-func SetButtonLamp(direction string,floor C.int, value C.int){
+func SetButtonLamp(direction string,floor int, value int){
   if direction == "UP"{
       //fmt.Println("goin' up") //Debug
-      C.elev_set_button_lamp(C.BUTTON_CALL_UP, floor, value)
+      C.elev_set_button_lamp(C.BUTTON_CALL_UP, C.int(floor), C.int(value))
   }else if direction == "DOWN"{
       //fmt.Println("goin' down") //Debug
-      C.elev_set_button_lamp(C.BUTTON_CALL_DOWN, floor, value)
+      C.elev_set_button_lamp(C.BUTTON_CALL_DOWN, C.int(floor), C.int(value))
   }else{
       //Trying to kick the shit out of software in case of wrong input
       fmt.Println("Panicking")
@@ -55,16 +55,16 @@ func SetButtonLamp(direction string,floor C.int, value C.int){
   } 
 }
 
-func SetFloorLamp(floor C.int){
-   C.elev_set_floor_indicator(floor)
+func SetFloorLamp(floor int){
+   C.elev_set_floor_indicator(C.int(floor))
 }
 
-func SetStopLamp(value C.int){
-  C.elev_set_stop_lamp(value)
+func SetStopLamp(value int){
+  C.elev_set_stop_lamp(C.int(value))
 }
 
-func SetDoorLamp(value C.int){
-  C.elev_set_door_open_lamp(value)  
+func SetDoorLamp(value int){
+  C.elev_set_door_open_lamp(C.int(value))  
 }
 
 //OUTPUT from controller
