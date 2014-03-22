@@ -134,16 +134,16 @@ func main(){
 	ordersChann 		:= make(chan order)
 	updateCurrentOrder 	:= make(chan bool)
 	updatePos 			:= make(chan order)
-/*	
-	costRequestIn 	:= make(chan exOrder)
-	costRequestOut 	:= make(chan exOrder)
-	costResponsIn 	:= make(chan exOrder)
-	costResponsOut 	:= make(chan exOrder)	
-	
-	delegate := make(chan exOrder)
-	
-	setOtherLights := make(chan exLights) 
-*/
+
+	costRequestIn 		:= make(chan exOrder)
+	costRequestOut 		:= make(chan exOrder)
+	costResponsIn 		:= make(chan exOrder)
+	costResponsOut 		:= make(chan exOrder)	
+	delegate 			:= make(chan exOrder)
+	aquire				:= make(chan exOrder)
+
+//	setOtherLights := make(chan exLights) 
+
 	var currentFloor 	int
 	var lastFloor 		int
 	var currentOrder	order
@@ -151,6 +151,7 @@ func main(){
 	var afterOrders 	[]order
 //	var direction		string
 	var status			string
+
 	
 	go func(){
 		for{
@@ -164,7 +165,6 @@ func main(){
 						if currentFloor != 0{
 							lastFloor = currentFloor
 						}
-//						driverInterface.SetFloorLamp(driverInterface._Ctype_int(lastFloor))
 						updatePos <- currentOrder
 					}()		
 				}
@@ -176,7 +176,6 @@ func main(){
 		for currentFloor!= 1{
 			time.Sleep(time.Millisecond*200)
 			if currentFloor!=0{
-//				driverInterface.SetFloorLamp(currentFloor-1)
 			}
 		}
 		state("STOP")
@@ -187,6 +186,9 @@ func main(){
 	go func(){
 		for{
 			select{
+
+				case 
+
 				case a:=<-updateCurrentOrder:
 					go func(){
 						a=a
@@ -259,8 +261,6 @@ func main(){
 //						fmt.Println("OL: ",orderList)						
 					}()
 
-
-
 				case new_stuff := <- updatePos:
 					go func(){
 //						fmt.Println("proposed order: ",new_stuff)
@@ -300,17 +300,40 @@ func main(){
 							extOrder = order{((extSig - (extSig % 2) - 30) / 10),"UP", false}
 						}
 						fmt.Println(cost(orderList, afterOrders, lastFloor, status, extOrder.floor, extOrder.dir))
-						ordersChann <- extOrder				
-//						costRequestOut <- extOrder{floor: extSig.floor, direction: extSig.dir, origin: THIS_ID}
-//						min := cost(orderList, afterOrders, lastFloor, status, extSig.floor, extSig.dir)
-						//wait for cost responses for 2 sek, whilst updating min
-//						delegate <-
+						//ordersChann <- extOrder				
+//*						
+						if !contains(extOrder, orderList)/*&& THIS_ID!=-1*/{
+							min:=exOrder(floor:extOrder.floor, dir:extOrder.dir, origin:THIS_ID, cost:cost(orderList, afterOrders, lastFloor, status, extOrder.floor, extOrder.dir), recipient:THIS_ID) 
+							var got exOrder
+							costRequestOut <- min
+							go func(){
+								got =<- costResponsIn
+								if got.cost<min.cost{
+									min=got
+								}
+							}()
+
+							for i:=0; i<2; i++{
+								time.Sleep(time.Second)
+							}
+							if min.recipient==THIS_ID{
+								ordersChann <- order(min.floor, floor.dir, false)	
+
+							}else{
+								delegate<-min
+							}
+
+						}else{
+							ordersChann <- order(min.floor, floor.dir, false)
+						}
+//* 
 					}()
-/*				case  costReq := <-costRequestIn:
+				case  costReq := <-costRequestIn:
 					go func(){
 							costResponsOut <- extOrder{floor: costReq.floor, dir: costReq.dir, recipient: THIS_ID, origin: costReq.origin, cost: cost(orderList, afterOrders, lastFloor, status, costReq.floor, costReq.dir)}
 						}()
-*/
+				case stolen_orders := <- aquire:
+					ordersChann <-order(stolen_orders.floor, stolen_orders.dir, false)
 
 
 			}
