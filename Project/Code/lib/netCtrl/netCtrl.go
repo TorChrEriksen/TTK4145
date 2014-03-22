@@ -23,7 +23,7 @@ type NetController struct {
     UDPPort int
     BroadcastPort int
     PacketSize int
-    DisableComm bool
+    CommDisabled bool
     Timeout time.Duration
     al *logger.AppLogger
     localIP string // TODO: change this to net.IP and do byte compare
@@ -36,12 +36,9 @@ type NetController struct {
     orderChan chan []byte
     bcChan chan int
     timeoutChan chan string
+    monitorConnectionsChan chan int
 
 //    sendOrderChannel chan []byte
-}
-
-func (nc *NetController) GetCommStatus() bool {
-    return nc.DisableComm
 }
 
 func (nc *NetController) Debug() {
@@ -64,10 +61,10 @@ func (nc *NetController) Create(a *logger.AppLogger) {
     var intErr int
     nc.localIP, intErr = NetServices.FindLocalIP()
     if intErr == 1 {
-        nc.DisableComm = false
+        nc.CommDisabled = false
         nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Local IP found: ", nc.localIP))
     } else {
-        nc.DisableComm = true
+        nc.CommDisabled = true
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error finding local IP, disabling net communication")
     }
 
@@ -83,17 +80,19 @@ func (nc *NetController) Create(a *logger.AppLogger) {
     nc.orderChan = make(chan []byte)
     nc.timeoutChan = make(chan string)
 
+    nc.monitorConnectionsChan = make(chan int)
+
 //    nc.sendOrderChannel = make(chan []byte)
 }
 
-func (nc *NetController) connectTCP(tcpAddr string) {
+func (nc *NetController) connectTCP(tcpAddr string) int {
 
     for _, tcpConnection := range nc.tcpClients {
         if tcpConnection.GetTCPConn() != nil { //TODO Verify that this works
             if strings.EqualFold(tcpConnection.GetTCPConn().RemoteAddr().String(), tcpAddr) {
                 result := fmt.Sprint("Already connected to that address: ", tcpAddr, " --> ", tcpConnection.GetTCPConn().RemoteAddr().String())
                 nc.al.Send_To_Log(nc.Identifier, logger.ERROR, result)
-                return
+                return -1
             }
         }
     }
@@ -111,17 +110,17 @@ func (nc *NetController) connectTCP(tcpAddr string) {
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error connecting to TCP.")
     }
 
-
+    return tcpErr
 }
 
-func (nc *NetController) connectUDP(udpAddr string) {
+func (nc *NetController) connectUDP(udpAddr string) int {
 
     for _, udpConnection := range nc.udpClients {
         if udpConnection.GetUDPConn() != nil { //TODO Verify that this works
             if strings.EqualFold(udpConnection.GetUDPConn().RemoteAddr().String(), udpAddr) {
                 result := fmt.Sprint("Already connected to that address: ", udpAddr, " --> ", udpConnection.GetUDPConn().RemoteAddr().String())
                 nc.al.Send_To_Log(nc.Identifier, logger.ERROR, result)
-                return
+                return -1
             }
         }
     }
@@ -139,14 +138,18 @@ func (nc *NetController) connectUDP(udpAddr string) {
     } else {
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error connecting to UDP.")
     }
+
+    return udpErr
 }
 
-func (nc *NetController) Run(newElevIdChan chan string) {
+func (nc *NetController) Run(newElevIdChan chan string, notifyCommChan chan bool) {
 
+    notifyCommChan <- nc.CommDisabled
     UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort, nc.PacketSize)
     UDP_BroadcastClient.Run(nc.bcChan, nc.BroadcastPort)
     SocketServer.Run(nc.orderChan, nc.heartbeatChan, nc.TCPPort, nc.PacketSize)
-    go nc.validateConnections(nc.timeoutChan)
+    go nc.validateConnections(nc.timeoutChan, nc.monitorConnectionsChan)
+    go nc.monitorCommStatus(nc.monitorConnectionsChan, notifyCommChan)
 
     go func() {
         for {
@@ -184,16 +187,20 @@ func (nc *NetController) Run(newElevIdChan chan string) {
                     nc.hostList = append(nc.hostList, broadcastMessage.IP)
 
 
-                    nc.connectTCP(fmt.Sprint(broadcastMessage.IP, ":", nc.TCPPort)) //TODO fix?
-                    nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":", nc.UDPPort)) //TODO fix?
+                    tcpErr := nc.connectTCP(fmt.Sprint(broadcastMessage.IP, ":", nc.TCPPort)) //TODO fix?
+                    udpErr := nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":", nc.UDPPort)) //TODO fix?
 
-                    newElevIdChan <- broadcastMessage.IP
+                    if (tcpErr != 1) || (udpErr != 1) {
+                        newElevIdChan <- broadcastMessage.IP
+                        nc.monitorConnectionsChan <- 1
+                    } else {
+                        fmt.Println("Error connecting")
+                    }
                 }()
 
             // Received a heartbeat
             case heartbeat := <-nc.heartbeatChan :
                 go func() {
-                    fmt.Println("Received a heartbeat")
                     for _, client := range nc.clientList {
                         if strings.EqualFold(client.GetIP(), heartbeat.IP) { //TODO: fix!
 //                     if bytes.Equal(client.IP, heartbeat.IP) {
@@ -230,9 +237,31 @@ func (nc *NetController) Run(newElevIdChan chan string) {
     }()
 }
 
-// TODO Make a routine for checking if we have any connections available
-/*
-func (nc *NetController) dummy() {
+// Checks if we have any connections available, if not we are "offline"
+func (nc *NetController) monitorCommStatus(ch chan int, notifyChan chan bool) {
+
+    numberOfConnections := 0
+
+    for {
+        value := <-ch
+
+        if value == -1 {
+            numberOfConnections -= 1
+        } else if value == 1 {
+            numberOfConnections += 1
+        } else {
+            continue
+        }
+
+        if numberOfConnections > 0 {
+            nc.CommDisabled = false
+            notifyChan <- true
+        } else {
+            nc.CommDisabled = true
+            notifyChan <- true
+        }
+    }
+
     disableComm := make(chan bool)
 
     go func() {
@@ -240,24 +269,17 @@ func (nc *NetController) dummy() {
             status := <-disableComm
 
             if status {
-                nc.DisableComm = true
+                nc.CommDisabled = true
             } else {
-                nc.DisableComm = false
+                nc.CommDisabled = false
             }
         }
     }()
-
-        if !clientsAvailable {
-            disableComm <- true
-        } else {
-            disableComm <- false
-        }
 }
-*/
 
 // Validate our connections, remove those that has timed out
 // TODO: Can we use this to detect if we are without network comm?
-func (nc *NetController) validateConnections(timeoutChan chan string) {
+func (nc *NetController) validateConnections(timeoutChan chan string, monitorConnectionsChan chan int) {
 
     // Check if we have net comm.
     // Like if the slice is empty or so?
@@ -269,6 +291,10 @@ func (nc *NetController) validateConnections(timeoutChan chan string) {
         for n, client := range nc.clientList {
             if strings.EqualFold(client.GetIP(), timedOutClient) {
                 fmt.Println("Found a client in our list that has timed out: ", timedOutClient)
+                
+                // Update our connection monitor
+                monitorConnectionsChan <- -1
+
                 fmt.Println("Client list: ", nc.clientList)
 
                 // Grow the slice by one

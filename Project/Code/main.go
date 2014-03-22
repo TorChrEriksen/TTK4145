@@ -183,6 +183,9 @@ func run() {
 
     // Declaring and setting up net controller
     if !config.DebugMode {
+
+        notifyCommChan := make(chan bool)
+
         // TODO: Use redundant config flag
         netCtrl := netCtrl.NetController{Identifier: "NETCONTROLLER",
                                          TCPPort: config.PortTCP,
@@ -194,24 +197,6 @@ func run() {
 
         elevIdListChan := make(chan string)
         elevIdList := make([]DataStore.Client, 0)
-        go func() {
-            for {
-                fmt.Println("Elevator ID List: ", elevIdList)
-                newElevIP := <-elevIdListChan
-                ignoreElement := false
-                for _, element := range elevIdList {
-                     if strings.EqualFold(newElevIP, element.IP) {
-                         fmt.Println("old elevator")
-                         ignoreElement = true
-                     }
-                }
-
-                if !ignoreElement {
-                    fmt.Println("new elevator")
-                    elevIdList = append(elevIdList, DataStore.Client{IP: newElevIP, ID: len(elevIdList)})
-                }
-            }
-        }()
 
         // Start elev logic part
         /*
@@ -232,30 +217,49 @@ func run() {
 */
         // End elev logic part
 
-        netCtrl.Run(elevIdListChan)
-
         go func() {
-            <-killChan
-            fmt.Println("Cleaning up before exiting")
-            netCtrl.Exit()
-            fmt.Println("Done cleaning up, exiting...")
-            os.Exit(0)
+            for {
+                fmt.Println("im here")
+                select {
+                case kill := <-killChan :
+                    _ = kill
+                    fmt.Println("Cleaning up before exiting")
+                    netCtrl.Exit()
+                    fmt.Println("Done cleaning up, exiting...")
+                    os.Exit(0)
+                case commStatusChanged := <- notifyCommChan :
+                    go func() {
+                        fmt.Println("Comm status changed to: ", commStatusChanged)
+                    }()
+                case newElevIP := <- elevIdListChan :
+                    go func() {
+                        fmt.Println("Elevator ID List: ", elevIdList)
+                        ignoreElement := false
+                        for _, element := range elevIdList {
+                             if strings.EqualFold(newElevIP, element.IP) {
+    //                             fmt.Println("old elevator")
+                                 ignoreElement = true
+                             }
+                        }
+
+                        if !ignoreElement {
+    //                        fmt.Println("new elevator")
+                            elevIdList = append(elevIdList, DataStore.Client{IP: newElevIP, ID: len(elevIdList)})
+                        }
+                    }()
+                }
+            }
         }()
+
+
+        go netCtrl.Run(elevIdListChan, notifyCommChan)
 
         // TODO Remove
         // go netCtrl.Debug()
 
-/*
-        go func() {
-            for {
-                time.Sleep(time.Second * 1)
-                fmt.Println("Comm status: ", netCtrl.GetCommStatus())
-            }
-        }()
-        */
 
         // Sending some test data
-//        sendEggData(netCtrl)
+        //go run sendEggData(netCtrl)
         ch := make(chan int)
         <-ch
     }
