@@ -1,3 +1,0 @@
-2014/03/22 14:03:05.705899 logger.go:87: ========== New log ==========
-2014/03/22 14:03:10.099977 logger.go:94: ERROR:  NETCONTROLLER  :  Error connecting to TCP.
-2014/03/22 14:03:36.393764 logger.go:94: ERROR:    :  Catched a killsignal:, interrupt

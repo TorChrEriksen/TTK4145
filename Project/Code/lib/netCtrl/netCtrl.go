@@ -61,10 +61,8 @@ func (nc *NetController) Create(a *logger.AppLogger) {
     var intErr int
     nc.localIP, intErr = NetServices.FindLocalIP()
     if intErr == 1 {
-        nc.CommDisabled = false
         nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Local IP found: ", nc.localIP))
     } else {
-        nc.CommDisabled = true
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error finding local IP, disabling net communication")
     }
 
@@ -106,6 +104,7 @@ func (nc *NetController) connectTCP(tcpAddr string) int {
         nc.tcpClients = append(nc.tcpClients, tcpClient) 
         result := fmt.Sprint("Added connection to TCP slice: ", tcpClient.GetTCPConn().RemoteAddr().String())
         nc.al.Send_To_Log(nc.Identifier, logger.INFO, result)
+        nc.monitorConnectionsChan <- 1
     } else {
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error connecting to TCP.")
     }
@@ -135,6 +134,7 @@ func (nc *NetController) connectUDP(udpAddr string) int {
         result := fmt.Sprint("Added connection to UDP slice: ", udpClient.GetUDPConn().RemoteAddr().String())
         nc.al.Send_To_Log(nc.Identifier, logger.INFO, result)
         udpClient.SendHeartbeat()
+//        nc.monitorConnectionsChan <- 1
     } else {
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error connecting to UDP.")
     }
@@ -144,7 +144,6 @@ func (nc *NetController) connectUDP(udpAddr string) int {
 
 func (nc *NetController) Run(newElevIdChan chan string, notifyCommChan chan bool) {
 
-    notifyCommChan <- nc.CommDisabled
     UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort, nc.PacketSize)
     UDP_BroadcastClient.Run(nc.bcChan, nc.BroadcastPort)
     SocketServer.Run(nc.orderChan, nc.heartbeatChan, nc.TCPPort, nc.PacketSize)
@@ -192,7 +191,6 @@ func (nc *NetController) Run(newElevIdChan chan string, notifyCommChan chan bool
 
                     if (tcpErr == 1) && (udpErr == 1) {
                         newElevIdChan <- broadcastMessage.IP
-                        nc.monitorConnectionsChan <- 1
                     } else {
                         fmt.Println("Error connecting")
                     }
@@ -253,28 +251,16 @@ func (nc *NetController) monitorCommStatus(ch chan int, notifyChan chan bool) {
             continue
         }
 
+        fmt.Println("Number of connections: ", numberOfConnections)
+
         if numberOfConnections > 0 {
             nc.CommDisabled = false
-            notifyChan <- true
+            notifyChan <- false
         } else {
             nc.CommDisabled = true
             notifyChan <- true
         }
     }
-
-    disableComm := make(chan bool)
-
-    go func() {
-        for {
-            status := <-disableComm
-
-            if status {
-                nc.CommDisabled = true
-            } else {
-                nc.CommDisabled = false
-            }
-        }
-    }()
 }
 
 // Validate our connections, remove those that has timed out
@@ -301,13 +287,13 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
                 nc.clientList = append(nc.clientList, ClientCtrl.ClientInfo{})
                 fmt.Println("Client list: ", nc.clientList)
 
-                // Swap the element that timed out with the last element (always nil)
+                // Swap the element that timed out with the last element (always nil), and delete shrink slice
                 nc.clientList = append(nc.clientList[:n], nc.clientList[n + 1])
                 fmt.Println("Client list: ", nc.clientList)
 
                 // Shrink the slice by one
-                nc.clientList = nc.clientList[0:len(nc.clientList) - 1]
-                fmt.Println("Client list: ", nc.clientList)
+//                nc.clientList = nc.clientList[0:len(nc.clientList) - 1]
+//                fmt.Println("Client list: ", nc.clientList)
 
                 // Remove the connection from TCP client list
                 for k, tcpClient := range nc.tcpClients {
@@ -332,13 +318,13 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
                             nc.tcpClients = append(nc.tcpClients, SocketClient.SocketClient{})
                             fmt.Println("TCP clients: ", nc.tcpClients)
 
-                            // Swap the element that timed out with the last element (always nil)
+                            // Swap the element that timed out with the last element (always nil), and delete shrink slice
                             nc.tcpClients = append(nc.tcpClients[:k], nc.tcpClients[k + 1])
                             fmt.Println("TCP clients: ", nc.tcpClients)
 
                             // Shrink the slice by one
-                            nc.tcpClients = nc.tcpClients[0:len(nc.tcpClients) - 1]
-                            fmt.Println("TCP clients: ", nc.tcpClients)
+//                            nc.tcpClients = nc.tcpClients[0:len(nc.tcpClients) - 1]
+//                            fmt.Println("TCP clients: ", nc.tcpClients)
                         }
                     }
                 }
@@ -366,13 +352,13 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
                             nc.udpClients = append(nc.udpClients, SocketClient.SocketClient{})
                             fmt.Println("UDP clients: ", nc.udpClients)
 
-                            // Swap the element that timed out with the last element (always nil)
+                            // Swap the element that timed out with the last element (always nil), and delete shrink slice
                             nc.udpClients = append(nc.udpClients[:j], nc.udpClients[j + 1])
                             fmt.Println("UDP clients: ", nc.udpClients)
 
                             // Shrink the slice by one
-                            nc.udpClients = nc.udpClients[0:len(nc.udpClients) - 1]
-                            fmt.Println("UDP clients: ", nc.udpClients)
+//                            nc.udpClients = nc.udpClients[0:len(nc.udpClients) - 1]
+//                            fmt.Println("UDP clients: ", nc.udpClients)
                         }
                     }
                 }
