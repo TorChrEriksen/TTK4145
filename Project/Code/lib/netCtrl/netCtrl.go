@@ -241,7 +241,8 @@ func (nc *NetController) validateConnections() {
 
                         nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill tcp connection")
                         tcpClient.KillTCPConnection()
-                        nc.tcpClients = append(nc.tcpClients[:k], nc.tcpClients[k + 1:])
+                        nc.tcpClients = append(nc.tcpClients[:k], nc.tcpClients[k+1])
+                        nc.tcpClients = nc.tcpClients[0:len(nc.tcpClients) - 1]
                         //nc.tcpClients = append([]SocketClient.SocketClient, nc.tcpClients[:len(nc.tcpClients) - 1])
                     }
                 }
@@ -254,13 +255,15 @@ func (nc *NetController) validateConnections() {
 
                         nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill udp connection")
                         udpClient.KillUDPConnection()
-                        nc.udpClients = append(nc.udpClients[:j], nc.udpClients[j + 1:])
+                        nc.udpClients = append(nc.udpClients[:j], nc.udpClients[j + 1])
+                        nc.udpClients = nc.udpClients[0:len(nc.udpClients) -1]
                         //nc.udpClients = append([]SocketClient.SocketClient(nil), nc.udpClients[:len(nc.udpClients) - 1])
                     }
                 }
             }
 
-            nc.clientList = append(nc.clientList[:n], nc.clientList[n + 1:])
+            nc.clientList = append(nc.clientList[:n], nc.clientList[n + 1])
+            nc.clientList = nc.clientList[0:len(nc.clientList) - 1]
             //nc.clientList = append([]ClientCtrl.ClientInfo, nc.clientList[:len(nc.clientList) - 1])
         }
     }
