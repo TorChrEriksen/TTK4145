@@ -66,10 +66,10 @@ func (nc *NetController) Create(a *logger.AppLogger) {
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error finding local IP, disabling net communication")
     }
 
-    nc.hostList = make([]string, 1)
-    nc.tcpClients = make([]SocketClient.SocketClient, 1)
-    nc.udpClients = make([]SocketClient.SocketClient, 1)
-    nc.clientList = make([]ClientCtrl.ClientInfo, 1)
+    nc.hostList = make([]string, 0)
+    nc.tcpClients = make([]SocketClient.SocketClient, 0)
+    nc.udpClients = make([]SocketClient.SocketClient, 0)
+    nc.clientList = make([]ClientCtrl.ClientInfo, 0)
 
     nc.broadcastChan = make(chan DataStore.Broadcast_Message)
     nc.heartbeatChan = make(chan DataStore.Heartbeat_Message)
@@ -242,6 +242,7 @@ func (nc *NetController) validateConnections() {
                         nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill tcp connection")
                         tcpClient.KillTCPConnection()
                         nc.tcpClients = append(nc.tcpClients[:k], nc.tcpClients[k + 1])
+
                     }
                 }
             }
