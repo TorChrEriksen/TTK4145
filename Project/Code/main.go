@@ -254,15 +254,18 @@ func run() {
                 case sendToOne := <- sendOrderToOne:
                     go func() {
                         netCtrl.SendData_SingleRecepient(sendToOne, sendToOne.RecipientIP)
+                        fmt.Println("Send to single Recepient: ", sendToOne)
                     }()
                 case sendToAll := <- sendOrderToAll:
                     go func() {
                         sendToAll.OriginIP = localIP //TODO: validate with Fredrik
                         netCtrl.SendData(sendToAll)
+                        fmt.Println("Send To All: ", sendToAll)
                     }()
                 case recvOrder := <- orderChanCallback:
                     go func() {
                         receivedOrder <- recvOrder
+                        fmt.Println("Received: ", recvOrder)
                     }()
                 }
             }

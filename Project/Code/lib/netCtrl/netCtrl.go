@@ -495,10 +495,14 @@ func (nc *NetController) Exit() {
 
     // Close connections
     for _, tcpClient := range nc.tcpClients {
-        tcpClient.KillTCPConnection()
+        if tcpClient.GetTCPConn() != nil { // TODO test this by letting client be timed out for a long time
+            tcpClient.KillTCPConnection()
+        }
     }
 
     for _, udpClient := range nc.udpClients {
-        udpClient.KillUDPConnection()
+        if udpClient.GetUDPConn() != nil { // TODO test this by letting client be timed out for a long time
+            udpClient.KillUDPConnection()
+        }
     }
 }
