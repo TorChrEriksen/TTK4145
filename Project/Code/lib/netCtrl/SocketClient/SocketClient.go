@@ -83,6 +83,20 @@ func (sc *SocketClient) ConnectUDP(udpAddr string) int {
     }
 }
 
+func (sc *SocketClient) KillTCPConnection() {
+    err := TCPConn.TerminateConn(*sc.tcpConn)
+	if err != nil {
+        sc.al.Send_To_Log(sc.Identifier, logger.ERROR, fmt.Sprint("Error closing connection (TCP): ", err.Error()))
+	}
+}
+
+func (sc *SocketClient) KillUDPConnection() {
+    err := UDPConn.TerminateConn(*sc.udpConn)
+	if err != nil {
+        sc.al.Send_To_Log(sc.Identifier, logger.ERROR, fmt.Sprint("Error closing connection (UDP): ", err.Error()))
+	}
+}
+
 
 func (sc *SocketClient) SendHeartbeat() {
     // TODO: need to stop the heartbeat?

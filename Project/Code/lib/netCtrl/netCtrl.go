@@ -72,8 +72,6 @@ func (nc *NetController) Create(a *logger.AppLogger) {
 
 func (nc *NetController) connectTCP(tcpAddr string) {
 
-    // Check if socket is already connected to tcpAddr
-    // TODO: need to have a flag for connected or not.
     for _, tcpConnection := range nc.tcpClients {
         if tcpConnection.GetTCPConn() != nil { //TODO Verify that this works
             if strings.EqualFold(tcpConnection.GetTCPConn().LocalAddr().String(), tcpAddr) {
@@ -102,8 +100,6 @@ func (nc *NetController) connectTCP(tcpAddr string) {
 
 func (nc *NetController) connectUDP(udpAddr string) {
 
-    // Check if socket is already connected to udpAddr
-    // TODO: need to have a flag for connected or not.
     for _, udpConnection := range nc.udpClients {
         if udpConnection.GetUDPConn() != nil { //TODO Verify that this works
             if strings.EqualFold(udpConnection.GetUDPConn().LocalAddr().String(), udpAddr) {
@@ -175,16 +171,13 @@ func (nc *NetController) Run() {
                 }()
 
             case heartbeat := <-nc.heartbeatChan :
-                //fmt.Println(ssUDP)
-                // Update heartbeat, or not... Client should do that!?
-
                 go func() {
                     for _, client := range nc.clientList {
                         if strings.EqualFold(client.GetIP(), heartbeat.IP) { //TODO: fix!
 //                     if bytes.Equal(client.IP, heartbeat.IP) {
                             nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of UDP client list: ", heartbeat.IP))
 
-                            // Reset timer ticks for this connection
+                            // Reset timer for this connection
                             client.SetAlive()
                             return
                         }
@@ -197,8 +190,6 @@ func (nc *NetController) Run() {
                 }()
 
             case orderMsg := <-nc.orderChan :
-                //fmt.Println(ssTCP)
-
                 // We dont need a client list? Or?
                 go func() {
 /*
@@ -217,6 +208,7 @@ func (nc *NetController) Run() {
                         return
                     }
 
+                    fmt.Println("Message on orderChan: ", convData.Message)
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client: ", convData.Message))
 
                 }()
@@ -225,18 +217,40 @@ func (nc *NetController) Run() {
     }()
 }
 
-// TODO: Verify
-// TODO: Need to sync the data! 
-// Redo function to remove client when callback from Socket happens
+// Validate our connections, remove those that has timed out
 func (nc *NetController) validateConnections() {
     for n, client := range nc.clientList {
 
         // Client timed out, remove it from our list
         if client.GetStatus() {
-            nc.clientList = append(nc.clientList[:n], nc.clientList[n+1])
+        nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Connection timed out")
+
+            // Remove the connection from TCP client list
+            for k, tcpClient := range nc.tcpClients {
+                if tcpClient.GetTCPConn() != nil { //TODO Verify that this works
+                    if strings.EqualFold(client.GetIP(), tcpClient.GetTCPConn().LocalAddr().String()) {
+
+                        nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill tcp connection")
+                        tcpClient.KillTCPConnection()
+                        nc.tcpClients = append(nc.tcpClients[:k], nc.tcpClients[k + 1])
+                    }
+                }
+            }
+
+            // Remove the connection from UDP client list
+            for j, udpClient := range nc.udpClients {
+                if udpClient.GetUDPConn() != nil { //TODO Verify that this works
+                    if strings.EqualFold(client.GetIP(), udpClient.GetUDPConn().LocalAddr().String()) {
+
+                        nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill udp connection")
+                        udpClient.KillUDPConnection()
+                        nc.udpClients = append(nc.udpClients[:j], nc.udpClients[j + 1])
+                    }
+                }
+            }
+
+            nc.clientList = append(nc.clientList[:n], nc.clientList[n + 1])
         }
-//        if client != nil { // TODO Verify that this works
-//        }
     }
 }
 
@@ -251,11 +265,6 @@ func (nc *NetController) SendData(data DataStore.Order_Message) {
         return
     }
     nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while sending data: *NetController.SendData()."))
-}
-
-func (nc *NetController) SendData_SingleRecepient(data DataStore.Order_Message) {
-
-    // TODO: Send to single recepient
 
     // Check if we are connected to the client
         // print error message
@@ -264,6 +273,20 @@ func (nc *NetController) SendData_SingleRecepient(data DataStore.Order_Message) 
     // Send message
 }
 
+func (nc *NetController) SendData_SingleRecepient(data DataStore.Order_Message, elevID int) {
+
+    // TODO: Send to single recepient
+
+    // Use elevID to find IP of that client.
+
+    // Check if we are connected to the client
+        // print error message
+        // reconnect and resend message?
+
+    // Send message
+}
+
+// Serialize data to send
 func (nc *NetController) marshal(data DataStore.Order_Message) []byte {
     convData, err := json.Marshal(data)
     if err != nil {
@@ -273,6 +296,7 @@ func (nc *NetController) marshal(data DataStore.Order_Message) []byte {
     return convData
 }
 
+// Unserialize data received
 func (nc *NetController) unmarshal(data []byte) (DataStore.Order_Message, int) {
     convData := DataStore.Order_Message{}
     err := json.Unmarshal(data, &convData)

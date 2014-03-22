@@ -30,14 +30,9 @@ func OpenComm(addr net.UDPAddr) (int, *net.UDPConn) {
 	return 1, conn
 }
 
-func TerminateConn(conn net.UDPConn) int {
+func TerminateConn(conn net.UDPConn) error {
 	err := conn.Close()
-	if err != nil {
-		fmt.Println("Error closing connection: (UDP)", err.Error())
-		return -1
-	} else {
-		return 1
-	}
+    return err
 }
 
 func SendData(conn net.UDPConn, a string) int {
