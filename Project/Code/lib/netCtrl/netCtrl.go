@@ -230,7 +230,6 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderChanCallback chan Da
                         return
                     }
 
-                    fmt.Println("after unmarshalling: ", convData)
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client"))
                     orderChanCallback <-convData
 
@@ -488,7 +487,7 @@ func (nc *NetController) unmarshal(data []byte) (DataStore.Order_Message, int) {
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while unmarshalling: ", err.Error()))
         return convData, -1
     }
-    fmt.Println("unmarshall: ", convData)
+
     return convData, 1
 }
 

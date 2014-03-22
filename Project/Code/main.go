@@ -193,7 +193,6 @@ func run() {
         
         localIP := netCtrl.Create(&appLogger)
 
-
         orderChanCallback := make(chan DataStore.Order_Message)
 
         //elevIdListChan := make(chan string)
@@ -225,29 +224,30 @@ func run() {
                     fmt.Println("Done cleaning up, exiting...")
                     os.Exit(0)
 
-                case commStatusChanged := <- notifyCommChan :
+                case commStatusChanged := <-notifyCommChan :
                     fmt.Println(" <- notifyCommChan ")
                     go func() {
                         commStatusChan <- commStatusChanged
                     }()
 
-                case sendToOne := <- sendOrderToOne:
+                case sendToOne := <-sendOrderToOne:
                     fmt.Println(" <- sendOrderToOne ")
                     go func() {
                         netCtrl.SendData_SingleRecepient(sendToOne, sendToOne.RecipientIP)
                         fmt.Println("Send to single Recepient: ", sendToOne)
                     }()
-                case sendToAll := <- sendOrderToAll:
+
+                case sendToAll := <-sendOrderToAll:
                     fmt.Println(" <- sendOrderToAll ")
                     go func() {
                         sendToAll.OriginIP = localIP //TODO: validate with Fredrik
                         netCtrl.SendData(sendToAll)
                         fmt.Println("Send To All: ", sendToAll)
                     }()
-                case recvOrder := <- orderChanCallback:
+
+                case recvOrder := <-orderChanCallback:
                     fmt.Println(" <- orderChanCallback ")
                     go func() {
-                        receivedOrder <- recvOrder
                         fmt.Println("Received: ", recvOrder)
                         fmt.Println(recvOrder.Floor)
                         fmt.Println(recvOrder.Dir)
@@ -255,6 +255,7 @@ func run() {
                         fmt.Println(recvOrder.OriginIP)
                         fmt.Println(recvOrder.Cost)
                         fmt.Println(recvOrder.What)
+                        receivedOrder <- recvOrder
                     }()
                 }
             }
