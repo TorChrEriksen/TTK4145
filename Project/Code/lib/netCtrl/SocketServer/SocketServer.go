@@ -27,7 +27,7 @@ func acceptConn(conn net.Conn, l log.Logger, ch chan []byte, packetSize int) {
 		n, err := conn.Read(data)
 
         if err != nil {
-            fmt.Prinln("HURP A DURP A LURP") // TODO remove
+            fmt.Println("HURP A DURP A LURP") // TODO remove
             l.Println("Error while reading from connection: ", err.Error(), " I read ", n, " bytes.")
             l.Println("ALERT: Connection probably terminated???")
             return
