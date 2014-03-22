@@ -36,7 +36,7 @@ type NetController struct {
     orderChan chan []byte
     bcChan chan int
 
-    sendOrderChannel chan []byte
+//    sendOrderChannel chan []byte
 }
 
 func (nc *NetController) Create(a *logger.AppLogger) {
@@ -67,7 +67,7 @@ func (nc *NetController) Create(a *logger.AppLogger) {
 
     nc.orderChan = make(chan []byte)
 
-    nc.sendOrderChannel = make(chan []byte)
+//    nc.sendOrderChannel = make(chan []byte)
 }
 
 func (nc *NetController) connectTCP(tcpAddr string) {
@@ -83,7 +83,7 @@ func (nc *NetController) connectTCP(tcpAddr string) {
     }
 
     tcpClient := SocketClient.SocketClient{Identifier: "TCP_SOCKETCLIENT"}
-    tcpClient.Create(nc.al, nc.sendOrderChannel)
+    tcpClient.Create(nc.al)
     tcpErr := tcpClient.ConnectTCP(tcpAddr) //TODO: FIX
 
     // Add tcp connection to tcp slice.
@@ -111,7 +111,7 @@ func (nc *NetController) connectUDP(udpAddr string) {
     }
 
     udpClient := SocketClient.SocketClient{Identifier: "UDP_SOCKETCLIENT"}
-    udpClient.Create(nc.al, nc.sendOrderChannel) // TODO: one struct for UDP, one for TCP
+    udpClient.Create(nc.al) // TODO: one struct for UDP, one for TCP
     udpErr := udpClient.ConnectUDP(udpAddr)
 
     // Add udp connection to udp slice.
@@ -211,7 +211,12 @@ func (nc *NetController) Run() {
 }
 
 // Validate our connections, remove those that has timed out
+// TODO: Can we use this to detect if we are without network comm?
 func (nc *NetController) validateConnections() {
+
+    // Check if we have net comm.
+    // Like if the slice is empty or so?
+
     for n, client := range nc.clientList {
 
         // Client timed out, remove it from our list
@@ -249,12 +254,20 @@ func (nc *NetController) validateConnections() {
 
 // Parameter is not to be a string, but serialized data.
 // TODO Waiting for structure.
+// TODO Do we want to check the tcpClient list vs the clientList?
 func (nc *NetController) SendData(data DataStore.Order_Message) {
+
+    fmt.Println(nc.tcpClients)
 
     // Send to all hosts
     convData := nc.marshal(data)
     if convData != nil {
-        nc.sendOrderChannel <- convData
+        for _, client := range nc.tcpClients {
+            if client.GetTCPConn() != nil {
+                fmt.Println("Sending data")
+                client.SendData(convData)
+            }
+        }
         return
     }
     nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while sending data: *NetController.SendData()."))

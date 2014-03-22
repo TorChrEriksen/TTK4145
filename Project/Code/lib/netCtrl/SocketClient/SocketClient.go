@@ -19,7 +19,7 @@ type SocketClient struct {
 }
 
 // Always called before any other function in this module
-func (sc *SocketClient) Create(a *logger.AppLogger, ch chan []byte) {
+func (sc *SocketClient) Create(a *logger.AppLogger) {
     fileName := fmt.Sprint("log/SocketClient/SocketClient_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/SocketClient.log"
 
@@ -27,7 +27,7 @@ func (sc *SocketClient) Create(a *logger.AppLogger, ch chan []byte) {
     sc.al.SetPackageLog(sc.Identifier, fileName, logSymLink)
 
     sc.heartbeatChan = make(chan bool)
-    sc.orderChan = ch
+    sc.orderChan = make(chan []byte)
 
     go sc.waitForInput()
 }
@@ -95,6 +95,10 @@ func (sc *SocketClient) SendHeartbeat() {
             }
         }
     }()
+}
+
+func (sc *SocketClient) SendData(data []byte) {
+    sc.orderChan <- data
 }
 
 // TODO: Need to make the package SocketClient only one connection, and let the netCtrl control each one of them.

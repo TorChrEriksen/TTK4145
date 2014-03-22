@@ -13,9 +13,9 @@ type ClientInfo struct {
 }
 
 func (ci *ClientInfo) Create(ip string, timeout time.Duration) {
-    fmt.Println("Create ClientInfo")
     ci.ip = ip
     ci.timeout = timeout
+    ci.timeoutChan = make(chan bool)
     go ci.runTimer()
 }
 
@@ -38,7 +38,7 @@ func (ci *ClientInfo) runTimer() {
 
         // Client timed out, set the flag
         // TODO: make this dynamic set of channels in netctrl instead of using the flag?
-        fmt.Println("Client timed out!")
+        fmt.Println("Client timed out: ", ci.ip)
         ci.timedOut = true
         ci.timeoutChan <- true
     }()
@@ -50,7 +50,6 @@ func (ci *ClientInfo) runTimer() {
             break
         }
 
-        fmt.Println("Resetting ClientInfo timer")
         timer.Reset(ci.timeout)
     }
 }

@@ -1,3 +1,4 @@
+rm secondaryPID
 rm log/*.log
 rm log/Error/*.log
 rm log/NetController/*.log
