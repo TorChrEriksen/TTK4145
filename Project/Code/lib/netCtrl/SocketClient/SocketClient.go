@@ -80,8 +80,6 @@ func (sc *SocketClient) KillUDPConnection() {
 
 
 func (sc *SocketClient) SendHeartbeat() {
-    // TODO: need to stop the heartbeat?
-    // sc.heartbeatChan <- true
     callback := make(chan string)
     go UDPConn.SendHeartbeat(sc.udpConn, "Im aliiiiiive!", sc.heartbeatChan, callback)
     go func() {
@@ -104,13 +102,10 @@ func (sc *SocketClient) SendData(data []byte) {
 // TODO: Need to make the package SocketClient only one connection, and let the netCtrl control each one of them.
 func (sc *SocketClient) waitForInput() {
     for order := range sc.orderChan {
-//        for _, host := range sc.tcpConn {
-//            if host != nil {
         if sc.tcpConn != nil {
-                n := TCPConn.SendData(sc.tcpConn, order) // TODO: use return value for something?
-                _ = n
-            }
-//        }
+            n := TCPConn.SendData(sc.tcpConn, order)
+            _ = n
+        }
     }
 }
 

@@ -11,7 +11,7 @@ import (
     "strings"
 )
 
-var TIMEOUT = time.Duration(time.Second * 5)
+var APP_TIMEOUT = time.Duration(time.Second * 5)
 
 func restartPrimaryAsSecondary(wdPID int) (*os.Process, error) {
     argv := []string{"./elevApp", strconv.Itoa(1), strconv.Itoa(wdPID)} // 1 = START_SECONDARY
@@ -49,7 +49,7 @@ type ProcessIDs struct {
 
 func waitForAliveFromPrimary(signalChan chan os.Signal, obsChan chan int) {
 
-    timer := time.NewTimer(TIMEOUT)
+    timer := time.NewTimer(APP_TIMEOUT)
     go func() {
         <-timer.C
 
@@ -62,7 +62,7 @@ func waitForAliveFromPrimary(signalChan chan os.Signal, obsChan chan int) {
         _ = sig
 
 //        fmt.Println("WD: signal received from Primary: ", sig)
-        timer.Reset(TIMEOUT)
+        timer.Reset(APP_TIMEOUT)
     }
 
     //fmt.Println("WD: Exited waitForAliveFromPrimary, SWAG!!!")
@@ -70,7 +70,7 @@ func waitForAliveFromPrimary(signalChan chan os.Signal, obsChan chan int) {
 
 func waitForAliveFromSecondary(signalChan chan os.Signal, obsChan chan int) {
 
-    timer := time.NewTimer(TIMEOUT)
+    timer := time.NewTimer(APP_TIMEOUT)
     go func() {
         <-timer.C
 
@@ -83,7 +83,7 @@ func waitForAliveFromSecondary(signalChan chan os.Signal, obsChan chan int) {
         _ = sig
 
 //        fmt.Println("WD: signal received from Secondary: ", sig)
-        timer.Reset(TIMEOUT)
+        timer.Reset(APP_TIMEOUT)
 
         // Open file and read PID so that we can 
         file, err := os.Open("secondaryPID")

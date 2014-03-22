@@ -64,7 +64,7 @@ func SendHeartbeat(conn *net.UDPConn, a string, quit chan bool, ch chan string) 
                 }
                 ch <- "Sent a heartbeat"
             }
-            time.Sleep(time.Second)
+            time.Sleep(time.Millisecond * 250)
         }
     }
 }

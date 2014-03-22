@@ -24,13 +24,14 @@ const (
     START_SECONDARY = 1
 )
 
-var TIMEOUT = time.Duration(time.Second * 5)
+var APP_TIMEOUT = time.Duration(time.Second * 5)
+var NET_TIMEOUT = time.Duration(time.Second)
 
 // start redundant related functions
 func waitForAliveFromWD(signalChan chan os.Signal, obsChan chan int) {
     fmt.Println("Primary: waiting for signal from WD")
 
-    timer := time.NewTimer(TIMEOUT)
+    timer := time.NewTimer(APP_TIMEOUT)
     go func() {
         <-timer.C
 
@@ -44,7 +45,7 @@ func waitForAliveFromWD(signalChan chan os.Signal, obsChan chan int) {
         _ = sig
 
 //        fmt.Println("Primary: signal received from WD: ", sig)
-        timer.Reset(TIMEOUT)
+        timer.Reset(APP_TIMEOUT)
     }
 }
 
@@ -189,7 +190,7 @@ func run() {
                                          UDPPort: config.PortUDP,
                                          BroadcastPort: config.PortBroadcast,
                                          PacketSize: config.PacketSize,
-                                         Timeout: TIMEOUT}
+                                         Timeout: NET_TIMEOUT}
         
         localIP := netCtrl.Create(&appLogger)
 
@@ -262,7 +263,7 @@ func run() {
         }()
 
         // TODO Remove
-        // go netCtrl.Debug()
+        go netCtrl.Debug()
 
         ch := make(chan int)
         <-ch
