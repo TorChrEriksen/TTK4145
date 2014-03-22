@@ -190,7 +190,7 @@ func (nc *NetController) Run(newElevIdChan chan string, notifyCommChan chan bool
                     tcpErr := nc.connectTCP(fmt.Sprint(broadcastMessage.IP, ":", nc.TCPPort)) //TODO fix?
                     udpErr := nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":", nc.UDPPort)) //TODO fix?
 
-                    if (tcpErr != 1) || (udpErr != 1) {
+                    if (tcpErr == 1) && (udpErr == 1) {
                         newElevIdChan <- broadcastMessage.IP
                         nc.monitorConnectionsChan <- 1
                     } else {
