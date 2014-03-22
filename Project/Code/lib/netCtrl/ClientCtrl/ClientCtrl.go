@@ -13,6 +13,7 @@ type ClientInfo struct {
 }
 
 func (ci *ClientInfo) Create(ip string, timeout time.Duration) {
+    fmt.Println("Create ClientInfo")
     ci.ip = ip
     ci.timeout = timeout
     go ci.runTimer()
@@ -49,6 +50,7 @@ func (ci *ClientInfo) runTimer() {
             break
         }
 
+        fmt.Println("Resetting ClientInfo timer")
         timer.Reset(ci.timeout)
     }
 }

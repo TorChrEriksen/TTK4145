@@ -14,19 +14,19 @@ import (
 var TIMEOUT = time.Duration(time.Second * 5)
 
 func restartPrimaryAsSecondary(wdPID int) (*os.Process, error) {
-    argv := []string{"./main", strconv.Itoa(1), strconv.Itoa(wdPID)} // 1 = START_SECONDARY
+    argv := []string{"./elevApp", strconv.Itoa(1), strconv.Itoa(wdPID)} // 1 = START_SECONDARY
     attr := new(os.ProcAttr)
     attr.Files = []*os.File{nil, os.Stdout, os.Stderr}
-    proc, err := os.StartProcess("main", argv, attr) // need struct to keep track of the PIDs
+    proc, err := os.StartProcess("elevApp", argv, attr) // need struct to keep track of the PIDs
 
     return proc, err
 }
 
 func restartSecondary(wdPID int) (*os.Process, error) {
-    argv := []string{"./main", strconv.Itoa(1), strconv.Itoa(wdPID)} // 1 = START_SECONDARY
+    argv := []string{"./elevApp", strconv.Itoa(1), strconv.Itoa(wdPID)} // 1 = START_SECONDARY
     attr := new(os.ProcAttr)
     attr.Files = []*os.File{nil, os.Stdout, os.Stderr}
-    proc, err := os.StartProcess("main", argv, attr) // need struct to keep track of the PIDs
+    proc, err := os.StartProcess("elevApp", argv, attr) // need struct to keep track of the PIDs
 
     return proc, err
 }

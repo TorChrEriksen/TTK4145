@@ -76,7 +76,7 @@ func spawnCopy(wdPID int) (*os.Process, error) {
     argv := []string{os.Args[0], strconv.Itoa(START_SECONDARY), strconv.Itoa(wdPID)}
     attr := new(os.ProcAttr)
     attr.Files = []*os.File{nil, os.Stdout, os.Stderr}
-    proc, err := os.StartProcess("main", argv, attr)
+    proc, err := os.StartProcess("elevApp", argv, attr)
     return proc, err
 }
 

@@ -1,8 +1,7 @@
 # Kill all previous instances of the application
-pkill main
+pkill elevApp
 pkill wd
 
 # Start primary with the correct parameters
 echo Starting primary
-./main 0
-
+./elevApp 0

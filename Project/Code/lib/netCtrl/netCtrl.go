@@ -130,6 +130,7 @@ func (nc *NetController) Run() {
     UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort, nc.PacketSize)
     UDP_BroadcastClient.Run(nc.bcChan, nc.BroadcastPort)
     SocketServer.Run(nc.orderChan, nc.heartbeatChan, nc.TCPPort, nc.PacketSize)
+    go nc.validateConnections()
 
     go func() {
         for {
@@ -184,7 +185,7 @@ func (nc *NetController) Run() {
                             return
                         }
                     }
-                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to UDP client list: ", heartbeat.IP))
+                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to client list: ", heartbeat.IP))
                     newClient := ClientCtrl.ClientInfo{}
                     newClient.Create(heartbeat.IP, nc.Timeout)
                     nc.clientList = append(nc.clientList, newClient)
@@ -196,7 +197,7 @@ func (nc *NetController) Run() {
                 go func() {
                     convData, errInt := nc.unmarshal(orderMsg)
                     if errInt == -1 {
-                        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Cannot read message, somrthing went wrong unmarshaling."))
+                        //nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Cannot read message, somrthing went wrong unmarshaling."))
                         return
                     }
 
