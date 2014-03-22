@@ -186,6 +186,9 @@ func run() {
         netCtrl.Create(&appLogger)
         netCtrl.Run()
 
+        // TODO Remove
+        netCtrl.Debug()
+
         // Sending some test data
         sendEggData(netCtrl)
     }

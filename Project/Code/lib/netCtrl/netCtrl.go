@@ -39,6 +39,15 @@ type NetController struct {
 //    sendOrderChannel chan []byte
 }
 
+func (nc *NetController) Debug() {
+    for {
+        fmt.Println("TCP clients: ", nc.tcpClients)
+        fmt.Println("UDP clients: ", nc.udpClients)
+        fmt.Println("Client list: ", nc.clientList)
+        time.Sleep(time.Second * 2)
+    }
+}
+
 func (nc *NetController) Create(a *logger.AppLogger) {
     fileName := fmt.Sprint("log/NetController/NetController_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/NetController.log"
