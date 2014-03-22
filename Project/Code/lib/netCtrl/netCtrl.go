@@ -44,6 +44,7 @@ func (nc *NetController) Debug() {
         fmt.Println("TCP clients: ", nc.tcpClients)
         fmt.Println("UDP clients: ", nc.udpClients)
         fmt.Println("Client list: ", nc.clientList)
+        fmt.Println("Host list: ", nc.hostList)
         time.Sleep(time.Second * 2)
     }
 }
@@ -65,10 +66,10 @@ func (nc *NetController) Create(a *logger.AppLogger) {
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error finding local IP, disabling net communication")
     }
 
-    nc.hostList = make([]string, 10)
-    nc.tcpClients = make([]SocketClient.SocketClient, 10)
-    nc.udpClients = make([]SocketClient.SocketClient, 10)
-    nc.clientList = make([]ClientCtrl.ClientInfo, 10)
+    nc.hostList = make([]string, 1)
+    nc.tcpClients = make([]SocketClient.SocketClient, 1)
+    nc.udpClients = make([]SocketClient.SocketClient, 1)
+    nc.clientList = make([]ClientCtrl.ClientInfo, 1)
 
     nc.broadcastChan = make(chan DataStore.Broadcast_Message)
     nc.heartbeatChan = make(chan DataStore.Heartbeat_Message)
@@ -225,6 +226,7 @@ func (nc *NetController) validateConnections() {
 
     // Check if we have net comm.
     // Like if the slice is empty or so?
+    // TODO Remove from host list
 
     for n, client := range nc.clientList {
 
