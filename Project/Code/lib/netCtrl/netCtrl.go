@@ -13,7 +13,7 @@ import (
     "time"
     "strings"
     "encoding/json"
-//    "net"
+    "net"
 //    "bytes"
 )
 
@@ -35,8 +35,13 @@ type NetController struct {
     heartbeatChan chan DataStore.Heartbeat_Message
     orderChan chan []byte
     bcChan chan int
+    timeoutChan chan string
 
 //    sendOrderChannel chan []byte
+}
+
+func (nc *NetController) GetCommStatus() bool {
+    return nc.DisableComm
 }
 
 func (nc *NetController) Debug() {
@@ -76,6 +81,7 @@ func (nc *NetController) Create(a *logger.AppLogger) {
     nc.bcChan = make(chan int)
 
     nc.orderChan = make(chan []byte)
+    nc.timeoutChan = make(chan string)
 
 //    nc.sendOrderChannel = make(chan []byte)
 }
@@ -84,8 +90,8 @@ func (nc *NetController) connectTCP(tcpAddr string) {
 
     for _, tcpConnection := range nc.tcpClients {
         if tcpConnection.GetTCPConn() != nil { //TODO Verify that this works
-            if strings.EqualFold(tcpConnection.GetTCPConn().LocalAddr().String(), tcpAddr) {
-                result := fmt.Sprint("Already connected to that address: ", tcpAddr, " --> ", tcpConnection.GetTCPConn().LocalAddr().String())
+            if strings.EqualFold(tcpConnection.GetTCPConn().RemoteAddr().String(), tcpAddr) {
+                result := fmt.Sprint("Already connected to that address: ", tcpAddr, " --> ", tcpConnection.GetTCPConn().RemoteAddr().String())
                 nc.al.Send_To_Log(nc.Identifier, logger.ERROR, result)
                 return
             }
@@ -99,7 +105,7 @@ func (nc *NetController) connectTCP(tcpAddr string) {
     // Add tcp connection to tcp slice.
     if tcpErr == 1 {
         nc.tcpClients = append(nc.tcpClients, tcpClient) 
-        result := fmt.Sprint("Added connection to TCP slice: ", tcpClient.GetTCPConn().LocalAddr().String())
+        result := fmt.Sprint("Added connection to TCP slice: ", tcpClient.GetTCPConn().RemoteAddr().String())
         nc.al.Send_To_Log(nc.Identifier, logger.INFO, result)
     } else {
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error connecting to TCP.")
@@ -112,8 +118,8 @@ func (nc *NetController) connectUDP(udpAddr string) {
 
     for _, udpConnection := range nc.udpClients {
         if udpConnection.GetUDPConn() != nil { //TODO Verify that this works
-            if strings.EqualFold(udpConnection.GetUDPConn().LocalAddr().String(), udpAddr) {
-                result := fmt.Sprint("Already connected to that address: ", udpAddr, " --> ", udpConnection.GetUDPConn().LocalAddr().String())
+            if strings.EqualFold(udpConnection.GetUDPConn().RemoteAddr().String(), udpAddr) {
+                result := fmt.Sprint("Already connected to that address: ", udpAddr, " --> ", udpConnection.GetUDPConn().RemoteAddr().String())
                 nc.al.Send_To_Log(nc.Identifier, logger.ERROR, result)
                 return
             }
@@ -127,7 +133,7 @@ func (nc *NetController) connectUDP(udpAddr string) {
     // Add udp connection to udp slice.
     if udpErr == 1 {
         nc.udpClients = append(nc.udpClients, udpClient)
-        result := fmt.Sprint("Added connection to UDP slice: ", udpClient.GetUDPConn().LocalAddr().String())
+        result := fmt.Sprint("Added connection to UDP slice: ", udpClient.GetUDPConn().RemoteAddr().String())
         nc.al.Send_To_Log(nc.Identifier, logger.INFO, result)
         udpClient.SendHeartbeat()
     } else {
@@ -135,12 +141,12 @@ func (nc *NetController) connectUDP(udpAddr string) {
     }
 }
 
-func (nc *NetController) Run() {
+func (nc *NetController) Run(newElevIdChan chan string) {
 
     UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort, nc.PacketSize)
     UDP_BroadcastClient.Run(nc.bcChan, nc.BroadcastPort)
     SocketServer.Run(nc.orderChan, nc.heartbeatChan, nc.TCPPort, nc.PacketSize)
-    go nc.validateConnections()
+    go nc.validateConnections(nc.timeoutChan)
 
     go func() {
         for {
@@ -180,11 +186,14 @@ func (nc *NetController) Run() {
 
                     nc.connectTCP(fmt.Sprint(broadcastMessage.IP, ":", nc.TCPPort)) //TODO fix?
                     nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":", nc.UDPPort)) //TODO fix?
+
+                    newElevIdChan <- broadcastMessage.IP
                 }()
 
             // Received a heartbeat
             case heartbeat := <-nc.heartbeatChan :
                 go func() {
+                    fmt.Println("Received a heartbeat")
                     for _, client := range nc.clientList {
                         if strings.EqualFold(client.GetIP(), heartbeat.IP) { //TODO: fix!
 //                     if bytes.Equal(client.IP, heartbeat.IP) {
@@ -195,11 +204,12 @@ func (nc *NetController) Run() {
                             return
                         }
                     }
+
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to client list: ", heartbeat.IP))
                     newClient := ClientCtrl.ClientInfo{}
                     newClient.Create(heartbeat.IP, nc.Timeout)
+                    go newClient.RunCtrl(nc.timeoutChan)
                     nc.clientList = append(nc.clientList, newClient)
-
                 }()
 
             // Received an order
@@ -220,97 +230,227 @@ func (nc *NetController) Run() {
     }()
 }
 
+// TODO Make a routine for checking if we have any connections available
+/*
+func (nc *NetController) dummy() {
+    disableComm := make(chan bool)
+
+    go func() {
+        for {
+            status := <-disableComm
+
+            if status {
+                nc.DisableComm = true
+            } else {
+                nc.DisableComm = false
+            }
+        }
+    }()
+
+        if !clientsAvailable {
+            disableComm <- true
+        } else {
+            disableComm <- false
+        }
+}
+*/
+
 // Validate our connections, remove those that has timed out
 // TODO: Can we use this to detect if we are without network comm?
-func (nc *NetController) validateConnections() {
+func (nc *NetController) validateConnections(timeoutChan chan string) {
 
     // Check if we have net comm.
     // Like if the slice is empty or so?
     // TODO Remove from host list
 
-    for n, client := range nc.clientList {
+    for {
+        timedOutClient := <-timeoutChan
 
-        // Client timed out, remove it from our list
-        if client.GetStatus() {
-        nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Connection timed out")
+        for n, client := range nc.clientList {
+            if strings.EqualFold(client.GetIP(), timedOutClient) {
+                fmt.Println("Found a client in our list that has timed out: ", timedOutClient)
+                fmt.Println("Client list: ", nc.clientList)
 
-            // Remove the connection from TCP client list
-            for k, tcpClient := range nc.tcpClients {
-                if tcpClient.GetTCPConn() != nil { //TODO Verify that this works
-                    if strings.EqualFold(client.GetIP(), tcpClient.GetTCPConn().LocalAddr().String()) {
+                // Grow the slice by one
+                nc.clientList = append(nc.clientList, ClientCtrl.ClientInfo{})
+                fmt.Println("Client list: ", nc.clientList)
 
-                        nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill tcp connection")
-                        tcpClient.KillTCPConnection()
-                        nc.tcpClients = append(nc.tcpClients[:k], nc.tcpClients[k+1])
-                        nc.tcpClients = nc.tcpClients[0:len(nc.tcpClients) - 1]
-                        //nc.tcpClients = append([]SocketClient.SocketClient, nc.tcpClients[:len(nc.tcpClients) - 1])
+                // Swap the element that timed out with the last element (always nil)
+                nc.clientList = append(nc.clientList[:n], nc.clientList[n + 1])
+                fmt.Println("Client list: ", nc.clientList)
+
+                // Shrink the slice by one
+                nc.clientList = nc.clientList[0:len(nc.clientList) - 1]
+                fmt.Println("Client list: ", nc.clientList)
+
+                // Remove the connection from TCP client list
+                for k, tcpClient := range nc.tcpClients {
+                    if tcpClient.GetTCPConn() != nil { //TODO Verify that this works
+
+                        host, _, err := net.SplitHostPort(tcpClient.GetTCPConn().RemoteAddr().String())
+                        if err != nil {
+                            nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error spliting TCP IP: ", err.Error()))
+                            return
+                        }
+
+                        fmt.Println("TCP IP: ", host)
+
+                        if strings.EqualFold(timedOutClient, host) {
+
+                            // Kill TCP connection
+                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill tcp connection")
+                            tcpClient.KillTCPConnection()
+                            fmt.Println("TCP clients: ", nc.tcpClients)
+
+                            // Grow the slice by one
+                            nc.tcpClients = append(nc.tcpClients, SocketClient.SocketClient{})
+                            fmt.Println("TCP clients: ", nc.tcpClients)
+
+                            // Swap the element that timed out with the last element (always nil)
+                            nc.tcpClients = append(nc.tcpClients[:k], nc.tcpClients[k + 1])
+                            fmt.Println("TCP clients: ", nc.tcpClients)
+
+                            // Shrink the slice by one
+                            nc.tcpClients = nc.tcpClients[0:len(nc.tcpClients) - 1]
+                            fmt.Println("TCP clients: ", nc.tcpClients)
+                        }
+                    }
+                }
+
+                // Remove the connection from UDP client list
+                for j, udpClient := range nc.udpClients {
+                    if udpClient.GetUDPConn() != nil { 
+                        
+                        host, _, err := net.SplitHostPort(udpClient.GetUDPConn().RemoteAddr().String())
+                        if err != nil {
+                            nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error spliting UDP IP: ", err.Error()))
+                            return
+                        }
+
+                        fmt.Println("UDP IP: ", host)
+
+                        if strings.EqualFold(timedOutClient, host) {
+
+                            // Kill UDP connection
+                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill udp connection")
+                            udpClient.KillUDPConnection()
+                            fmt.Println("UDP clients: ", nc.udpClients)
+
+                            // Grow the slice by one
+                            nc.udpClients = append(nc.udpClients, SocketClient.SocketClient{})
+                            fmt.Println("UDP clients: ", nc.udpClients)
+
+                            // Swap the element that timed out with the last element (always nil)
+                            nc.udpClients = append(nc.udpClients[:j], nc.udpClients[j + 1])
+                            fmt.Println("UDP clients: ", nc.udpClients)
+
+                            // Shrink the slice by one
+                            nc.udpClients = nc.udpClients[0:len(nc.udpClients) - 1]
+                            fmt.Println("UDP clients: ", nc.udpClients)
+                        }
                     }
                 }
             }
-
-            // Remove the connection from UDP client list
-            for j, udpClient := range nc.udpClients {
-                if udpClient.GetUDPConn() != nil { //TODO Verify that this works
-                    if strings.EqualFold(client.GetIP(), udpClient.GetUDPConn().LocalAddr().String()) {
-
-                        nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill udp connection")
-                        udpClient.KillUDPConnection()
-                        nc.udpClients = append(nc.udpClients[:j], nc.udpClients[j + 1])
-                        nc.udpClients = nc.udpClients[0:len(nc.udpClients) -1]
-                        //nc.udpClients = append([]SocketClient.SocketClient(nil), nc.udpClients[:len(nc.udpClients) - 1])
-                    }
-                }
-            }
-
-            nc.clientList = append(nc.clientList[:n], nc.clientList[n + 1])
-            nc.clientList = nc.clientList[0:len(nc.clientList) - 1]
-            //nc.clientList = append([]ClientCtrl.ClientInfo, nc.clientList[:len(nc.clientList) - 1])
         }
     }
+    /*
+    for {
+        fmt.Println("Validating connections")
+        for _, client := range nc.clientList {
+ //           clientsAvailable = true
+            fmt.Println("inside a client")
+
+            // Client timed out, remove it from our list
+            fmt.Println(client.GetIP(), " : ", client.GetStatus())
+            if client.GetStatus() {
+            nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Connection timed out")
+
+                // Remove the connection from TCP client list
+                for _, tcpClient := range nc.tcpClients {
+                    if tcpClient.GetTCPConn() != nil { //TODO Verify that this works
+                        if strings.EqualFold(client.GetIP(), tcpClient.GetTCPConn().LocalAddr().String()) {
+
+                            fmt.Println("Shrinking TCP conn slice")
+                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill tcp connection")
+                            tcpClient.KillTCPConnection()
+                            //nc.tcpClients = append(nc.tcpClients[:k], nc.tcpClients[k+1])
+                            nc.tcpClients = nc.tcpClients[0:len(nc.tcpClients) - 1]
+                            //nc.tcpClients = append([]SocketClient.SocketClient, nc.tcpClients[:len(nc.tcpClients) - 1])
+                        }
+                    }
+                }
+
+                // Remove the connection from UDP client list
+                for _, udpClient := range nc.udpClients {
+                    if udpClient.GetUDPConn() != nil { //TODO Verify that this works
+                        if strings.EqualFold(client.GetIP(), udpClient.GetUDPConn().LocalAddr().String()) {
+
+                            fmt.Println("Shrinking UDP conn slice")
+                            nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill udp connection")
+                            udpClient.KillUDPConnection()
+                            //nc.udpClients = append(nc.udpClients[:j], nc.udpClients[j + 1])
+                            nc.udpClients = nc.udpClients[0:len(nc.udpClients) -1]
+                            //nc.udpClients = append([]SocketClient.SocketClient(nil), nc.udpClients[:len(nc.udpClients) - 1])
+                        }
+                    }
+                }
+
+                fmt.Println("Shrinking clients slice")
+                //nc.clientList = append(nc.clientList[:n], nc.clientList[n + 1])
+                nc.clientList = nc.clientList[0:len(nc.clientList) - 1]
+                //nc.clientList = append([]ClientCtrl.ClientInfo, nc.clientList[:len(nc.clientList) - 1])
+            }
+        }
+
+        time.Sleep(time.Second * 1)
+    }
+    */
 }
 
-//[]SocketClient.SocketClient
-//[]SocketClient.SocketClient
-//[]ClientCtrl.ClientInfo
-
-// Parameter is not to be a string, but serialized data.
 // TODO Waiting for structure.
 // TODO Do we want to check the tcpClient list vs the clientList?
 func (nc *NetController) SendData(data DataStore.Order_Message) {
 
     fmt.Println(nc.tcpClients)
 
-    // Send to all hosts
     convData := nc.marshal(data)
     if convData != nil {
         for _, client := range nc.tcpClients {
             if client.GetTCPConn() != nil {
-                fmt.Println("Sending data")
                 client.SendData(convData)
             }
         }
         return
     }
+
     nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while sending data: *NetController.SendData()."))
-
-    // Check if we are connected to the client
-        // print error message
-        // reconnect and resend message?
-
-    // Send message
 }
 
-func (nc *NetController) SendData_SingleRecepient(data DataStore.Order_Message, elevID int) {
+func (nc *NetController) SendData_SingleRecepient(data DataStore.Order_Message, destIP string) {
 
     // TODO: Send to single recepient
 
-    // Use elevID to find IP of that client.
+    convData := nc.marshal(data)
+    if convData != nil {
 
-    // Check if we are connected to the client
-        // print error message
-        // reconnect and resend message?
+        // See if we are connected to the client
+        for _, tcpClient := range nc.tcpClients {
+            host, _, err := net.SplitHostPort(tcpClient.GetTCPConn().RemoteAddr().String())
+            if err != nil {
+                nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error spliting TCP IP: ", err.Error()))
+                return
+            }
 
-    // Send message
+            if strings.EqualFold(destIP, host) {
+                tcpClient.SendData(convData)
+            }
+        }
+        return
+    }
+
+    nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while sending data: *NetController.SendData_SingleRecepient()."))
+
+    // TODO Reconnect and resend message?
 }
 
 // Serialize data to send
@@ -332,4 +472,17 @@ func (nc *NetController) unmarshal(data []byte) (DataStore.Order_Message, int) {
         return convData, -1
     }
     return convData, 1
+}
+
+func (nc *NetController) Exit() {
+    // Save stuff to file for the last time?
+
+    // Close connections
+    for _, tcpClient := range nc.tcpClients {
+        tcpClient.KillTCPConnection()
+    }
+
+    for _, udpClient := range nc.udpClients {
+        udpClient.KillUDPConnection()
+    }
 }

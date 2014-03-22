@@ -151,13 +151,19 @@ func writePidToFile(filename string) {
 // end redundant related functions
 
 // Stopping Ctrl + C kill signal
-func catchKill(appLog logger.AppLogger) {
-    killChan := make(chan os.Signal, 1)
-    signal.Notify(killChan, os.Interrupt)
+func catchKill(appLog logger.AppLogger, killChan chan int) {
+    sigChan := make(chan os.Signal, 1)
+    signal.Notify(sigChan, os.Interrupt)
 
-    for signal := range killChan {
+    for signal := range sigChan {
         appLog.Send_To_Log("", logger.ERROR, fmt.Sprint("Catched a killsignal:, ", signal))
+        killChan <- 1
+
     }
+}
+
+func handleElevIdList(ch chan DataStore.Client) {
+
 }
 
 func run() {
@@ -170,8 +176,9 @@ func run() {
     fmt.Println("Loaded application config: ", *config)
 
     // Fire up interrupt catcher|
+    killChan := make(chan int)
     if config.CatchInterrupt {
-        go catchKill(appLogger)
+        go catchKill(appLogger, killChan)
     }
 
     // Declaring and setting up net controller
@@ -184,13 +191,73 @@ func run() {
                                          PacketSize: config.PacketSize,
                                          Timeout: TIMEOUT}
         netCtrl.Create(&appLogger)
-        netCtrl.Run()
+
+        elevIdListChan := make(chan string)
+        elevIdList := make([]DataStore.Client, 0)
+        go func() {
+            for {
+                fmt.Println("Elevator ID List: ", elevIdList)
+                newElevIP := <-elevIdListChan
+                ignoreElement := false
+                for _, element := range elevIdList {
+                     if strings.EqualFold(newElevIP, element.IP) {
+                         fmt.Println("old elevator")
+                         ignoreElement = true
+                     }
+                }
+
+                if !ignoreElement {
+                    fmt.Println("new elevator")
+                    elevIdList = append(elevIdList, DataStore.Client{IP: newElevIP, ID: len(elevIdList)})
+                }
+            }
+        }()
+
+        // Start elev logic part
+        /*
+        requestOrderChan := make(chan ...)
+
+
+        elevLogic := ordDriv.OrderDriver{}
+        elevLogic.Create()
+        elevLogic.Run(requestOrderChan, ...)
+
+        go func() {
+            select {
+            case sendRequestToAll <- requestOrderChan:
+                case.....
+
+            }
+        }
+*/
+        // End elev logic part
+
+        netCtrl.Run(elevIdListChan)
+
+        go func() {
+            <-killChan
+            fmt.Println("Cleaning up before exiting")
+            netCtrl.Exit()
+            fmt.Println("Done cleaning up, exiting...")
+            os.Exit(0)
+        }()
 
         // TODO Remove
-        netCtrl.Debug()
+        // go netCtrl.Debug()
+
+/*
+        go func() {
+            for {
+                time.Sleep(time.Second * 1)
+                fmt.Println("Comm status: ", netCtrl.GetCommStatus())
+            }
+        }()
+        */
 
         // Sending some test data
-        sendEggData(netCtrl)
+//        sendEggData(netCtrl)
+        ch := make(chan int)
+        <-ch
     }
 }
 

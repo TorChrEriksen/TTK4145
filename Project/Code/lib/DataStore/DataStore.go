@@ -23,7 +23,7 @@ type ExtButtons_Message struct {
 
 type Client struct {
     IP string
-    Ticks int
+    ID int
 }
 
 // Need a type or way to get FT data
