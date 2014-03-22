@@ -1,0 +1,35 @@
+2014/03/22 14:04:55.402329 logger.go:87: ========== New log ==========
+2014/03/22 14:04:55.402512 logger.go:87: Local IP found: 129.241.187.140
+2014/03/22 14:04:55.403304 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 14:04:55.403350 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 14:04:59.995050 logger.go:87: Appending to host list: 129.241.187.150
+2014/03/22 14:04:59.995334 logger.go:87: Added connection to TCP slice: 129.241.187.150:12345
+2014/03/22 14:04:59.995406 logger.go:87: Added connection to UDP slice: 129.241.187.150:12346
+2014/03/22 14:05:00.403458 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 14:05:00.403509 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 14:05:00.405841 logger.go:87: Appending to client list: 129.241.187.150
+2014/03/22 14:05:01.404207 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:02.404290 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:03.404383 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:04.404510 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:04.995617 logger.go:87: Already part of host list: 129.241.187.150
+2014/03/22 14:05:05.403480 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 14:05:05.403515 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 14:05:05.405638 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:06.404698 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:07.404791 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:08.404890 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:09.404996 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:09.995704 logger.go:87: Already part of host list: 129.241.187.150
+2014/03/22 14:05:10.403602 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 14:05:10.403644 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 14:05:10.405115 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:11.405171 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:12.405275 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:13.405385 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:14.875228 logger.go:87: Already part of host list: 129.241.187.150
+2014/03/22 14:05:15.403711 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 14:05:15.403763 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 14:05:15.405746 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:16.404566 logger.go:87: Already part of UDP client list: 129.241.187.150
+2014/03/22 14:05:17.404645 logger.go:87: Already part of UDP client list: 129.241.187.150

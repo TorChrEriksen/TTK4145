@@ -1,0 +1,31 @@
+2014/03/22 14:03:10.099728 logger.go:87: ========== New log ==========
+2014/03/22 14:03:10.099968 logger.go:87: Error connecting (TCP)
+2014/03/22 14:03:10.101889 logger.go:87: ========== New log ==========
+2014/03/22 14:03:10.102473 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:11.102609 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.150:12346: connection refused
+2014/03/22 14:03:11.102638 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:12.102759 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:13.102863 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:14.102963 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:15.103064 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:16.103174 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:17.103282 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:18.103388 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:19.103500 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:20.103608 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:21.103713 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:22.103815 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:23.103919 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:24.104020 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:25.104126 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:26.104230 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:27.104340 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:28.104449 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:29.104547 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:30.104677 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:31.104782 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:32.104891 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:33.104997 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:34.105101 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:35.105210 logger.go:87: Sent a heartbeat
+2014/03/22 14:03:36.105324 logger.go:87: Sent a heartbeat
