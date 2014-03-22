@@ -14,6 +14,7 @@ import (
 	"math"
 	"time"
 	"sort"
+	"io/ioutil"
 )
 
 type ByFloor []order
@@ -30,6 +31,7 @@ type exOrder struct{
 	recipient	int
 	origin		int
 	cost		float64
+	what		string
 }
 
 type exLights struct{
@@ -135,12 +137,15 @@ func main(){
 	updateCurrentOrder 	:= make(chan bool)
 	updatePos 			:= make(chan order)
 
-	costRequestIn 		:= make(chan exOrder)
-	costRequestOut 		:= make(chan exOrder)
+//	costRequestIn 		:= make(chan exOrder)
+//	costRequestOut 		:= make(chan exOrder)
 	costResponsIn 		:= make(chan exOrder)
-	costResponsOut 		:= make(chan exOrder)	
-	delegate 			:= make(chan exOrder)
-	aquire				:= make(chan exOrder)
+//	costResponsOut 		:= make(chan exOrder)	
+//	delegate 			:= make(chan exOrder)
+//	aquire				:= make(chan exOrder)
+	toOne				:= make(chan exOrder)
+	toAll				:= make(chan exOrder)
+	recieve				:= make(chan exOrder)
 
 //	setOtherLights := make(chan exLights) 
 
@@ -149,7 +154,6 @@ func main(){
 	var currentOrder	order
 	var orderList 		[]order
 	var afterOrders 	[]order
-//	var direction		string
 	var status			string
 
 	
@@ -303,9 +307,9 @@ func main(){
 						//ordersChann <- extOrder				
 //*						
 						if !contains(extOrder, orderList)/*&& THIS_ID!=-1*/{
-							min:=exOrder(floor:extOrder.floor, dir:extOrder.dir, origin:THIS_ID, cost:cost(orderList, afterOrders, lastFloor, status, extOrder.floor, extOrder.dir), recipient:THIS_ID) 
+							min:=exOrder(floor:extOrder.floor, dir:extOrder.dir, origin:THIS_ID, cost:cost(orderList, afterOrders, lastFloor, status, extOrder.floor, extOrder.dir), recipient:THIS_ID, what: "COST_REQ") 
 							var got exOrder
-							costRequestOut <- min
+							toAll <- min
 							go func(){
 								got =<- costResponsIn
 								if got.cost<min.cost{
@@ -320,22 +324,28 @@ func main(){
 								ordersChann <- order(min.floor, floor.dir, false)	
 
 							}else{
-								delegate<-min
+								min.what, min.recipient, min.origin = "O_REQ", min.origin, min.recipient
+								toOne<-min
 							}
 
 						}else{
 							ordersChann <- order(min.floor, floor.dir, false)
 						}
-//* 
+
 					}()
-				case  costReq := <-costRequestIn:
+//*/
+//*
+				case input := <- recieve:
 					go func(){
-							costResponsOut <- extOrder{floor: costReq.floor, dir: costReq.dir, recipient: THIS_ID, origin: costReq.origin, cost: cost(orderList, afterOrders, lastFloor, status, costReq.floor, costReq.dir)}
+						if input.what=="COST_REQ"{
+							toOne <-extOrder{floor: input.floor, dir: input.dir, recipient: input.origin, origin: input.recipient, cost: cost(orderList, afterOrders, lastFloor, status, costReq.floor, costReq.dir), what:"COST_RES"}
+						}else if input.what=="COST_RES"{
+							costResponsIn <- input
+						}else if input.what=="O_REQ"{
+							ordersChann <- order(input.floor, input.dir, false)
+						}
 						}()
-				case stolen_orders := <- aquire:
-					ordersChann <-order(stolen_orders.floor, stolen_orders.dir, false)
-
-
+//*/
 			}
 		}
 	}()
