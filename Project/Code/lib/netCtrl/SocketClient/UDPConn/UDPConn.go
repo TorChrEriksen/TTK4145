@@ -30,18 +30,12 @@ func OpenComm(addr net.UDPAddr) (int, *net.UDPConn) {
 	return 1, conn
 }
 
-func TerminateConn(conn net.UDPConn) int {
+func TerminateConn(conn net.UDPConn) error {
 	err := conn.Close()
-	if err != nil {
-		fmt.Println("Error closing connection: (UDP)", err.Error())
-		return -1
-	} else {
-		return 1
-	}
+    return err
 }
 
 func SendData(conn net.UDPConn, a string) int {
-	//fmt.Println("SendData() (UDP)")
 	data := make([]byte, 4096)
     data = []byte(a)
 
@@ -53,7 +47,7 @@ func SendData(conn net.UDPConn, a string) int {
 	return n
 }
 
-func SendHeartbeat(conn []*net.UDPConn, a string, quit chan bool, ch chan string) {
+func SendHeartbeat(conn *net.UDPConn, a string, quit chan bool, ch chan string) {
     data := make([]byte, 4096)
     data = []byte(a)
 
@@ -63,17 +57,14 @@ func SendHeartbeat(conn []*net.UDPConn, a string, quit chan bool, ch chan string
             ch <- "I was told to quit"
             return
         default :
-            for _, c := range conn {
-                if c != nil {
-                    _, err := c.Write(data)
-                    if err != nil {
-                        ch <- fmt.Sprint("Error writing to connection: (UDP)", err.Error())
-                    }
-                    ch <- "Sent a heartbeat"
+            if conn != nil {
+                _, err := conn.Write(data)
+                if err != nil {
+                    ch <- fmt.Sprint("Error writing to connection: (UDP)", err.Error())
                 }
+                ch <- "Sent a heartbeat"
             }
             time.Sleep(time.Second)
         }
     }
 }
-

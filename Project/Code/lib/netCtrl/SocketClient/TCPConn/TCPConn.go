@@ -30,21 +30,12 @@ func OpenComm(addr net.TCPAddr) (int, *net.TCPConn) {
 
 }
 
-func TerminateConn(conn net.TCPConn) int {
+func TerminateConn(conn net.TCPConn) error {
 	err := conn.Close()
-	if err != nil {
-		fmt.Println("Error closing connection: (TCP)", err.Error())
-		return -1
-	} else {
-		return 1
-	}
+    return err
 }
 
-func SendData(conn net.TCPConn, a string) int {
-	//fmt.Println("SendData() (UDP)")
-	data := make([]byte, 4096)
-    data = []byte(a)
-
+func SendData(conn *net.TCPConn, data []byte) int {
 	n, err := conn.Write(data)
 	if err != nil {
 		fmt.Println("Error writing to connection: (TCP)", err.Error())

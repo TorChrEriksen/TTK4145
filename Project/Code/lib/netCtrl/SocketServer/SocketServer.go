@@ -7,6 +7,7 @@ import (
 	"os"
     "strings"
     "time"
+    "./../../DataStore"
     "./../NetServices"
 )
 
@@ -19,10 +20,10 @@ func convertData(data []byte, n int) string {
 	return fmt.Sprint("Data from client: ", n, " --> ", (string)(convertedData))
 }
 
-func acceptConn(conn net.Conn, l log.Logger, ch chan string) {
+func acceptConn(conn net.Conn, l log.Logger, ch chan []byte, packetSize int) {
 	l.Println("Success: Connection accepted from ", conn.RemoteAddr())
 	for {
-		data := make([]byte, 4096)
+		data := make([]byte, packetSize)
 		n, err := conn.Read(data)
 
         if err != nil {
@@ -31,10 +32,10 @@ func acceptConn(conn net.Conn, l log.Logger, ch chan string) {
             return
         }
 
-        convData := convertData(data, n)
-        convData = fmt.Sprint("Number of bytes read: ", n, " | Data: ", convData)
-        l.Println(convData)
-        ch <- convData
+//        convData := convertData(data, n)
+//        convData = fmt.Sprint("Number of bytes read: ", n, " | Data: ", convData)
+//        l.Println(convData)
+        ch <- data[:n]
 	}
 
 	// Handle timeout?!
@@ -59,7 +60,7 @@ func handleData() {
 }
 */
 
-func startTCPServ(ch chan string) {
+func startTCPServ(ch chan []byte, port int, packetSize int) {
     fileName := fmt.Sprint("log/SocketServer/TCP_Server_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/TCP_Server.log"
 
@@ -79,7 +80,8 @@ func startTCPServ(ch chan string) {
 
     l.Println("========== New log ==========")
 
-	listener, err := net.Listen("tcp", ":12345")
+    listenPort := fmt.Sprint(":", port)
+	listener, err := net.Listen("tcp", listenPort)
 	if err != nil {
         l.Println("Error: ", err.Error())
 	}
@@ -92,14 +94,14 @@ func startTCPServ(ch chan string) {
 			l.Println(err.Error())
 		} else {
 			l.Println("Firing goroutine for handling connection.")
-			go acceptConn(conn, *l, ch)
+			go acceptConn(conn, *l, ch, packetSize)
 		}
 	}
 
-    ch <- "-1"
+    close(ch)
 }
 
-func startUDPServ(ch chan string) {
+func startUDPServ(ch chan DataStore.Heartbeat_Message, packetSize int) {
     fileName := fmt.Sprint("log/SocketServer/UDP_Server_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/UDP_Server.log"
 
@@ -137,9 +139,9 @@ func startUDPServ(ch chan string) {
 	}
 	defer listener.Close()
 
-    buffer := make([]byte, 4096)
+    buffer := make([]byte, packetSize)
 	for {
-        n, _, err := listener.ReadFromUDP(buffer)
+        n, netInfo, err := listener.ReadFromUDP(buffer)
         if err != nil {
             l.Println("Error reading from UDP: ", err.Error())
         }
@@ -149,16 +151,15 @@ func startUDPServ(ch chan string) {
         convData := convertData(buffer, n)
         convData = fmt.Sprint("Number of bytes read: ", n, " | Data: ", convData)
         l.Println(convData)
-        ch <- convData
+        ch <- DataStore.Heartbeat_Message{IP: fmt.Sprint(netInfo.IP), Message: convData}
 
         l.Println("Converting seems successfull.")
 	}
 
-    ch <- "-1"
-
+    close(ch)
 }
 
-func Create(tcpChan chan string, udpChan chan string) {
-    go startTCPServ(tcpChan)
-    go startUDPServ(udpChan)
+func Run(tcpChan chan []byte, udpChan chan DataStore.Heartbeat_Message, tcpPort int, packetSize int) {
+    go startTCPServ(tcpChan, tcpPort, packetSize)
+    go startUDPServ(udpChan, packetSize)
 }

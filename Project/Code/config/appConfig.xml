@@ -1,0 +1,18 @@
+<!-- Config file for the elevator application  -->
+<appcnf>
+    <config key="CatchInterrupt" value="1" />
+    <config key="Redundant" value="1" />
+    <config key="PortTCP" value="12345" />
+    <config key="PortUDP" value="12346" />
+    <config key="PortBroadcast" value="12347" />
+    <config key="DebugMode" value="0" />
+    <config key="Floors" value="4" />
+    <config key="ButtonBaseInternal" value="11" />
+    <config key="ButtonBaseExternal" value="50" />
+    <config key="FloorNumberBase" value="31" />
+    <config key="StopButtonBase" value="10" />
+    <config key="PacketSize" value="4096" />
+    <config key="ElevID" value="0" />
+</appcnf>
+
+<!-- End-of-File -->
