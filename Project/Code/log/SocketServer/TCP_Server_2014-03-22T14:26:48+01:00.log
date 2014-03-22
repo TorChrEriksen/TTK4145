@@ -1,0 +1,12 @@
+2014/03/22 14:26:48.987075 SocketServer.go:81: ========== New log ==========
+2014/03/22 14:26:48.987124 SocketServer.go:91: Listening for new connections...
+2014/03/22 14:26:53.987947 SocketServer.go:96: Firing goroutine for handling connection.
+2014/03/22 14:26:53.989472 SocketServer.go:91: Listening for new connections...
+2014/03/22 14:26:53.989499 SocketServer.go:24: Success: Connection accepted from  129.241.187.150:56113
+2014/03/22 14:27:14.185902 SocketServer.go:30: Error while reading from connection:  EOF  I read  0  bytes.
+2014/03/22 14:27:14.185913 SocketServer.go:31: ALERT: Connection probably terminated???
+2014/03/22 14:27:23.988618 SocketServer.go:96: Firing goroutine for handling connection.
+2014/03/22 14:27:23.988706 SocketServer.go:91: Listening for new connections...
+2014/03/22 14:27:23.988723 SocketServer.go:24: Success: Connection accepted from  129.241.187.150:56118
+2014/03/22 14:27:40.425861 SocketServer.go:30: Error while reading from connection:  EOF  I read  0  bytes.
+2014/03/22 14:27:40.425874 SocketServer.go:31: ALERT: Connection probably terminated???

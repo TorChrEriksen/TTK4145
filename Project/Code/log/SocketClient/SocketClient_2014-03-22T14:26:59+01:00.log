@@ -1,0 +1,384 @@
+2014/03/22 14:26:59.114692 logger.go:87: ========== New log ==========
+2014/03/22 14:26:59.114957 logger.go:87: ========== New log ==========
+2014/03/22 14:26:59.115047 logger.go:87: Sent a heartbeat
+2014/03/22 14:26:59.772119 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:00.115186 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:00.115216 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:00.772217 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:01.115330 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:01.772321 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:02.115445 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:02.115472 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:02.772425 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:03.115587 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:03.772520 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:04.115686 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:04.115709 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:04.772634 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:05.115828 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:05.772727 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:06.115935 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:06.115963 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:06.772835 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:07.116084 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:07.772940 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:08.116193 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:08.116219 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:08.773046 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:09.116332 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:09.773147 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:10.116471 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:10.116501 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:10.773263 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:11.116611 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:11.773365 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:12.116723 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:12.116748 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:12.773476 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:13.116874 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:13.773582 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:14.116979 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:14.117006 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:14.773686 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:15.117128 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:15.773790 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.150:12346: connection refused
+2014/03/22 14:27:15.773813 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:16.117228 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:16.117252 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:16.773939 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:17.117369 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:17.774048 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.150:12346: connection refused
+2014/03/22 14:27:17.774072 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:18.117477 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:18.117500 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:18.774211 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:19.117636 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:19.774303 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:19.774341 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:20.117733 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:20.117755 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:20.774454 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:20.774474 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:21.117874 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:21.774585 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:21.774609 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:22.117979 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:22.118005 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:22.774720 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:22.774742 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:23.118127 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:23.774854 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:23.774876 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:24.118233 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:24.118260 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:24.774985 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:24.775008 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:25.118376 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:25.775120 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:25.775143 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:26.118482 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:26.118503 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:26.775253 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:26.775270 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:27.118630 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:27.775377 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:27.775399 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:28.118727 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:28.118753 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:28.775511 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:28.775534 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:29.118874 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:29.775643 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:29.775678 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:30.118988 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:30.119017 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:30.775798 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:30.775833 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:31.119130 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:31.775945 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:31.775965 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:32.119229 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:32.119254 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:32.776073 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:32.776092 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:33.119371 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:33.776197 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:33.776218 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:34.119486 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:34.119516 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:34.776345 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:34.776369 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:35.119626 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:35.776481 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:35.776500 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:36.119722 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:36.119746 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:36.776607 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:36.776631 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:37.119862 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:37.776736 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:37.776759 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:38.119960 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:38.119981 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:38.776865 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:38.776888 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:39.120099 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:39.776996 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:39.777020 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:40.120204 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:40.120226 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:40.777149 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:40.777175 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:41.120356 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:41.777293 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:41.777318 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:42.120462 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:42.120487 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:42.777457 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:42.777494 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:43.120613 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:43.777598 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:43.777622 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:44.120724 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:44.120756 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:44.777736 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:44.777760 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:45.120873 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:45.777870 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:45.777892 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:46.120975 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:46.120996 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:46.778002 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:46.778025 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:47.121115 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:47.778133 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:47.778156 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:48.121217 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:48.121266 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:48.778264 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:48.778287 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:49.121376 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:49.778398 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:49.778420 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:50.121493 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:50.121513 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:50.778531 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:50.778554 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:51.121631 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:51.778664 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:51.778687 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:52.121738 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:52.121762 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:52.778797 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:52.778819 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:53.121879 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:53.778945 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:53.778971 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:54.121984 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:54.122010 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:54.779082 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:54.779105 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:55.122128 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:55.779223 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:55.779264 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:56.122233 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:56.122260 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:56.779354 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:56.779366 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:57.122391 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:57.779480 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:57.779503 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:58.122502 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:27:58.122525 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:58.779609 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:58.779629 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:59.122645 logger.go:87: Sent a heartbeat
+2014/03/22 14:27:59.779737 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:27:59.779760 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:00.122752 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:00.122777 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:00.779876 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:00.779899 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:01.122925 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:01.780032 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:01.780055 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:02.123024 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:02.123070 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:02.780167 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:02.780190 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:03.123188 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:03.780302 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:03.780329 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:04.123289 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:04.123314 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:04.780441 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:04.780465 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:05.123435 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:05.780569 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:05.780592 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:06.123536 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:06.123562 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:06.780696 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:06.780718 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:07.123682 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:07.780841 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:07.780863 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:08.123783 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:08.123808 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:08.780974 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:08.780999 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:09.123928 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:09.781118 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:09.781145 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:10.124045 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:10.124078 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:10.781248 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:10.781267 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:11.124194 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:11.781380 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:11.781408 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:12.124320 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:12.124344 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:12.781518 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:12.781541 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:13.124464 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:13.781652 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:13.781675 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:14.124564 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:14.124591 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:14.781799 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:14.781823 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:15.124714 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:15.781935 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:15.781958 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:16.124813 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:16.124835 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:16.782070 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:16.782092 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:17.124969 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:17.782197 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:17.782219 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:18.125073 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:18.125098 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:18.782329 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:18.782350 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:19.125223 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:19.782463 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:19.782487 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:20.125327 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:20.125375 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:20.782602 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:20.782623 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:21.125493 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:21.782736 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:21.782755 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:22.125600 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:22.125623 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:22.782869 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:22.782893 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:23.125757 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:23.783007 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:23.783032 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:24.125860 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:24.125886 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:24.783147 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:24.783172 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:25.126014 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:25.783285 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:25.783310 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:26.126123 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:26.126145 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:26.783429 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:26.783457 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:27.126276 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:27.783581 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:27.783608 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:28.126380 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:28.126407 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:28.783726 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:28.783753 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:29.126530 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:29.783870 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:29.783908 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:30.126643 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:30.126672 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:30.784030 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:30.784075 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:31.126788 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:31.784193 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:31.784219 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:32.126888 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:32.126914 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:32.784336 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:32.784359 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:33.127039 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:33.784472 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:33.784498 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:34.127139 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:34.127166 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:34.784616 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:34.784642 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:35.127292 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:35.784759 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:35.784785 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:36.127396 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:36.127422 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:36.784898 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:36.784924 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:37.127559 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:37.785038 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:37.785063 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:38.127681 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:38.127705 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:38.785179 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:38.785202 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:39.127824 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:39.785316 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:39.785339 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:40.127931 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:40.127956 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:40.785455 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:40.785479 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:41.128076 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:41.785589 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:41.785611 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:42.128182 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:42.128207 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:42.785726 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:42.785746 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:43.128333 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:43.785860 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:43.785882 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:44.128439 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:44.128465 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:44.785996 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:44.786019 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:45.128585 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:45.786150 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:45.786173 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:46.128692 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:46.128730 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:46.786287 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:46.786311 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:47.128848 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:47.786421 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:47.786446 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:48.128952 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:48.128976 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:48.786569 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:48.786593 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:49.129099 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:49.786711 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:49.786752 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:50.129205 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:50.129228 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:50.786872 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:50.786898 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:51.129357 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:51.787013 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:51.787038 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:52.129454 logger.go:87: Error writing to connection: (UDP)write udp 129.241.187.142:12346: connection refused
+2014/03/22 14:28:52.129477 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:52.787151 logger.go:87: Error writing to connection: (UDP)use of closed network connection
+2014/03/22 14:28:52.787175 logger.go:87: Sent a heartbeat
+2014/03/22 14:28:53.129598 logger.go:87: Sent a heartbeat

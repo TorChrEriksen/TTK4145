@@ -1,7 +1,8 @@
-package ordDriv
+package elevDriver
 
 import (
 	"./lib"
+    "./../DataStore"
 	"fmt"
 	"math"
 	"time"
@@ -10,34 +11,22 @@ import (
 
 
 type OrderDriver struct{
-
-
-
-
+    N_FLOOR int
 	currentFloor 	int
 	lastFloor 		int
 	currentOrder	order
 	orderList 		[]order
 	afterOrders 	[]order
 	status			string	
-
+    commDisabled   bool
 }
 
 type ByFloor []order
 
 type order struct{
-	floor int
-	dir string
-	clear bool
-}
-//TODO: DATASTORE
-type exOrder struct{
-	floor		int
-	dir 		int
-	recipient	int
-	origin		int
-	cost		float64
-	what		string
+	Floor int
+	Dir string
+	Clear bool
 }
 
 type exLights struct{
@@ -50,14 +39,15 @@ type exLights struct{
 func (od *OrderDriver) Create() {
 	od.currentFloor = 0
 	od.lastFloor = 0
-	od.currentOrder = 0	
+	od.currentOrder = order{}	
 	od.orderList = make([]order, 0)
 	od.afterOrders = make([]order, 0)
 	od.status = "IDLE"
+    od.commDisabled = true
 }
 
 func (p order) String() string {
-	return fmt.Sprintf("Floor %d, dir: %s, Del: %t", p.floor, p.dir, p.clear)
+	return fmt.Sprintf("Floor %d, dir: %s, Del: %t", p.Floor, p.Dir, p.Clear)
 }
 
 func contains(a order, list []order) bool {
@@ -79,8 +69,58 @@ func remove(a order, list []order)[]order{
 	return ny
 }
 
+func (a ByFloor) Len() int           { return len(a) }
+func (a ByFloor) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByFloor) Less(i, j int) bool { return a[i].Floor < a[j].Floor }
 
-func (od *OrderDriver) Run( toOne chan exOrder, toAll chan exOrder, recieved chan exOrder){
+func state(direction string) {
+	switch {
+	case direction == "DOWN":
+//		fmt.Println("DOWN")
+		driverInterface.SetSpeed(-300)
+	case direction == "UP":
+//		fmt.Println("UP")
+		driverInterface.SetSpeed(300)
+	case direction == "STOP":
+//		fmt.Println("STOP")
+		driverInterface.SetSpeed(300)
+		driverInterface.SetSpeed(-300)
+		driverInterface.SetSpeed(0)
+	case direction == "OPEN":
+		driverInterface.SetDoorLamp(1)
+		time.Sleep(2 * time.Second)
+		driverInterface.SetDoorLamp(0)
+	}
+}
+
+func cost(orderList []order, afterOrderList []order, currPos int, dir_now string, new_order int, new_order_dir string) float64 {
+	var squared float64
+	squared = 2.0
+	switch {
+	case dir_now == "UP" && new_order_dir == "UP":
+		if currPos < new_order {
+			return math.Pow(float64((new_order-currPos)+len(orderList)), squared)
+		} else {
+			return math.Pow(float64(((2*orderList[len(orderList)-1].Floor)-new_order-currPos)+len(orderList)), squared)
+		}
+
+	case dir_now == "DOWN" && new_order_dir == "DOWN":
+		if new_order < currPos {
+			return math.Pow(float64((currPos-new_order)+len(orderList)), squared)
+		} else {
+			return math.Pow(float64(new_order+currPos-orderList[0].Floor+len(orderList)), squared)
+		}
+
+	case dir_now == "UP" && new_order_dir == "DOWN":
+		return math.Pow(float64(2*orderList[len(orderList)-1].Floor-currPos-new_order+len(orderList)), squared)
+
+	case dir_now == "DOWN" && new_order_dir == "UP":
+		return math.Pow(float64(currPos+new_order-orderList[0].Floor+len(orderList)), squared)
+	}
+	return -1.0
+}
+
+func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataStore.Order_Message, recieve chan DataStore.Order_Message, commStatus chan bool){
 	driverInterface.Init()
 	
 	intButtonChannel 	:= make(chan int)
@@ -90,9 +130,10 @@ func (od *OrderDriver) Run( toOne chan exOrder, toAll chan exOrder, recieved cha
 	timeoutChannel 		:= make(chan int)
 
 	ordersChann 		:= make(chan order)
-	updatecurrentOrder 	:= make(chan bool)
+	updateCurrentOrder 	:= make(chan bool)
 	updatePos 			:= make(chan order)
 
+    costResponsInternal := make(chan DataStore.Order_Message)
 
 	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel, timeoutChannel)
 	
@@ -112,7 +153,10 @@ func (od *OrderDriver) Run( toOne chan exOrder, toAll chan exOrder, recieved cha
 							driverInterface.SetFloorLamp(od.currentFloor-1) //TODO Find nicer way of setting the lamp?
 						}
 						updatePos <- od.currentOrder
-					}()		
+					}()
+                case statusChanged := <-commStatus:
+                    od.commDisabled = statusChanged
+                    fmt.Println("Comm status changed to: ", statusChanged, " | ", od.commDisabled) //TODO remove
 				}
 			}
 	}()
@@ -129,14 +173,14 @@ func (od *OrderDriver) Run( toOne chan exOrder, toAll chan exOrder, recieved cha
 	}
 
 	//SIGNAL HANDLING
-	go func(){
-		for{
-			select{
+    go func() {
+		for {
+			select {
 
-				case a:=<-updateCurrentOrder:
-					go func(){
+				case a:= <-updateCurrentOrder:
+					go func() {
 						a=a
-						if len(od.orderList)==0&&len(od.afterOrders)==0{
+						if (len(od.orderList)== 0) && (len(od.afterOrders) == 0){
 							state("STOP")
 							updatePos <- order{-1, "NO", false}
 						}else if len(od.orderList)==0{
@@ -154,9 +198,9 @@ func (od *OrderDriver) Run( toOne chan exOrder, toAll chan exOrder, recieved cha
 				case buttonSignal := <- intButtonChannel:
 					go func(){
 //						fmt.Println("INT: ", buttonSignal)
-						incommingI := order{floor: buttonSignal-10, dir: "INT"}
-						driverInterface.SetButtonLamp(incommingI.dir, incommingI.floor-1, 1 ) //TODO make nicer. handle floors better
-						ordersChann <- incommingI
+						incommingInternal := order{Floor: buttonSignal-10, Dir: "INT"}
+						driverInterface.SetButtonLamp(incommingInternal.Dir, incommingInternal.Floor-1, 1 ) //TODO make nicer. handle floors better
+						ordersChann <- incommingInternal
 					}()
 
 				case new_order := <- ordersChann:
@@ -168,16 +212,16 @@ func (od *OrderDriver) Run( toOne chan exOrder, toAll chan exOrder, recieved cha
 							od.orderList = od.afterOrders
 							od.afterOrders = nil
 //							fmt.Println(od.orderList, od.afterOrders)
-							updateod.currentOrder <- true
-						}else if new_order.clear{
-							od.orderList = remove(order{new_order.floor, new_order.dir, false},od.orderList)
+							updateCurrentOrder <- true
+						}else if new_order.Clear{
+							od.orderList = remove(order{new_order.Floor, new_order.Dir, false},od.orderList)
 ///							fmt.Println("REMOVED: ",new_order, od.orderList)
 //							fmt.Println(od.orderList)
-							updateod.currentOrder <- true
+							updateCurrentOrder <- true
 						
-						}else if !contains(new_order, od.orderList) && new_order.dir != "NO" {
+						}else if !contains(new_order, od.orderList) && new_order.Dir != "NO" {
 							if od.status == "UP" {
-								if (new_order.floor < od.currentFloor && od.currentFloor==od.lastFloor) || (new_order.floor < od.lastFloor+1&&od.currentFloor==0)||new_order.dir=="DOWN" {
+								if (new_order.Floor < od.currentFloor && od.currentFloor == od.lastFloor) || (new_order.Floor < od.lastFloor+1 && od.currentFloor == 0) || new_order.Dir == "DOWN" {
 									od.afterOrders = append(od.afterOrders, new_order)
 									sort.Sort(ByFloor(od.afterOrders))
 //									fmt.Println("yay!")
@@ -188,7 +232,7 @@ func (od *OrderDriver) Run( toOne chan exOrder, toAll chan exOrder, recieved cha
 ///									fmt.Println("nan!")
 								}
 							} else if od.status == "DOWN" {
-								if (new_order.floor > od.currentFloor && od.currentFloor==od.lastFloor) || (new_order.floor > od.lastFloor-1&&od.currentFloor==0)||new_order.dir=="UP" {
+								if (new_order.Floor > od.currentFloor && od.currentFloor == od.lastFloor) || (new_order.Floor > od.lastFloor-1 && od.currentFloor == 0) || new_order.Dir=="UP" {
 									od.afterOrders = append(od.afterOrders, new_order)
 									sort.Sort(ByFloor(od.afterOrders))
 								} else {
@@ -210,38 +254,37 @@ func (od *OrderDriver) Run( toOne chan exOrder, toAll chan exOrder, recieved cha
 					go func(){
 //						fmt.Println("proposed order: ",new_stuff)
 //						fmt.Println(od.status)
-						if !new_stuff.clear||new_stuff.dir!="NO"{
+						if !new_stuff.Clear || new_stuff.Dir != "NO" {
 							od.currentOrder = new_stuff
 						}
-						if new_stuff.dir=="NO"{
-							for od.currentFloor==0{
+						if new_stuff.Dir == "NO" {
+							for od.currentFloor == 0 {
 								time.Sleep(time.Millisecond*250)
 							}
 							od.status = "IDLE"
 //							state("STOP")
-						}else if len(od.orderList)==0 && len(od.afterOrders)==0{
+						} else if len(od.orderList) == 0 && len(od.afterOrders) == 0 {
 							state("IDLE")
-						}else if od.currentOrder.floor==od.currentFloor{
+						} else if od.currentOrder.Floor == od.currentFloor{
 							state("STOP")
-							driverInterface.SetButtonLamp(od.currentOrder.dir, od.currentFloor-1, 0)
+							driverInterface.SetButtonLamp(od.currentOrder.Dir, od.currentFloor - 1, 0)
 							state("OPEN")	
 //							fmt.Println("GOT TO FLOOR")
-							if od.currentFloor==1{
+							if od.currentFloor == 1 {
 								od.status="UP"
-							}else if od.currentFloor==N_FLOOR{
+							} else if od.currentFloor == od.N_FLOOR {
 								od.status="DOWN"
 							}
-							ordersChann <- order{od.currentOrder.floor, od.currentOrder.dir, true}
-							updateod.currentOrder <- true
+							ordersChann <- order{od.currentOrder.Floor, od.currentOrder.Dir, true}
+							updateCurrentOrder <- true
 						
-						}else if od.currentOrder.floor>od.lastFloor{
+						}else if od.currentOrder.Floor > od.lastFloor{
 							state("UP")
 							od.status="UP"
 
-						}else if (od.currentOrder.floor<od.lastFloor && od.currentOrder.floor!=0){
+						}else if (od.currentOrder.Floor < od.lastFloor && od.currentOrder.Floor != 0){
 							state("DOWN")
 							od.status="DOWN"
-						
 						}
 //						fmt.Println("current order:", od.currentOrder)						
 					}()
@@ -257,7 +300,7 @@ func (od *OrderDriver) Run( toOne chan exOrder, toAll chan exOrder, recieved cha
 //						setOtherLights <- exLights{((extSignal - (extSignal % 2) - 30) / 10), (extSignal % 2), 1}
 						
 						var extOrder order
-						if extSig%2==0{
+						if extSig % 2 == 0 {
 							extOrder = order{((extSig - (extSig % 2) - 30) / 10),"DOWN", false}
 							driverInterface.SetButtonLamp("DOWN", ((extSig - (extSig % 2) - 30) / 10)-1, 1 ) //TODO make nicer. handle floors better
 							//fmt.Println("ExtOrder: ", extOrder)
@@ -268,50 +311,47 @@ func (od *OrderDriver) Run( toOne chan exOrder, toAll chan exOrder, recieved cha
 						}
 //						fmt.Println(cost(od.orderList, od.afterOrders, od.lastFloor, od.status, extOrder.floor, extOrder.dir))
 				//		ordersChann <- extOrder
-					}()
-				
-						
-						if !contains(extOrder, od.orderList)&& THIS_ID!=-1{
-							min:=exOrder(floor:extOrder.floor, dir:extOrder.dir, origin:THIS_ID, cost:cost(od.orderList, od.afterOrders, od.lastFloor, od.status, extOrder.floor, extOrder.dir), recipient:THIS_ID, what: "COST_REQ") 
-							var got exOrder
-							toAll <- min
-							go func(){
-								got =<- costResponsIn
-								if got.cost<min.cost{
-									min=got
-								}
-							}()
+					//}()
+                        
+                        // OriginIP is set in Application Control 
+                        min := DataStore.Order_Message{Floor: extOrder.Floor, Dir: extOrder.Dir, RecipientIP: "", Cost: cost(od.orderList, od.afterOrders, od.lastFloor, od.status, extOrder.Floor, extOrder.Dir), What: "COST_REQ"}
 
-							time.Sleep(time.Second * 2)
+                        if !contains(extOrder, od.orderList) && !od.commDisabled {
 
-							if min.recipient==THIS_ID{
-								ordersChann <- order(min.floor, floor.dir, false)	
+                            toAll <- min
+                            go func(){
+                                got := <-costResponsInternal
+                                if got.Cost < min.Cost{
+                                    min = got
+                                }
+                            }()
 
-							}else{
-								min.what, min.recipient, min.origin = "O_REQ", min.origin, min.recipient
-								toOne<-min
-							}
+                            time.Sleep(time.Second * 2)
 
-						}else{
-							ordersChann <- order(min.floor, floor.dir, false)
-						}
+                            if min.OriginIP == "" {
+                                ordersChann <- order{min.Floor, min.Dir, false}
 
-					}()
+                            } else {
+                                min.What, min.RecipientIP, min.OriginIP = "O_REQ", min.OriginIP, min.RecipientIP
+                                toOne<-min
 
+                            }  
+                        } else {
+                            ordersChann <- order{min.Floor, min.Dir, false}
+                        }
+                    }()
 
 				case input := <- recieve:
 					go func(){
-						if input.what=="COST_REQ"{
-							toOne <-extOrder{floor: input.floor, dir: input.dir, recipient: input.origin, origin: input.recipient, cost: cost(od.orderList, od.afterOrders, od.lastFloor, od.status, costReq.floor, costReq.dir), what:"COST_RES"}
-						}else if input.what=="COST_RES"{
-							costResponsIn <- input
-						}else if input.what=="O_REQ"{
-							ordersChann <- order(input.floor, input.dir, false)
+						if input.What == "COST_REQ" {
+							toOne <-DataStore.Order_Message{Floor: input.Floor, Dir: input.Dir, RecipientIP: input.OriginIP, OriginIP: input.RecipientIP, Cost: cost(od.orderList, od.afterOrders, od.lastFloor, od.status, input.Floor, input.Dir), What:"COST_RES"}
+						} else if input.What == "COST_RES" {
+							costResponsInternal <- input
+						} else if input.What == "O_REQ" {
+							ordersChann <- order{input.Floor, input.Dir, false}
 						}
-						}()
-			}()
+				}()
 			}
-		}()
-
-
+		}
+	}()
 }

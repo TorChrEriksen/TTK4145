@@ -4,6 +4,7 @@ import (
     "./lib/netCtrl"
     "./lib/logger"
     "./lib/DataStore"
+    "./lib/elevDriver"
     "os"
     "os/signal"
     "fmt"
@@ -162,9 +163,11 @@ func catchKill(appLog logger.AppLogger, killChan chan int) {
     }
 }
 
+/*
 func handleElevIdList(ch chan DataStore.Client) {
 
 }
+*/
 
 func run() {
     // Declaring and setting up application logger
@@ -193,28 +196,23 @@ func run() {
                                          BroadcastPort: config.PortBroadcast,
                                          PacketSize: config.PacketSize,
                                          Timeout: TIMEOUT}
-        netCtrl.Create(&appLogger)
+        
+        localIP := netCtrl.Create(&appLogger)
 
-        elevIdListChan := make(chan string)
-        elevIdList := make([]DataStore.Client, 0)
+
+        orderChanCallback := make(chan DataStore.Order_Message)
+
+        //elevIdListChan := make(chan string)
+        //elevIdList := make([]DataStore.Client, 0)
 
         // Start elev logic part
-        /*
-        requestOrderChan := make(chan ...)
+        sendOrderToOne := make(chan DataStore.Order_Message)
+        sendOrderToAll := make(chan DataStore.Order_Message)
+        receivedOrder := make(chan DataStore.Order_Message)
+        commStatusChan := make(chan bool)
 
-
-        elevLogic := ordDriv.OrderDriver{}
+        elevLogic := elevDriver.OrderDriver{N_FLOOR: config.Floors}
         elevLogic.Create()
-        elevLogic.Run(requestOrderChan, ...)
-
-        go func() {
-            select {
-            case sendRequestToAll <- requestOrderChan:
-                case.....
-
-            }
-        }
-*/
         // End elev logic part
 
         go func() {
@@ -227,10 +225,13 @@ func run() {
                     netCtrl.Exit()
                     fmt.Println("Done cleaning up, exiting...")
                     os.Exit(0)
+
                 case commStatusChanged := <- notifyCommChan :
                     go func() {
-                        fmt.Println("Comm status changed to: ", commStatusChanged)
+                        commStatusChan <- commStatusChanged
                     }()
+
+                    /*
                 case newElevIP := <- elevIdListChan :
                     go func() {
                         fmt.Println("Elevator ID List: ", elevIdList)
@@ -247,12 +248,28 @@ func run() {
                             elevIdList = append(elevIdList, DataStore.Client{IP: newElevIP, ID: len(elevIdList)})
                         }
                     }()
+                    */
+
+                case sendToOne := <- sendOrderToOne:
+                    go func() {
+                        netCtrl.SendData_SingleRecepient(sendToOne, sendToOne.RecipientIP)
+                    }()
+                case sendToAll := <- sendOrderToAll:
+                    go func() {
+                        sendToAll.OriginIP = localIP //TODO: validate with Fredrik
+                        netCtrl.SendData(sendToAll)
+                    }()
+                case recvOrder := <- orderChanCallback:
+                    go func() {
+                        receivedOrder <- recvOrder
+                    }()
                 }
             }
         }()
 
-
-        go netCtrl.Run(elevIdListChan, notifyCommChan)
+        go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan)
+        go netCtrl.Run(notifyCommChan, orderChanCallback)
+        //go netCtrl.Run(elevIdListChan, notifyCommChan, orderChanCallback)
 
         // TODO Remove
         // go netCtrl.Debug()
@@ -432,6 +449,8 @@ func waitForFailure(wdChan chan int, wdSignalChan chan os.Signal, haltChan chan 
     }
 }
 
+//TODO: remove
+/*
 func sendEggData(nc netCtrl.NetController) {
     dataForTheEgg := DataStore.Order_Message{Message : "(╯°□°）╯︵ ┻━┻)"}
     time.Sleep(time.Second * 10)
@@ -440,9 +459,9 @@ func sendEggData(nc netCtrl.NetController) {
         time.Sleep(time.Second * 1)
     }
 }
+*/
 
 // Config declaration and import part
-
 type ImportedConfig struct {
     CatchInterrupt bool
     Redundant bool

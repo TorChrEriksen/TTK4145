@@ -51,7 +51,7 @@ func (nc *NetController) Debug() {
     }
 }
 
-func (nc *NetController) Create(a *logger.AppLogger) {
+func (nc *NetController) Create(a *logger.AppLogger) string {
     fileName := fmt.Sprint("log/NetController/NetController_", time.Now().Format(time.RFC3339), ".log")
     logSymLink := "log/NetController.log"
 
@@ -79,6 +79,8 @@ func (nc *NetController) Create(a *logger.AppLogger) {
     nc.timeoutChan = make(chan string)
 
     nc.monitorConnectionsChan = make(chan int)
+
+    return nc.localIP
 
 //    nc.sendOrderChannel = make(chan []byte)
 }
@@ -142,7 +144,7 @@ func (nc *NetController) connectUDP(udpAddr string) int {
     return udpErr
 }
 
-func (nc *NetController) Run(newElevIdChan chan string, notifyCommChan chan bool) {
+func (nc *NetController) Run(notifyCommChan chan bool, orderChanCallback chan DataStore.Order_Message) {
 
     UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort, nc.PacketSize)
     UDP_BroadcastClient.Run(nc.bcChan, nc.BroadcastPort)
@@ -186,14 +188,16 @@ func (nc *NetController) Run(newElevIdChan chan string, notifyCommChan chan bool
                     nc.hostList = append(nc.hostList, broadcastMessage.IP)
 
 
-                    tcpErr := nc.connectTCP(fmt.Sprint(broadcastMessage.IP, ":", nc.TCPPort)) //TODO fix?
-                    udpErr := nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":", nc.UDPPort)) //TODO fix?
+                    nc.connectTCP(fmt.Sprint(broadcastMessage.IP, ":", nc.TCPPort)) //TODO fix?
+                    nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":", nc.UDPPort)) //TODO fix?
 
+                    /*
                     if (tcpErr == 1) && (udpErr == 1) {
                         newElevIdChan <- broadcastMessage.IP
                     } else {
                         fmt.Println("Error connecting")
                     }
+                    */
                 }()
 
             // Received a heartbeat
@@ -226,8 +230,8 @@ func (nc *NetController) Run(newElevIdChan chan string, notifyCommChan chan bool
                         return
                     }
 
-                    fmt.Println("Message on orderChan: ", convData.Message)
-                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client: ", convData.Message))
+                    nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client"))
+                    orderChanCallback <- convData
 
                 }()
             }
