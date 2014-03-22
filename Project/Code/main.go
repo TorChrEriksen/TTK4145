@@ -184,7 +184,8 @@ func run() {
                                          TCPPort: config.PortTCP,
                                          UDPPort: config.PortUDP,
                                          BroadcastPort: config.PortBroadcast,
-                                         PacketSize: config.PacketSize}
+                                         PacketSize: config.PacketSize,
+                                         Timeout: TIMEOUT}
         netCtrl.Create(&appLogger)
         netCtrl.Run()
 

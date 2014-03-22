@@ -6,6 +6,7 @@ import (
     "./SocketServer"
     "./SocketClient"
     "./NetServices"
+    "./ClientCtrl"
     "./../DataStore"
     "./../logger"
     "fmt"
@@ -17,19 +18,19 @@ import (
 )
 
 type NetController struct {
-    // What if this is uninitialized when calling SendData
-    // eg. calling SendData before Create(), or something....
     Identifier string
     TCPPort int
     UDPPort int
     BroadcastPort int
     PacketSize int
+    DisableComm bool
+    Timeout time.Duration
     al *logger.AppLogger
     localIP string // TODO: change this to net.IP and do byte compare
     hostList []string //TODO : we are doing string compare, do it with bytes instead in some way
     tcpClients []SocketClient.SocketClient
     udpClients []SocketClient.SocketClient
-    clientList []DataStore.Client
+    clientList []ClientCtrl.ClientInfo
     broadcastChan chan DataStore.Broadcast_Message
     heartbeatChan chan DataStore.Heartbeat_Message
     orderChan chan []byte
@@ -48,19 +49,17 @@ func (nc *NetController) Create(a *logger.AppLogger) {
     var intErr int
     nc.localIP, intErr = NetServices.FindLocalIP()
     if intErr == 1 {
+        nc.DisableComm = false
         nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Local IP found: ", nc.localIP))
     } else {
-        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error finding local IP")
-        // TODO: We will ahve to disable the net ctrl when we have no valid local IP
-        // Enough for detecting that we have no connection?
-        // Or do we use the heartbeat for that as well, and just ignore the local IP?
-
+        nc.DisableComm = true
+        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, "Error finding local IP, disabling net communication")
     }
 
     nc.hostList = make([]string, 10)
     nc.tcpClients = make([]SocketClient.SocketClient, 10)
     nc.udpClients = make([]SocketClient.SocketClient, 10)
-    nc.clientList = make([]DataStore.Client, 10)
+    nc.clientList = make([]ClientCtrl.ClientInfo, 10)
 
     nc.broadcastChan = make(chan DataStore.Broadcast_Message)
     nc.heartbeatChan = make(chan DataStore.Heartbeat_Message)
@@ -140,7 +139,7 @@ func (nc *NetController) Run() {
         for {
             select {
             case bClient := <-nc.bcChan :
-                // TODO: when to stop broadcasting?
+                // TODO: when to stop broadcasting, never? :)
                 nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Sent ", bClient, " bytes."))
 
             // Received a broadcast, check if its a new elevator or old
@@ -158,6 +157,7 @@ func (nc *NetController) Run() {
                 // Check if we are connected to this computer
                 // Connect if not
                 // Need more logic here
+                // Or maybe its enough? What happens if the heartbeat is still running but we loose the TCP connection?
 
                     for _, host := range nc.hostList {
                         if strings.EqualFold(string(host), string(broadcastMessage.IP)) {
@@ -180,14 +180,19 @@ func (nc *NetController) Run() {
 
                 go func() {
                     for _, client := range nc.clientList {
-                        if strings.EqualFold(client.IP, heartbeat.IP) { //TODO: fix!
+                        if strings.EqualFold(client.GetIP(), heartbeat.IP) { //TODO: fix!
 //                     if bytes.Equal(client.IP, heartbeat.IP) {
                             nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of UDP client list: ", heartbeat.IP))
+
+                            // Reset timer ticks for this connection
+                            client.SetAlive()
                             return
                         }
                     }
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Appending to UDP client list: ", heartbeat.IP))
-                    nc.clientList = append(nc.clientList, DataStore.Client{IP : heartbeat.IP, Ticks : 0})
+                    newClient := ClientCtrl.ClientInfo{}
+                    newClient.Create(heartbeat.IP, nc.Timeout)
+                    nc.clientList = append(nc.clientList, newClient)
 
                 }()
 
@@ -222,10 +227,15 @@ func (nc *NetController) Run() {
 
 // TODO: Verify
 // TODO: Need to sync the data! 
+// Redo function to remove client when callback from Socket happens
 func (nc *NetController) validateConnections() {
-    for _, client := range nc.clientList {
+    for n, client := range nc.clientList {
+
+        // Client timed out, remove it from our list
+        if client.GetStatus() {
+            nc.clientList = append(nc.clientList[:n], nc.clientList[n+1])
+        }
 //        if client != nil { // TODO Verify that this works
-            client.Ticks = client.Ticks + 1
 //        }
     }
 }
@@ -246,6 +256,12 @@ func (nc *NetController) SendData(data DataStore.Order_Message) {
 func (nc *NetController) SendData_SingleRecepient(data DataStore.Order_Message) {
 
     // TODO: Send to single recepient
+
+    // Check if we are connected to the client
+        // print error message
+        // reconnect and resend message?
+
+    // Send message
 }
 
 func (nc *NetController) marshal(data DataStore.Order_Message) []byte {

@@ -41,7 +41,6 @@ func TerminateConn(conn net.UDPConn) int {
 }
 
 func SendData(conn net.UDPConn, a string) int {
-	//fmt.Println("SendData() (UDP)")
 	data := make([]byte, 4096)
     data = []byte(a)
 
@@ -63,8 +62,6 @@ func SendHeartbeat(conn *net.UDPConn, a string, quit chan bool, ch chan string) 
             ch <- "I was told to quit"
             return
         default :
-//            for _, c := range conn {
-//                if c != nil {
             if conn != nil {
                 _, err := conn.Write(data)
                 if err != nil {
@@ -72,10 +69,7 @@ func SendHeartbeat(conn *net.UDPConn, a string, quit chan bool, ch chan string) 
                 }
                 ch <- "Sent a heartbeat"
             }
-//            }
             time.Sleep(time.Second)
         }
     }
 }
-
-
