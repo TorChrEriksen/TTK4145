@@ -226,7 +226,7 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderChanCallback chan Da
                 go func() {
                     convData, errInt := nc.unmarshal(orderMsg)
                     if errInt == -1 {
-                        //nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Cannot read message, somrthing went wrong unmarshaling."))
+                        nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Cannot read message, somrthing went wrong unmarshaling."))
                         return
                     }
 
