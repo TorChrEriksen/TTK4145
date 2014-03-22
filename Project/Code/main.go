@@ -131,9 +131,9 @@ func notifySecondaryAlive(p *os.Process, ch chan bool) {
 
 func writePidToFile(filename string) {
     // Remove file if it already exists
-    os.Remove(filename)
+    // os.Remove(filename)
 
-    file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+    file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
     if err != nil {
         fmt.Println("Error creating pid file: ", err.Error())
         os.Exit(0)
@@ -223,6 +223,7 @@ func run() {
                     _ = kill
                     fmt.Println("Cleaning up before exiting")
                     netCtrl.Exit()
+//                    elevLogic.Exit()
                     fmt.Println("Done cleaning up, exiting...")
                     os.Exit(0)
 

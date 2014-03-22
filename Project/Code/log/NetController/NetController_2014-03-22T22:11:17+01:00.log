@@ -1,0 +1,18 @@
+2014/03/22 22:11:17.549422 logger.go:87: ========== New log ==========
+2014/03/22 22:11:17.549600 logger.go:87: Local IP found: 129.241.187.140
+2014/03/22 22:11:17.550228 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 22:11:17.550334 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 22:11:22.550365 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 22:11:22.550435 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 22:11:27.550470 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 22:11:27.550528 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 22:11:32.550560 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 22:11:32.550604 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 22:11:37.550659 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 22:11:37.550699 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 22:11:42.550769 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 22:11:42.550828 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 22:11:47.550880 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 22:11:47.550935 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140
+2014/03/22 22:11:52.550988 logger.go:87: Sent a heartbeat with 48 bytes.
+2014/03/22 22:11:52.551074 logger.go:87: Ignoring broadcast from local IP: 129.241.187.140

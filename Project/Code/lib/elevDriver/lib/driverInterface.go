@@ -46,6 +46,8 @@ func SetButtonLamp(direction string, floor int, value int){
   }else if direction == "DOWN"{
       fmt.Println("goin' down")
       C.elev_set_button_lamp(C.BUTTON_CALL_DOWN, C.int(floor), C.int(value))
+  }else if direction == "INT"{
+      C.elev_set_button_lamp(C.BUTTON_COMMAND, C.int(floor), C.int(value))
   }else{
       //Trying to kick the shit out of software in case of wrong input
       fmt.Println("Panicking")
