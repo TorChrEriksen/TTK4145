@@ -140,7 +140,7 @@ func (nc *NetController) connectUDP(udpAddr string) int {
     return udpErr
 }
 
-func (nc *NetController) Run(notifyCommChan chan bool, orderChanCallback chan DataStore.Order_Message, processGOLChan chan string) {
+func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan DataStore.Order_Message, processGOLChan chan string, extButtonCallbackChan chan DataStore.ExtButtons_Message, globalOrderListCallbackChan chan DataStore.Received_OrderData) {
 
     UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort, nc.PacketSize)
     UDP_BroadcastClient.Run(nc.bcChan, nc.BroadcastPort)
@@ -209,18 +209,19 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderChanCallback chan Da
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client"))
 
                     m := convData.(map[string]interface{})
-                    _ = m
-/*
+
                     for k, v := range m {
-                        switch vv := v.(type) {
-                        case DataStore.Order_Message:
-                            orderChanCallback <-vv(m)
+                        switch v.(type) {
+                        case DataStore.Order_Message :
+                            orderCallbackChan <- v.(DataStore.Order_Message)
+                        case DataStore.ExtButtons_Message :
+                            extButtonCallbackChan <-v.(DataStore.ExtButtons_Message)
+                        case DataStore.Received_OrderData :
+                            globalOrderListCallbackChan <- v.(DataStore.Received_OrderData)
                         default:
                             fmt.Println(k, " is of type i dont know how to handle", v)
                         }
                     }
-                    //orderChanCallback <-convData
-                    */
                 }()
             }
         }
@@ -362,11 +363,34 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
     }
 }
 
+func (nc *NetController) SendGlobalOrderList(data DataStore.Received_OrderData) {
+    convData := nc.marshal(data)
+    if convData != nil {
+        for _, client := range nc.tcpClients {
+            if client.GetTCPConn() != nil {
+                client.SendData(convData)
+            }
+        }
+        return
+    }
+    nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while sending data: *NetController.SendGlobalOrderList()."))
+}
+
+func (nc *NetController) SendLights(data DataStore.ExtButtons_Message) {
+    convData := nc.marshal(data)
+    if convData != nil {
+        for _, client := range nc.tcpClients {
+            if client.GetTCPConn() != nil {
+                client.SendData(convData)
+            }
+        }
+        return
+    }
+    nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while sending data: *NetController.SendLights()."))
+}
+
 // Send data to all available elevators
 func (nc *NetController) SendData(data DataStore.Order_Message) {
-
-    fmt.Println(nc.tcpClients)
-
     convData := nc.marshal(data)
     if convData != nil {
         for _, client := range nc.tcpClients {
@@ -403,7 +427,7 @@ func (nc *NetController) SendData_SingleRecepient(data DataStore.Order_Message, 
 }
 
 // Serialize data to send
-func (nc *NetController) marshal(data DataStore.Order_Message) []byte {
+func (nc *NetController) marshal(data interface{}) []byte {
     convData, err := json.Marshal(data)
     if err != nil {
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while marshalling: ", err.Error()))

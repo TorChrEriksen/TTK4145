@@ -181,24 +181,29 @@ func run() {
     
     localIP := netCtrl.Create(&appLogger)
 
-    orderChanCallback := make(chan DataStore.Order_Message)
+    orderCallbackChan := make(chan DataStore.Order_Message)
     notifyCommChan := make(chan bool)
     processGOLChan := make(chan string)
+    extButtonCallbackChan := make(chan DataStore.ExtButtons_Message)
+    globalOrderListCallbackChan := make(chan DataStore.Received_OrderData)
 
     // Start elev logic part
     sendOrderToOne := make(chan DataStore.Order_Message)
     sendOrderToAll := make(chan DataStore.Order_Message)
     receivedOrder := make(chan DataStore.Order_Message)
     commStatusChan := make(chan bool)
-    setLightsChan := make(chan DataStore.ExtButtons_Message)
+    sendLightsChan := make(chan DataStore.ExtButtons_Message)
+    recvLightsChan := make(chan DataStore.ExtButtons_Message)
+    sendGlobalChan := make(chan DataStore.Received_OrderData)
+    recvGlobalChan := make(chan DataStore.Received_OrderData)
 
     elevLogic := elevDriver.OrderDriver{N_FLOOR: config.Floors}
     elevLogic.Create()
     // End elev logic part
 
     // Fire up goroutines
-    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan, setLightsChan, processGOLChan) // TODO use processGOLChan
-    go netCtrl.Run(notifyCommChan, orderChanCallback, processGOLChan)
+    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan, sendLightsChan, recvLightsChan, sendGlobalChan, recvGlobalChan, processGOLChan) // TODO use processGOLChan
+    go netCtrl.Run(notifyCommChan, orderCallbackChan, processGOLChan, extButtonCallbackChan, globalOrderListCallbackChan)
 
     // Application Control
     go func() {
@@ -230,16 +235,34 @@ func run() {
                     fmt.Println("Send To All: ", sendToAll)
                 }()
 
-            case recvOrder := <-orderChanCallback:
+            case recvOrder := <-orderCallbackChan:
                 go func() {
                     fmt.Println("Received: ", recvOrder)
                     receivedOrder <- recvOrder
                 }()
 
-            case setLights := <-setLightsChan:
+            case sendLights := <-sendLightsChan:
                 go func() {
-                    fmt.Println("Set Lights: ", setLights)
-                    // TODO
+                    fmt.Println("Send Lights: ", sendLights)
+                    netCtrl.SendLights(sendLights)
+                }()
+                
+            case recvLights := <-extButtonCallbackChan:
+                go func() {
+                    fmt.Println("Recv Lights: ", recvLights)
+                    recvLightsChan <- recvLights 
+                }()
+        
+            case sendGlobalOrderList := <- sendGlobalChan:
+                go func() {
+                    fmt.Println("Send Global Order List: ", sendGlobalOrderList)
+                    netCtrl.SendGlobalOrderList(sendGlobalOrderList)
+                }()
+
+            case recvGlobalOrderList := <-globalOrderListCallbackChan:
+                go func() {
+                    fmt.Println("Recv Global Order List: ", recvGlobalOrderList)
+                    recvGlobalChan <- recvGlobalOrderList
                 }()
             }
         }
