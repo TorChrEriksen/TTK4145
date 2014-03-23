@@ -420,7 +420,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 				go func(){
 					// OriginIP is set in Application Control 
 				
-					min := DataStore.Order_Message{Floor: acosting.Floor, Dir: acosting.Dir, RecipientIP: "", Cost: cost(od.orderList, od.afterOrders, od.lastFloor, od.status, acosting.Floor, acosting.Dir), What: "COST_REQ"}
+					min := DataStore.Order_Message{Floor: acosting.Floor, Dir: acosting.Dir, RecipientIP: od.myIP, Cost: cost(od.orderList, od.afterOrders, od.lastFloor, od.status, acosting.Floor, acosting.Dir), What: "COST_REQ"}
 					req := min
 					if !contains(acosting, od.orderList) && !od.commDisabled {
 
