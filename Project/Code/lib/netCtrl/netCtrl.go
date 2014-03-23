@@ -219,6 +219,7 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                     switch newId {
                     // Order message
                     case 0:
+                        fmt.Println("Im inside here now")
                         var result DataStore.Order_Message
                         for k, v := range m {
                             switch k {
@@ -236,6 +237,8 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                                 result.Cost = v.(float64)
                             case "What" :
                                 result.What = v.(string)
+                            default :
+                                fmt.Println(k, " | ", v)
                             }
                         }
                         fmt.Println("Im here")
