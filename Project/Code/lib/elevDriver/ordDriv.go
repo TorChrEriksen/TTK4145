@@ -235,15 +235,17 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 	if od.currentFloor != 1 && (len(orderList)+len(afterOrders)) == 0{
 		state("DOWN")
 		for od.currentFloor != 1 {
-			time.Sleep(time.Millisecond * 200)
 			if od.currentFloor != 0 {
+				time.Sleep(time.Millisecond * 200)
 			}
 		}
 		state("STOP")
 		od.status = "IDLE"
-	} else {
+	} else if od.currentFloor==0{
 		state("DOWN")
 		for od.currentFloor !=0{time.Sleep(time.Millisecond*250)}
+		updateCurrentOrder <- true
+	}else {
 		updateCurrentOrder <- true
 	}
 
@@ -414,7 +416,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 				go func(){
 					// OriginIP is set in Application Control 
 				
-					min := DataStore.Order_Message{Floor: acosting.Floor, Dir: acosting.Dir, RecipientIP: "", Cost: cost(od.orderList, od.afterOrders, od.lastFloor, od.status, extOrder.Floor, extOrder.Dir), What: "COST_REQ"}
+					min := DataStore.Order_Message{Floor: acosting.Floor, Dir: acosting.Dir, RecipientIP: "", Cost: cost(od.orderList, od.afterOrders, od.lastFloor, od.status, acosting.Floor, acosting.Dir), What: "COST_REQ"}
 					req = min
 					if !contains(acosting, od.orderList) && !od.commDisabled {
 
@@ -447,22 +449,27 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 			case input := <-recieve:
 				go func() {
 					if input.What == "COST_REQ" {
+						fmt.Println("Getting a cost request")
 						toOne <- DataStore.Order_Message{Floor: input.Floor, Dir: input.Dir, RecipientIP: input.OriginIP, OriginIP: input.RecipientIP, Cost: cost(od.orderList, od.afterOrders, od.lastFloor, od.status, input.Floor, input.Dir), What: "COST_RES"}
 					} else if input.What == "COST_RES" {
+						fmt.Println("Getting a cost respons")
 						costResponsInternal <- input
 					} else if input.What == "O_REQ" {
+						fmt.Println(("Getting an Order from OUTSIDE"))
 						ordersChann <- order{input.Floor, input.Dir, false}
 					}
 				}()
 
 			case lit := <-recvLights:
 				go func() {
+					fmt.Println("Oh God we have to set lights")
 					driverInterface.SetButtonLamp(lit.Dir, lit.Floor-1, lit.Value)
 				}()
 
 // se om vi skal sette den utenfor, og bruke buffer på chan for å unngå forvirring i ordre.
 			case ipDown := <-processGOL:
 				go func() {
+					fmt.Println("OH NO! A computer is down")
 					for _,i in range od.GOL[ipDown].OrderList{
 						ordersAcosted <- order{Floor:i.Floor, Dir:i.Dir, Clear: false}
 					}
