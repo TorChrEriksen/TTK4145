@@ -233,7 +233,27 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 			case statusChanged := <-commDisabled:
 				od.commDisabled = statusChanged
 				fmt.Println("Comm status changed to: ", statusChanged, " | ", od.commDisabled) //TODO remove
+			
+			
+			case a := <-updateCurrentOrder:
+				go func() {
+					a = a
+					if (len(od.orderList) == 0) && (len(od.afterOrders) == 0) {
+						state("STOP")
+						updatePos <- order{-1, "NO", false}
+					} else if len(od.orderList) == 0 {
+						ordersChann <- order{-1, "NO", false}
+
+					} else if (od.status == "IDLE" && od.lastFloor<3) || (od.status == "UP") {
+						sort.Sort(ByFloor(od.afterOrders))
+						updatePos <- od.orderList[0]
+					} else if (od.status == "IDLE" && od.lastFloor>=3) || (od.status == "DOWN") {
+						updatePos <- od.orderList[len(od.orderList)-1]
+					}
+				}()
+			
 			}
+			
 		}
 	}()
 
@@ -268,22 +288,6 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 		for {
 			select {
 
-			case a := <-updateCurrentOrder:
-				go func() {
-					a = a
-					if (len(od.orderList) == 0) && (len(od.afterOrders) == 0) {
-						state("STOP")
-						updatePos <- order{-1, "NO", false}
-					} else if len(od.orderList) == 0 {
-						ordersChann <- order{-1, "NO", false}
-
-					} else if (od.status == "IDLE" && od.lastFloor<3) || (od.status == "UP") {
-						sort.Sort(ByFloor(od.afterOrders))
-						updatePos <- od.orderList[0]
-					} else if (od.status == "IDLE" && od.lastFloor>=3) || (od.status == "DOWN") {
-						updatePos <- od.orderList[len(od.orderList)-1]
-					}
-				}()
 
 			case buttonSignal := <-intButtonChannel:
 				go func() {
