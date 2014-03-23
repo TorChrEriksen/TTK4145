@@ -10,9 +10,10 @@ import "C"
 import (
     "fmt"
     "time"
+    "math"
 )
 //Number of floors
-const FLOORS int = 4
+//const FLOORS int = 4
 
 // Test function for elevator
 func Test_Run() {
@@ -30,9 +31,9 @@ func Init(){
   C.elev_init()
 }
 
-func SetSpeed(speed C.int){
+func SetSpeed(speed int){
   //fmt.Println("Attmepting to set speed to ", speed)
-  C.elev_set_speed(speed)
+  C.elev_set_speed(C.int(speed))
 }
 
 func StopElevator(){
@@ -41,13 +42,15 @@ func StopElevator(){
 
 //TODO Consider using const UP = 1 instead of strings
 //func SetButtonLamp(btn C.elev_button_type_t,floor C.int, value C.int){
-func SetButtonLamp(direction string,floor C.int, value C.int){
+func SetButtonLamp(direction string,floor int, value int){
   if direction == "UP"{
       //fmt.Println("goin' up") //Debug
-      C.elev_set_button_lamp(C.BUTTON_CALL_UP, floor, value)
+      C.elev_set_button_lamp(C.BUTTON_CALL_UP, C.int(floor), C.int(value))
   }else if direction == "DOWN"{
       //fmt.Println("goin' down") //Debug
-      C.elev_set_button_lamp(C.BUTTON_CALL_DOWN, floor, value)
+      C.elev_set_button_lamp(C.BUTTON_CALL_DOWN, C.int(floor), C.int(value))
+  }else if direction == "INT"{
+  		C.elev_set_button_lamp(C.BUTTON_COMMAND, C.int(floor), C.int(value))
   }else{
       //Trying to kick the shit out of software in case of wrong input
       fmt.Println("Panicking")
@@ -55,16 +58,16 @@ func SetButtonLamp(direction string,floor C.int, value C.int){
   } 
 }
 
-func SetFloorLamp(floor C.int){
-   C.elev_set_floor_indicator(floor)
+func SetFloorLamp(floor int){
+   C.elev_set_floor_indicator(C.int(floor))
 }
 
-func SetStopLamp(value C.int){
-  C.elev_set_stop_lamp(value)
+func SetStopLamp(value int){
+  C.elev_set_stop_lamp(C.int(value))
 }
 
-func SetDoorLamp(value C.int){
-  C.elev_set_door_open_lamp(value)  
+func SetDoorLamp(value int){
+  C.elev_set_door_open_lamp(C.int(value))  
 }
 
 //OUTPUT from controller
@@ -81,7 +84,6 @@ func GetObstructionSignal() int{
 }
 
 func Create(intBtChan chan int, floorChan chan int, stopChan chan int, extBtChan chan int) {
-	fmt.Println("driverinterface create!")
 	go createIntButtonListener(intBtChan)
     go createFloorListener(floorChan)
     go createStopListener(stopChan)
@@ -90,7 +92,6 @@ func Create(intBtChan chan int, floorChan chan int, stopChan chan int, extBtChan
 
 const INT_BTN_BASE int = 11
 func createIntButtonListener(ch chan int) {
-	fmt.Println("createIntButtonListener")
 	var FloorCommands = [FLOORS]C.int{C.FLOOR_COMMAND1, C.FLOOR_COMMAND2, C.FLOOR_COMMAND3, C.FLOOR_COMMAND4}
     //TODO think about fault tolerance here    
     var prevStateIntBtn [FLOORS]int
@@ -157,14 +158,22 @@ func createStopListener(ch chan int){
     }
 }
 
-const EXT_BTN_BASE int = 50
+const EXT_BTN_BASE int = 40
 func createExtButtonListener(ch chan int){
-    var FloorCommands = [FLOORS+2]C.int{C.FLOOR_UP1, C.FLOOR_UP2, C.FLOOR_DOWN2, C.FLOOR_UP3, C.FLOOR_DOWN3, C.FLOOR_DOWN4}
-    var prevStateExtBtn [FLOORS+2]int
-    var StateExtBtn [FLOORS+2]int
+	var FloorChans [FLOORS*2]int
+    var FloorCommands = [FLOORS*2]C.int{0, C.FLOOR_UP1, C.FLOOR_DOWN2, C.FLOOR_UP2, C.FLOOR_DOWN3, C.FLOOR_UP3, C.FLOOR_DOWN4, 0}
+    var prevStateExtBtn [FLOORS*2]int
+    var StateExtBtn [FLOORS*2]int
+    step:= -10
     for i := range StateExtBtn{
     	prevStateExtBtn[i] = 0
     	StateExtBtn[i] = 0
+    	if math.Mod(float64(i),2)==0{
+    		step+=10
+    		FloorChans[i] = EXT_BTN_BASE+step
+    	}else{
+    		FloorChans[i] = EXT_BTN_BASE+step+1
+    	}
     }
     
     for{
@@ -174,7 +183,7 @@ func createExtButtonListener(ch chan int){
     		if StateExtBtn[i] != prevStateExtBtn[i]{
     			prevStateExtBtn[i] = StateExtBtn[i]
     			if StateExtBtn[i] == 1{
-    				ch <- EXT_BTN_BASE + i
+    				ch <- FloorChans[i]
     			}
     		}
     	}

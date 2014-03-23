@@ -10,9 +10,10 @@ import "C"
 import (
     "fmt"
     "time"
+    "math"
 )
 //Number of floors
-const FLOORS int = 4
+//const FLOORS int = 4
 
 // Test function for elevator
 func Test_Run() {
@@ -48,6 +49,8 @@ func SetButtonLamp(direction string,floor int, value int){
   }else if direction == "DOWN"{
       //fmt.Println("goin' down") //Debug
       C.elev_set_button_lamp(C.BUTTON_CALL_DOWN, C.int(floor), C.int(value))
+  }else if direction == "INT"{
+  		C.elev_set_button_lamp(C.BUTTON_COMMAND, C.int(floor), C.int(value))
   }else{
       //Trying to kick the shit out of software in case of wrong input
       fmt.Println("Panicking")
@@ -155,14 +158,22 @@ func createStopListener(ch chan int){
     }
 }
 
-const EXT_BTN_BASE int = 50
+const EXT_BTN_BASE int = 40
 func createExtButtonListener(ch chan int){
-    var FloorCommands = [FLOORS+2]C.int{C.FLOOR_UP1, C.FLOOR_UP2, C.FLOOR_DOWN2, C.FLOOR_UP3, C.FLOOR_DOWN3, C.FLOOR_DOWN4}
-    var prevStateExtBtn [FLOORS+2]int
-    var StateExtBtn [FLOORS+2]int
+	var FloorChans [FLOORS*2]int
+    var FloorCommands = [FLOORS*2]C.int{0, C.FLOOR_UP1, C.FLOOR_DOWN2, C.FLOOR_UP2, C.FLOOR_DOWN3, C.FLOOR_UP3, C.FLOOR_DOWN4, 0}
+    var prevStateExtBtn [FLOORS*2]int
+    var StateExtBtn [FLOORS*2]int
+    step:= -10
     for i := range StateExtBtn{
     	prevStateExtBtn[i] = 0
     	StateExtBtn[i] = 0
+    	if math.Mod(float64(i),2)==0{
+    		step+=10
+    		FloorChans[i] = EXT_BTN_BASE+step
+    	}else{
+    		FloorChans[i] = EXT_BTN_BASE+step+1
+    	}
     }
     
     for{
@@ -172,7 +183,7 @@ func createExtButtonListener(ch chan int){
     		if StateExtBtn[i] != prevStateExtBtn[i]{
     			prevStateExtBtn[i] = StateExtBtn[i]
     			if StateExtBtn[i] == 1{
-    				ch <- EXT_BTN_BASE + i
+    				ch <- FloorChans[i]
     			}
     		}
     	}
