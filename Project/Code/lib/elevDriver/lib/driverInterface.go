@@ -13,7 +13,7 @@ import (
     "math"
 )
 //Number of floors
-//const FLOORS int = 4
+const FLOORS int = 4
 
 // Test function for elevator
 func Test_Run() {
