@@ -390,6 +390,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 
 				// TODO Queue push?
 
+
 				go func() {
 
 					// TODO QUeue pop and loop untill queue empty?
@@ -442,7 +443,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 
 						} else {
 //							min.What min.RecipientIP, min.OriginIP = "O_REQ", min.OriginIP, min.RecipientIP
-							toOne <- DataStore.Order_Message{Floor: min.Floor, Dir: min.Dir, RecipientIP: min.OriginIP, What: min.What}
+							toOne <- DataStore.Order_Message{Floor: min.Floor, Dir: min.Dir, RecipientIP: min.OriginIP, What: "O_REQ"}
 
 						}
 					} else if od.commDisabled {
@@ -453,7 +454,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 			case input := <-recieve:
 				go func() {
 					if input.What == "COST_REQ" {
-						fmt.Println("Getting a cost request")
+						fmt.Println("Getting a cost request", input)
 						toOne <- DataStore.Order_Message{Floor: input.Floor, Dir: input.Dir, RecipientIP: input.OriginIP, OriginIP: input.RecipientIP, Cost: cost(od.orderList, od.afterOrders, od.lastFloor, od.status, input.Floor, input.Dir), What: "COST_RES"}
 					} else if input.What == "COST_RES" {
 						fmt.Println("Getting a cost respons")
