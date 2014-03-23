@@ -285,7 +285,7 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 
 			case new_order := <-ordersChann:
 				go func() {
-					test := order{-1, "NO", false}
+//					test := order{-1, "NO", false}
 					if len(od.afterOrders) != 0 && len(od.orderList) == 0 {
 
 						od.orderList = od.afterOrders
@@ -483,12 +483,14 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 			case ipDown := <-processGOL:
 				go func() {
 					//					fmt.Println("OH NO! A computer is down")s
-					if commDisabled{
+					if od.commDisabled{
 						for _, i := range od.GOL[ipDown] {
 							ordersChann <- order{Floor: i.Floor, Dir: i.Dir, Clear: false}
+						}	 
 					} else {
 						for _, i := range od.GOL[ipDown] {
 							ordersAcosted <- order{Floor: i.Floor, Dir: i.Dir, Clear: false}
+						}
 					}
 				}()
 
