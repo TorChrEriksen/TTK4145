@@ -212,6 +212,7 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                     //m := convData.(map[string]interface{})
 
                     fmt.Println(reflect.TypeOf(convData))
+                    fmt.Println(convData.(DataStore.Order_Message))
 
                     switch convData.(type) {
                         case DataStore.Order_Message :
