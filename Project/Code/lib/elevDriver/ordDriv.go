@@ -480,10 +480,10 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 
 			case ipDown := <-processGOL:
 				go func() {
-					if commDisabled{
+					if od.commDisabled{
 						for _, i := range od.GOL[ipDown] {
 							ordersChann <- order{Floor: i.Floor, Dir: i.Dir, Clear: false}
-
+						}
 					} else {
 						for _, i := range od.GOL[ipDown] {
 							ordersAcosted <- order{Floor: i.Floor, Dir: i.Dir, Clear: false}
