@@ -103,6 +103,7 @@ func (sc *SocketClient) waitForInput() {
         if sc.tcpConn != nil {
             n := TCPConn.SendData(sc.tcpConn, order)
             _ = n
+            time.Sleep(time.Millisecond * 10)
         }
     }
 }
