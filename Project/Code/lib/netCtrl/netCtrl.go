@@ -210,18 +210,17 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
 
                     m := convData.(map[string]interface{})
 
-                    id := m["MessageID"].(float64)
-                    newId := int(id)
+                    id := int(m["MessageID"].(float64))
 
-                    if newId == 1 {
+                    if id == 1 {
                         fmt.Println("Order message")
                         var result DataStore.Order_Message
                         for k, v := range m {
                             switch k {
                             case "MessageID" :
-                                result.MessageID = v.(int)
+                                result.MessageID = int(v.(float64))
                             case "Floor" :
-                                result.Floor = v.(int)
+                                result.Floor = int(v.(float64))
                             case "Dir" :
                                 result.Dir = v.(string)
                             case "RecipientIP" :
@@ -240,19 +239,19 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                         fmt.Println("Result: ", result)
                         orderCallbackChan <- result
 
-                    } else if newId == 2 {
+                    } else if id == 2 {
                         fmt.Println("Lights message")
                         var result DataStore.ExtButtons_Message
                         for k,v := range m {
                             switch k {
                             case "MessageID" :
-                                result.MessageID = v.(int)
+                                result.MessageID = int(v.(float64))
                             case "Floor" :
-                                result.Floor = v.(int)
+                                result.Floor = int(v.(float64))
                             case "Dir" :
                                 result.Dir = v.(string)
                             case "Value" :
-                                result.Value = v.(int)
+                                result.Value = int(v.(float64))
                             default :
                                 fmt.Println(k, " | ", v)
                             }
@@ -261,7 +260,7 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                         fmt.Println("Result: ", result)
                         extButtonCallbackChan <- result
 
-                    } else if newId == 3 {
+                    } else if id == 3 {
                         fmt.Println("Global order queue message")
 
                     } else {
