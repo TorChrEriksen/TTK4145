@@ -231,11 +231,8 @@ func run() {
                 go func() {
                     time.Sleep(time.Millisecond * 250)
                     if mastah_question_mark {
-                        fmt.Println("We are the master, processing the GOL")
                         doProcessGOLChan <- clientTimedOut
-                    } else {
-                        fmt.Println("We are not the master, someone else is processing the GOL")
-                    }
+                    } 
                 }()
 
             case commStatusChanged := <-notifyCommChan :
@@ -247,7 +244,6 @@ func run() {
                 go func() {
                     sendToOne.MessageID = 1
                     netCtrl.SendData_SingleRecepient(sendToOne, sendToOne.RecipientIP)
-                    fmt.Println("Send to single Recepient: ", sendToOne)
                 }()
 
             case sendToAll := <-sendOrderToAll:
@@ -255,38 +251,32 @@ func run() {
                     sendToAll.MessageID = 1
                     sendToAll.OriginIP = localIP // Validate
                     netCtrl.SendData(sendToAll)
-                    fmt.Println("Send To All: ", sendToAll)
                 }()
 
             case recvOrder := <-orderCallbackChan:
                 go func() {
-                    fmt.Println("Received: ", recvOrder)
                     receivedOrder <- recvOrder
                 }()
 
             case sendLights := <-sendLightsChan:
                 go func() {
                     sendLights.MessageID = 2
-                    fmt.Println("Send Lights: ", sendLights)
                     netCtrl.SendLights(sendLights)
                 }()
                 
             case recvLights := <-extButtonCallbackChan:
                 go func() {
-                    fmt.Println("Recv Lights: ", recvLights)
                     recvLightsChan <- recvLights 
                 }()
         
             case sendGlobalOrderList := <- sendGlobalChan:
                 go func() {
                     sendGlobalOrderList.MessageID = 3
-                    fmt.Println("Send Global Order List: ", sendGlobalOrderList)
                     netCtrl.SendGlobalOrderList(sendGlobalOrderList)
                 }()
 
             case recvGlobalOrderList := <-globalOrderListCallbackChan:
                 go func() {
-                    fmt.Println("Recv Global Order List: ", recvGlobalOrderList)
                     recvGlobalChan <- recvGlobalOrderList
                 }()
             }
