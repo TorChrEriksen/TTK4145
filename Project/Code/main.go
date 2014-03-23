@@ -248,7 +248,7 @@ func run() {
                 go func() {
                     sendLights.MessageID = 2
                     fmt.Println("Send Lights: ", sendLights)
-                    netCtrl.SendLights(sendLights)
+                    //netCtrl.SendLights(sendLights)
                 }()
                 
             case recvLights := <-extButtonCallbackChan:
