@@ -14,6 +14,7 @@ import (
     "strings"
     "encoding/json"
     "net"
+    "reflect"
 )
 
 type NetController struct {
@@ -209,6 +210,8 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client"))
 
                     //m := convData.(map[string]interface{})
+
+                    fmt.Println(reflect.TypeOf(convData))
 
                     switch convData.(type) {
                         case DataStore.Order_Message :
