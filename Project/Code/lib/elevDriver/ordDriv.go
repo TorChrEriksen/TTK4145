@@ -7,6 +7,8 @@ import (
 	"math"
 	"time"
 	"sort"
+    "os"
+    "io/ioutil"
 	"encoding/json"
 )
 
@@ -29,8 +31,6 @@ type order struct{
 	Dir string
 	Clear bool
 }
-
-
 
 func (od *OrderDriver) Create() {
 	od.currentFloor = 0
@@ -116,65 +116,56 @@ func cost(orderList []order, afterOrderList []order, currPos int, dir_now string
 	return -1.0
 }
 
-func marshal(data od.orderList) []byte {
-    convData, err := json.Marshal(data)
-    if err != nil {
-        return nil
-    }
-    return convData
-}
+func writeOrdersToFile(filename string, data []order) {
 
-// Unserialize data received
-func unmarshal(data []byte) (od.orderList, int) {
-    convData := od.orderList{}
-    err := json.Unmarshal(data, &convData)
+    b, err := json.Marshal(data)
     if err != nil {
-        return convData, -1
+        fmt.Println("ElevLogic: error while marshalling ", err.Error())
+        return
     }
-    return convData, 1
-}
-
-func writeOrdersToFile(filename string, data od.orderList, name string) {
 
     file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
-
     if err != nil {
-        fmt.Println("Error creating ",name," pid file: ", err.Error())
-        os.Exit(0)
+        fmt.Println("ElevLogic: error while creating file: ", err.Error())
+        return
     }
 
-    convData = marshal(data)
-    _, err = file.Write([]byte(convData))
-
+    _, err = file.Write(b)
     if err != nil {
-        fmt.Println("Error writing ",name," to file: ", err.Error())
-        os.Exit(0)
+        fmt.Println("ElevLogic: error writing to file: ", err.Error())
+        return
     }
-
     defer file.Close()
 }
- func readOrdersFromFile(filename string) od.orderList{
+func readOrdersFromFile(filename string) ([]order, int) {
 
- 	file, err := os.Open(filename)
-    	if err != nil {
-        	fmt.Println("There was an error opening ",filename)
-	    } else {
-            reader := bufio.NewReader(filename)
-            val, _ := reader.ReadString('\n')
-            val = strings.Trim(val, "\n")
-            pid, err := strconv.Atoi(val)
+    ordrList := make([]order, 0)
+    file, _ := os.Open(filename)
+    if file != nil {
 
-            if err != nil {
-                fmt.Println("There was an error converting the data to an int")
-            } else {
-                obsChan <- pid
-            }
+        b, err := ioutil.ReadFile(filename)
+        if err != nil {
+            fmt.Println("ElevLogic: error while reading from file: ", err.Error())
+            defer file.Close()
+            return ordrList, -1
         }
+
+        json.Unmarshal(b, &ordrList)
+        fmt.Println(ordrList)
         defer file.Close()
- }
+        return ordrList, 1
+    }
+    defer file.Close()
+    return ordrList, -1
+}
 
+// Clean exit, remove file
+func (od *OrderDriver) Exit() {
+    // TODO
+}
 
-func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataStore.Order_Message, recieve chan DataStore.Order_Message, commStatus chan bool, setLights chan DataStore.ExtButtons_Message){
+// TODO implement processGOL
+func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataStore.Order_Message, recieve chan DataStore.Order_Message, commStatus chan bool, setLights chan DataStore.ExtButtons_Message, processGOL chan string){
 	driverInterface.Init()
 	
 	intButtonChannel 	:= make(chan int)
@@ -321,7 +312,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 							state("STOP")
 							driverInterface.SetButtonLamp(od.currentOrder.Dir, od.currentFloor - 1, 0)
 							if od.currentOrder.Dir!="INT"{
-								setLights <- DataStore.ExtButton_Message(Floor:od.currentFloor - 1, Dir:od.currentOrder.Dir, Value:0)
+								setLights <- DataStore.ExtButtons_Message{Floor: od.currentFloor - 1, Dir: od.currentOrder.Dir, Value: 0}
 							}
 							state("OPEN")	
 //							fmt.Println("GOT TO FLOOR")
@@ -364,7 +355,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 							driverInterface.SetButtonLamp("UP", ((extSig - (extSig % 2) - 30) / 10)-1, 1 ) //TODO make nicer. handle floors better
 							//fmt.Println("ExtOrder: ", extOrder)
 						}
-						setLights <- DataStore.ExtButton_Message(Floor:extOrder.Floor, Dir:extOrder.Dir, Value:1)
+						setLights <- DataStore.ExtButtons_Message{Floor: extOrder.Floor, Dir: extOrder.Dir, Value: 1}
 //						fmt.Println(cost(od.orderList, od.afterOrders, od.lastFloor, od.status, extOrder.floor, extOrder.dir))
 				//		ordersChann <- extOrder
 					//}()

@@ -29,6 +29,6 @@ type Received_OrderData struct {
 // Message describes the state of the external buttons
 type ExtButtons_Message struct {
 	Floor int
-	Dir   int
+	Dir   string
 	Value int
 }

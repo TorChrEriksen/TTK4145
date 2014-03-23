@@ -190,13 +190,14 @@ func run() {
     sendOrderToAll := make(chan DataStore.Order_Message)
     receivedOrder := make(chan DataStore.Order_Message)
     commStatusChan := make(chan bool)
+    setLightsChan := make(chan DataStore.ExtButtons_Message)
 
     elevLogic := elevDriver.OrderDriver{N_FLOOR: config.Floors}
     elevLogic.Create()
     // End elev logic part
 
     // Fire up goroutines
-    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan) // TODO use processGOLChan
+    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan, setLightsChan, processGOLChan) // TODO use processGOLChan
     go netCtrl.Run(notifyCommChan, orderChanCallback, processGOLChan)
 
     // Application Control
@@ -207,7 +208,7 @@ func run() {
                 _ = kill
                 fmt.Println("Cleaning up before exiting")
                 netCtrl.Exit()
-//                    elevLogic.Exit()
+                elevLogic.Exit()
                 fmt.Println("Done cleaning up, exiting...")
                 os.Exit(0)
 
@@ -233,6 +234,12 @@ func run() {
                 go func() {
                     fmt.Println("Received: ", recvOrder)
                     receivedOrder <- recvOrder
+                }()
+
+            case setLights := <-setLightsChan:
+                go func() {
+                    fmt.Println("Set Lights: ", setLights)
+                    // TODO
                 }()
             }
         }

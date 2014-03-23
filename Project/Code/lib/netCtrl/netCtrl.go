@@ -197,7 +197,7 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderChanCallback chan Da
                     nc.clientList = append(nc.clientList, newClient)
                 }()
 
-            // Received an order
+            // Received data
             case orderMsg := <-nc.orderChan :
                 go func() {
                     convData, errInt := nc.unmarshal(orderMsg)
@@ -207,8 +207,20 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderChanCallback chan Da
                     }
 
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client"))
-                    orderChanCallback <-convData
 
+                    m := convData.(map[string]interface{})
+                    _ = m
+/*
+                    for k, v := range m {
+                        switch vv := v.(type) {
+                        case DataStore.Order_Message:
+                            orderChanCallback <-vv(m)
+                        default:
+                            fmt.Println(k, " is of type i dont know how to handle", v)
+                        }
+                    }
+                    //orderChanCallback <-convData
+                    */
                 }()
             }
         }
@@ -401,8 +413,9 @@ func (nc *NetController) marshal(data DataStore.Order_Message) []byte {
 }
 
 // Unserialize data received
-func (nc *NetController) unmarshal(data []byte) (DataStore.Order_Message, int) {
-    convData := DataStore.Order_Message{}
+func (nc *NetController) unmarshal(data []byte) (interface{}, int) {
+    var convData interface{}
+    //convData := DataStore.Order_Message{}
     err := json.Unmarshal(data, &convData)
     if err != nil {
         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error while unmarshalling: ", err.Error()))
