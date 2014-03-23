@@ -304,10 +304,32 @@ func (nc *NetController) monitorCommStatus(ch chan int, notifyChan chan bool, ma
     for {
         value := <-ch
 
+        if value == -1 {
+            numberOfConnections -= 1
+        } else if value == 1 {
+            numberOfConnections += 1
+        } else {
+            continue
+        }
+
+        fmt.Println("Number of connections: ", numberOfConnections)
+
+        if numberOfConnections > 0 {
+            nc.CommDisabled = false
+            notifyChan <- false
+        } else {
+            nc.CommDisabled = true
+            notifyChan <- true
+        }
+
         // See if we are the master
         me, err := strconv.Atoi(nc.localIP[strings.LastIndex(nc.localIP, ".") + 1:])
         if err != nil {
             fmt.Println("Error converting local IP last segment to int", err.Error())
+        } else if numberOfConnections == 0 {
+            nc.iAmTheMaster = false
+            fmt.Println("im no longer ZE MASTAH! No connections :<<<")
+            masterChan <- nc.iAmTheMaster
         } else {
              for _, candidate := range nc.hostList {
                 if candidate != "" {
@@ -331,24 +353,6 @@ func (nc *NetController) monitorCommStatus(ch chan int, notifyChan chan bool, ma
             // Notify that we are the master
             masterChan <- nc.iAmTheMaster
         }
-
-        if value == -1 {
-            numberOfConnections -= 1
-        } else if value == 1 {
-            numberOfConnections += 1
-        } else {
-            continue
-        }
-
-        fmt.Println("Number of connections: ", numberOfConnections)
-
-        if numberOfConnections > 0 {
-            nc.CommDisabled = false
-            notifyChan <- false
-        } else {
-            nc.CommDisabled = true
-            notifyChan <- true
-        }
     }
 }
 
@@ -361,9 +365,6 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
         for n, client := range nc.clientList {
             if strings.EqualFold(client.GetIP(), timedOutClient) {
                 fmt.Println("Found a client in our list that has timed out: ", timedOutClient)
-                
-                // Update our connection monitor
-                monitorConnectionsChan <- -1
 
                 fmt.Println("Client list: ", nc.clientList)
 
@@ -451,6 +452,9 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
                             // Swap the element that timed out with the last element (always nil), and delete shrink slice
                             nc.hostList = append(nc.hostList[:m], nc.hostList[m + 1])
                             fmt.Println("Host list: ", nc.hostList)
+
+                            // Update our connection monitor
+                            monitorConnectionsChan <- -1
                         }
                     }
                 }()

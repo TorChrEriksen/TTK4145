@@ -229,6 +229,7 @@ func run() {
 
             case clientTimedOut := <-processGOLChan :
                 go func() {
+                    time.Sleep(time.Millisecond * 250)
                     if mastah_question_mark {
                         fmt.Println("We are the master, processing the GOL")
                         doProcessGOLChan <- clientTimedOut
