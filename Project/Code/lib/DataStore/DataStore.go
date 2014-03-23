@@ -20,6 +20,14 @@ type Order_Message struct {
 	What        string
 }
 
+// Global Order Data
+type Global_OrderData struct {
+    Floor int
+    Dir string
+    HandlingIP string
+    Clear bool
+}
+
 // Global Order List
 type Received_OrderData struct {
     OriginIP string

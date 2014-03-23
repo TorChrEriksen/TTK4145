@@ -208,20 +208,24 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
 
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client"))
 
-                    m := convData.(map[string]interface{})
+                    //m := convData.(map[string]interface{})
 
-                    for k, v := range m {
-                        switch v.(type) {
+                    switch convData.(type) {
                         case DataStore.Order_Message :
-                            orderCallbackChan <- v.(DataStore.Order_Message)
+                            orderCallbackChan <- convData.(DataStore.Order_Message)
                         case DataStore.ExtButtons_Message :
-                            extButtonCallbackChan <-v.(DataStore.ExtButtons_Message)
+                            extButtonCallbackChan <- convData.(DataStore.ExtButtons_Message)
                         case DataStore.Received_OrderData :
-                            globalOrderListCallbackChan <- v.(DataStore.Received_OrderData)
+                            globalOrderListCallbackChan <- convData.(DataStore.Received_OrderData)
                         default:
-                            fmt.Println(k, " is of type i dont know how to handle", v)
-                        }
+                            fmt.Println(convData, " is of type i dont know how to handle.")
                     }
+
+                    /*
+                    for k, v := range map {
+                        switch v.(type) {
+                        }
+                    }*/
                 }()
             }
         }

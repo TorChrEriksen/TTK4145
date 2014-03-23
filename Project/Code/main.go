@@ -198,6 +198,7 @@ func run() {
     recvGlobalChan := make(chan DataStore.Received_OrderData)
 
     elevLogic := elevDriver.OrderDriver{N_FLOOR: config.Floors}
+    //elevLogic.Create(localIP)
     elevLogic.Create()
     // End elev logic part
 
