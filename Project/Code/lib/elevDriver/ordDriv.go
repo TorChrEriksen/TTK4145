@@ -166,7 +166,7 @@ func (od *OrderDriver) Exit() {
 }
 
 // TODO implement processGOL
-func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataStore.Order_Message, recieve chan DataStore.Order_Message, commStatus chan bool, setLights chan DataStore.ExtButtons_Message, processGOL chan string, ) {
+func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataStore.Order_Message, recieve chan DataStore.Order_Message, commStatus chan bool, setLights chan DataStore.ExtButtons_Message, recvLights chan DataStore.ExtButtons_Message, sendGlobal chan DataStore.Received_OrderData, recvGlobal chan DataStore.Received_OrderData, processGOL chan string){
 	driverInterface.Init()
 
 	intButtonChannel := make(chan int)
