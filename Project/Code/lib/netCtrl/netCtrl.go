@@ -200,7 +200,6 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
             // Received data
             case orderMsg := <-nc.orderChan :
                 go func() {
-                    fmt.Println("Received a message")
                     convData, errInt := nc.unmarshal(orderMsg)
                     if errInt == -1 {
                         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Cannot read message, somrthing went wrong unmarshaling."))
@@ -232,7 +231,7 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                             case "What" :
                                 result.What = v.(string)
                             default :
-                                fmt.Println(k, " | ", v)
+                                fmt.Println("Error: ", k, " | ", v)
                             }
                         }
 
@@ -253,7 +252,7 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                             case "Value" :
                                 result.Value = int(v.(float64))
                             default :
-                                fmt.Println(k, " | ", v)
+                                fmt.Println("Error: ", k, " | ", v)
                             }
                         }
 
@@ -262,39 +261,31 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
 
                     } else if id == 3 {
                         fmt.Println("Global order queue message")
+                        var result DataStore.Global_OrderData
+                        for k,v := range m {
+                            switch k {
+                            case "MessageID" :
+                                result.MessageID = int(v.(float64))
+                            case "Floor" :
+                                result.Floor = int(v.(float64))
+                            case "Dir" :
+                                result.Dir = v.(string)
+                            case "HandlingIP" :
+                                result.HandlingIP = v.(string)
+                            case "Clear" :
+                                result.Clear = v.(bool)
+                            default :
+                                fmt.Println("Error: ", k, " | ", v)
+                            }
+                        }
+
+                        fmt.Println("Result: ", result)
+                        globalOrderListCallbackChan <- result
 
                     } else {
-                        fmt.Println("unknown type")
-                    }
-/*
-                    switch newId {
-                    // Order message
-                    case 0:
-
-                    // Lights message
-                    case 1:
+                        fmt.Println("Unknown message received")
                         return
-                    // Global orderlist message
-                    case 2:
-                        return
-                    default:
-                        fmt.Println("Crash and burn!")
                     }
-                    */
-/*
-                    for k, v := range map {
-                        switch v.(type) {
-                        case DataStore.Order_Message :
-                            orderCallbackChan <- v.(DataStore.Order_Message)
-                        case DataStore.ExtButtons_Message :
-                            extButtonCallbackChan <-v.(DataStore.ExtButtons_Message)
-                        case DataStore.Received_OrderData :
-                            globalOrderListCallbackChan <- v.(DataStore.Received_OrderData)
-                        default:
-                            fmt.Println(k, " is of type i dont know how to handle", v)
-                        }
-                    }
-                    */
                 }()
             }
         }
