@@ -14,7 +14,6 @@ import (
     "strings"
     "encoding/json"
     "net"
-    "reflect"
 )
 
 type NetController struct {
@@ -207,30 +206,15 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Cannot read message, somrthing went wrong unmarshaling."))
                         return
                     }
-
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client"))
 
                     m := convData.(map[string]interface{})
 
-                    fmt.Println(m["MessageID"])
                     id := m["MessageID"].(float64)
                     newId := int(id)
-                    fmt.Println("Type of message id: ", reflect.TypeOf(newId))
 
                     if newId == 1 {
                         fmt.Println("Order message")
-                    } else if newId == 2 {
-                        fmt.Println("Lights message")
-                    } else if newId == 3 {
-                        fmt.Println("Global order queue message")
-                    } else {
-                        fmt.Println("unknown type")
-                    }
-/*
-                    switch newId {
-                    // Order message
-                    case 0:
-                        fmt.Println("Im inside here now")
                         var result DataStore.Order_Message
                         for k, v := range m {
                             switch k {
@@ -252,9 +236,42 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                                 fmt.Println(k, " | ", v)
                             }
                         }
-                        fmt.Println("Im here")
+
                         fmt.Println("Result: ", result)
                         orderCallbackChan <- result
+
+                    } else if newId == 2 {
+                        fmt.Println("Lights message")
+                        var result DataStore.ExtButtons_Message
+                        for k,v := range m {
+                            switch k {
+                            case "MessageID" :
+                                result.MessageID = v.(int)
+                            case "Floor" :
+                                result.Floor = v.(int)
+                            case "Dir" :
+                                result.Dir = v.(string)
+                            case "Value" :
+                                result.Value = v.(int)
+                            default :
+                                fmt.Println(k, " | ", v)
+                            }
+                        }
+
+                        fmt.Println("Result: ", result)
+                        extButtonCallbackChan <- result
+
+                    } else if newId == 3 {
+                        fmt.Println("Global order queue message")
+
+                    } else {
+                        fmt.Println("unknown type")
+                    }
+/*
+                    switch newId {
+                    // Order message
+                    case 0:
+
                     // Lights message
                     case 1:
                         return
