@@ -214,7 +214,7 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
 
                     switch m["MessageID"] {
                     // Order message
-                    case 0:
+                    case "0":
                         var result DataStore.Order_Message
                         for k, v := range m {
                             switch k {
@@ -237,10 +237,10 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                         fmt.Println(result)
                         orderCallbackChan <- result
                     // Lights message
-                    case 1:
+                    case "1":
                         return
                     // Global orderlist message
-                    case 2:
+                    case "2":
                         return
                     default:
                         fmt.Println("Crash and burn!")
