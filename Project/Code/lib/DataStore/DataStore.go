@@ -1,23 +1,23 @@
 package DataStore
 
-type Heartbeat_Message struct{
-    IP string
-    Message string
+type Heartbeat_Message struct {
+	IP      string
+	Message string
 }
 
 type Broadcast_Message struct {
-    IP string
-    Message string
+	IP      string
+	Message string
 }
 
 // Order Message for the elevator logic
 type Order_Message struct {
-	Floor		int
-	Dir 		string
-	RecipientIP	string
-	OriginIP	string
-	Cost		float64
-	What		string
+	Floor       int
+	Dir         string
+	RecipientIP string
+	OriginIP    string
+	Cost        float64
+	What        string
 }
 
 // Data received by socket server
@@ -28,8 +28,9 @@ type Order_Message struct {
 
 // Message describes the state of the external buttons
 type ExtButtons_Message struct {
-    UpButton [3]bool
-    DownButton [3]bool
+	Floor int
+	Dir   int
+	Value int
 }
 
 /*

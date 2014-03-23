@@ -7,6 +7,7 @@ import (
 	"math"
 	"time"
 	"sort"
+	"encoding/json"
 )
 
 
@@ -29,11 +30,6 @@ type order struct{
 	Clear bool
 }
 
-type exLights struct{
-	floor 	int
-	dir		int
-	value	int
-	}
 
 
 func (od *OrderDriver) Create() {
@@ -120,7 +116,65 @@ func cost(orderList []order, afterOrderList []order, currPos int, dir_now string
 	return -1.0
 }
 
-func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataStore.Order_Message, recieve chan DataStore.Order_Message, commStatus chan bool){
+func marshal(data od.orderList) []byte {
+    convData, err := json.Marshal(data)
+    if err != nil {
+        return nil
+    }
+    return convData
+}
+
+// Unserialize data received
+func unmarshal(data []byte) (od.orderList, int) {
+    convData := od.orderList{}
+    err := json.Unmarshal(data, &convData)
+    if err != nil {
+        return convData, -1
+    }
+    return convData, 1
+}
+
+func writeOrdersToFile(filename string, data od.orderList, name string) {
+
+    file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
+
+    if err != nil {
+        fmt.Println("Error creating ",name," pid file: ", err.Error())
+        os.Exit(0)
+    }
+
+    convData = marshal(data)
+    _, err = file.Write([]byte(convData))
+
+    if err != nil {
+        fmt.Println("Error writing ",name," to file: ", err.Error())
+        os.Exit(0)
+    }
+
+    defer file.Close()
+}
+ func readOrdersFromFile(filename string) od.orderList{
+
+ 	file, err := os.Open(filename)
+    	if err != nil {
+        	fmt.Println("There was an error opening ",filename)
+	    } else {
+            reader := bufio.NewReader(filename)
+            val, _ := reader.ReadString('\n')
+            val = strings.Trim(val, "\n")
+            pid, err := strconv.Atoi(val)
+
+            if err != nil {
+                fmt.Println("There was an error converting the data to an int")
+            } else {
+                obsChan <- pid
+            }
+        }
+        defer file.Close()
+ }
+
+
+func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataStore.Order_Message, recieve chan DataStore.Order_Message, commStatus chan bool, setLights chan DataStore.ExtButtons_Message){
 	driverInterface.Init()
 	
 	intButtonChannel 	:= make(chan int)
@@ -137,8 +191,6 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 
 	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel, timeoutChannel)
 	
-
-
 	go func(){
 		for{
 			select{	
@@ -268,6 +320,9 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 						} else if od.currentOrder.Floor == od.currentFloor{
 							state("STOP")
 							driverInterface.SetButtonLamp(od.currentOrder.Dir, od.currentFloor - 1, 0)
+							if od.currentOrder.Dir!="INT"{
+								setLights <- DataStore.ExtButton_Message(Floor:od.currentFloor - 1, Dir:od.currentOrder.Dir, Value:0)
+							}
 							state("OPEN")	
 //							fmt.Println("GOT TO FLOOR")
 							if od.currentFloor == 1 {
@@ -309,6 +364,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 							driverInterface.SetButtonLamp("UP", ((extSig - (extSig % 2) - 30) / 10)-1, 1 ) //TODO make nicer. handle floors better
 							//fmt.Println("ExtOrder: ", extOrder)
 						}
+						setLights <- DataStore.ExtButton_Message(Floor:extOrder.Floor, Dir:extOrder.Dir, Value:1)
 //						fmt.Println(cost(od.orderList, od.afterOrders, od.lastFloor, od.status, extOrder.floor, extOrder.dir))
 				//		ordersChann <- extOrder
 					//}()
@@ -351,6 +407,11 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 							ordersChann <- order{input.Floor, input.Dir, false}
 						}
 				}()
+
+				case setLight := <- setLights:
+					go func(){
+						driverInterface.SetButtonLamp(setLight.Dir, setLight.Floor-1, setLight.Value)
+						}()
 			}
 		}
 	}()
