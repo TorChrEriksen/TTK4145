@@ -12,8 +12,8 @@ import (
 type SocketClient struct {
     Identifier string
     al *logger.AppLogger
-    udpConn *net.UDPConn // mod
-    tcpConn *net.TCPConn // mod
+    udpConn *net.UDPConn
+    tcpConn *net.TCPConn
     heartbeatChan chan bool
     orderChan chan []byte
 }
@@ -33,7 +33,6 @@ func (sc *SocketClient) Create(a *logger.AppLogger) {
 }
 
 // Connect to host
-// Returns -1 if the connection was not successfull, in that case retry to connect
 func (sc *SocketClient) ConnectTCP(tcpAddr string) int {
 
 	_, tcpAddress := TCPConn.InitComm(tcpAddr)
@@ -49,7 +48,6 @@ func (sc *SocketClient) ConnectTCP(tcpAddr string) int {
 }
 
 // Connect to host
-// Returns -1 if the connection was not successfull, in that case retry to connect
 func (sc *SocketClient) ConnectUDP(udpAddr string) int {
 
     _, udpAddress := UDPConn.InitComm(udpAddr)
@@ -99,7 +97,6 @@ func (sc *SocketClient) SendData(data []byte) {
     sc.orderChan <- data
 }
 
-// TODO: Need to make the package SocketClient only one connection, and let the netCtrl control each one of them.
 func (sc *SocketClient) waitForInput() {
     for order := range sc.orderChan {
         if sc.tcpConn != nil {

@@ -43,8 +43,6 @@ func waitForAliveFromWD(signalChan chan os.Signal, obsChan chan int) {
     for sig := range signalChan {
 
         _ = sig
-
-//        fmt.Println("Primary: signal received from WD: ", sig)
         timer.Reset(APP_TIMEOUT)
     }
 }
@@ -57,8 +55,6 @@ func waitForWdCommand(upgChan chan bool) {
 
     for sig := range ch {
 
-        //fmt.Println("Secondary: RECEIVED COMMAND from WD: ", sig)
-
         switch sig {
         case syscall.SIGUSR1:
             close(ch)
@@ -67,8 +63,6 @@ func waitForWdCommand(upgChan chan bool) {
             fmt.Println("Unknown command received from Watch Dog")
         }
     }
-
-    //fmt.Println("waitForWdCommand() finished")
 }
 
 func spawnCopy(wdPID int) (*os.Process, error) {
@@ -130,10 +124,8 @@ func notifySecondaryAlive(p *os.Process, ch chan bool) {
     }
 }
 
+// Writes secondary app PID to file, Watch Dog is using this
 func writePidToFile(filename string) {
-    // Remove file if it already exists
-    // os.Remove(filename)
-
     file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
     if err != nil {
         fmt.Println("Error creating pid file: ", err.Error())
@@ -152,7 +144,7 @@ func writePidToFile(filename string) {
 }
 // end redundant related functions
 
-// Stopping Ctrl + C kill signal
+// Catching Ctrl + C kill signal for smooth shutdown
 func catchKill(appLog logger.AppLogger, killChan chan int) {
     sigChan := make(chan os.Signal, 1)
     signal.Notify(sigChan, os.Interrupt)
@@ -179,101 +171,86 @@ func run() {
         go catchKill(appLogger, killChan)
     }
 
+    notifyCommChan := make(chan bool)
+
+    // TODO: Use redundant config flag
+
     // Declaring and setting up net controller
-    if !config.DebugMode {
+    netCtrl := netCtrl.NetController{Identifier: "NETCONTROLLER",
+                                     TCPPort: config.PortTCP,
+                                     UDPPort: config.PortUDP,
+                                     BroadcastPort: config.PortBroadcast,
+                                     PacketSize: config.PacketSize,
+                                     Timeout: NET_TIMEOUT}
+    
+    localIP := netCtrl.Create(&appLogger)
 
-        notifyCommChan := make(chan bool)
+    orderChanCallback := make(chan DataStore.Order_Message)
 
-        // TODO: Use redundant config flag
-        netCtrl := netCtrl.NetController{Identifier: "NETCONTROLLER",
-                                         TCPPort: config.PortTCP,
-                                         UDPPort: config.PortUDP,
-                                         BroadcastPort: config.PortBroadcast,
-                                         PacketSize: config.PacketSize,
-                                         Timeout: NET_TIMEOUT}
-        
-        localIP := netCtrl.Create(&appLogger)
+    // Start elev logic part
+    sendOrderToOne := make(chan DataStore.Order_Message)
+    sendOrderToAll := make(chan DataStore.Order_Message)
+    receivedOrder := make(chan DataStore.Order_Message)
+    commStatusChan := make(chan bool)
 
-        orderChanCallback := make(chan DataStore.Order_Message)
+    elevLogic := elevDriver.OrderDriver{N_FLOOR: config.Floors}
+    elevLogic.Create()
+    // End elev logic part
 
-        //elevIdListChan := make(chan string)
-        //elevIdList := make([]DataStore.Client, 0)
+    // Fire up goroutines
+    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan)
+    go netCtrl.Run(notifyCommChan, orderChanCallback)
 
-        // Start elev logic part
-        sendOrderToOne := make(chan DataStore.Order_Message)
-        sendOrderToAll := make(chan DataStore.Order_Message)
-        receivedOrder := make(chan DataStore.Order_Message)
-        commStatusChan := make(chan bool)
-
-        elevLogic := elevDriver.OrderDriver{N_FLOOR: config.Floors}
-        elevLogic.Create()
-        // End elev logic part
-
-        // Fire up goroutines
-        go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan)
-        go netCtrl.Run(notifyCommChan, orderChanCallback)
-
-        // Application Control
-        go func() {
-            for {
-                select {
-                case kill := <-killChan :
-                    _ = kill
-                    fmt.Println("Cleaning up before exiting")
-                    netCtrl.Exit()
+    // Application Control
+    go func() {
+        for {
+            select {
+            case kill := <-killChan :
+                _ = kill
+                fmt.Println("Cleaning up before exiting")
+                netCtrl.Exit()
 //                    elevLogic.Exit()
-                    fmt.Println("Done cleaning up, exiting...")
-                    os.Exit(0)
+                fmt.Println("Done cleaning up, exiting...")
+                os.Exit(0)
 
-                case commStatusChanged := <-notifyCommChan :
-                    fmt.Println(" <- notifyCommChan ")
-                    go func() {
-                        commStatusChan <- commStatusChanged
-                    }()
+            case commStatusChanged := <-notifyCommChan :
+                go func() {
+                    commStatusChan <- commStatusChanged
+                }()
 
-                case sendToOne := <-sendOrderToOne:
-                    fmt.Println(" <- sendOrderToOne ")
-                    go func() {
-                        netCtrl.SendData_SingleRecepient(sendToOne, sendToOne.RecipientIP)
-                        fmt.Println("Send to single Recepient: ", sendToOne)
-                    }()
+            case sendToOne := <-sendOrderToOne:
+                go func() {
+                    netCtrl.SendData_SingleRecepient(sendToOne, sendToOne.RecipientIP)
+                    fmt.Println("Send to single Recepient: ", sendToOne)
+                }()
 
-                case sendToAll := <-sendOrderToAll:
-                    fmt.Println(" <- sendOrderToAll ")
-                    go func() {
-                        sendToAll.OriginIP = localIP //TODO: validate with Fredrik
-                        netCtrl.SendData(sendToAll)
-                        fmt.Println("Send To All: ", sendToAll)
-                    }()
+            case sendToAll := <-sendOrderToAll:
+                go func() {
+                    sendToAll.OriginIP = localIP // Validate
+                    netCtrl.SendData(sendToAll)
+                    fmt.Println("Send To All: ", sendToAll)
+                }()
 
-                case recvOrder := <-orderChanCallback:
-                    fmt.Println(" <- orderChanCallback ")
-                    go func() {
-                        fmt.Println("Received: ", recvOrder)
-                        fmt.Println(recvOrder.Floor)
-                        fmt.Println(recvOrder.Dir)
-                        fmt.Println(recvOrder.RecipientIP)
-                        fmt.Println(recvOrder.OriginIP)
-                        fmt.Println(recvOrder.Cost)
-                        fmt.Println(recvOrder.What)
-                        receivedOrder <- recvOrder
-                    }()
-                }
+            case recvOrder := <-orderChanCallback:
+                go func() {
+                    fmt.Println("Received: ", recvOrder)
+                    receivedOrder <- recvOrder
+                }()
             }
-        }()
-
-        // TODO Remove
+        }
+    }()
+ 
+    if config.DebugMode {
         go netCtrl.Debug()
-
-        ch := make(chan int)
-        <-ch
     }
+
+    ch := make(chan int)
+    <-ch
 }
 
 func main() {
-    if len(os.Args) == 2 { // Should be primary
+    if len(os.Args) == 2 { // Primary
         arg1, err1 := strconv.Atoi(os.Args[1])
-        //arg2, err2 := strconv.Atoi(os.Args[2])
         if err1 != nil {
             fmt.Println("Primary: Invalid argument (1)")
             os.Exit(0)
@@ -313,7 +290,7 @@ func main() {
                 <-ch
             }
         }
-    } else if len(os.Args) == 3 { // Should be secondary
+    } else if len(os.Args) == 3 { // Secondary
         arg1, err1 := strconv.Atoi(os.Args[1])
         wdPID, err2 := strconv.Atoi(os.Args[2])
         if err1 != nil {
@@ -354,7 +331,8 @@ func main() {
                     wdSignalChan := make(chan os.Signal, 1)
                     signal.Notify(wdSignalChan, syscall.SIGILL)
 
-                    go run() // TODO: what more to do when secondary takes over?
+                    // TODO load FT data?
+                    go run() // Secondary is taking over
                     go notifyPrimaryAlive(wd, haltChan)
                     go waitForFailure(wdChan, wdSignalChan, haltChan)
 
@@ -387,8 +365,7 @@ func waitForFailure(wdChan chan int, wdSignalChan chan os.Signal, haltChan chan 
         file, err := os.Open("secondaryPID")
         if err != nil {
             fmt.Println("There was an error opening the SECONDARY PID file")
-            //break
-            os.Exit(0) // Remove all os.Exit's?
+            os.Exit(0) 
         } else {
             reader := bufio.NewReader(file)
             val, _ := reader.ReadString('\n')
@@ -420,7 +397,7 @@ func waitForFailure(wdChan chan int, wdSignalChan chan os.Signal, haltChan chan 
         wd, err := spawnWD(os.Getpid())
         if err != nil {
             fmt.Println("Error restarting Watch Dog: ", err.Error())
-            os.Exit(0) // Remove all os.Exit's ?
+            os.Exit(0) 
         }
         fmt.Println("Primary: Watch Dog RESTARTED")
 
@@ -451,7 +428,6 @@ type ImportedConfig struct {
     FloorNumberBase int
     StopButtonBase int
     PacketSize int
-    ElevID int
 }
 
 type ConfigLine struct {
@@ -491,7 +467,6 @@ func loadDefaultConfig() *ImportedConfig {
     cnf.FloorNumberBase = 31
     cnf.StopButtonBase = 10
     cnf.PacketSize = 4096
-    cnf.ElevID = -1 // Run orders locally
     return cnf
 }
 
@@ -510,7 +485,6 @@ func importConfig(filePath string) *ImportedConfig {
     configFilePath, err := filepath.Abs(filePath)
 
     if err != nil {
-        //panic(err.Error())
         fmt.Println("Error loading config: ", err.Error())
         fmt.Println("Loading default config")
         return loadDefaultConfig()
@@ -575,12 +549,9 @@ func importConfig(filePath string) *ImportedConfig {
             impCnf.StopButtonBase = element.Value
         case 11:
             impCnf.PacketSize = element.Value
-        case 12:
-            impCnf.ElevID = element.Value
         }
     }
 
     return impCnf
 }
-
 // end Config part

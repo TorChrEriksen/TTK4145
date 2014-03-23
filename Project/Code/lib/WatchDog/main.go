@@ -17,7 +17,7 @@ func restartPrimaryAsSecondary(wdPID int) (*os.Process, error) {
     argv := []string{"./elevApp", strconv.Itoa(1), strconv.Itoa(wdPID)} // 1 = START_SECONDARY
     attr := new(os.ProcAttr)
     attr.Files = []*os.File{nil, os.Stdout, os.Stderr}
-    proc, err := os.StartProcess("elevApp", argv, attr) // need struct to keep track of the PIDs
+    proc, err := os.StartProcess("elevApp", argv, attr)
 
     return proc, err
 }
@@ -26,7 +26,7 @@ func restartSecondary(wdPID int) (*os.Process, error) {
     argv := []string{"./elevApp", strconv.Itoa(1), strconv.Itoa(wdPID)} // 1 = START_SECONDARY
     attr := new(os.ProcAttr)
     attr.Files = []*os.File{nil, os.Stdout, os.Stderr}
-    proc, err := os.StartProcess("elevApp", argv, attr) // need struct to keep track of the PIDs
+    proc, err := os.StartProcess("elevApp", argv, attr)
 
     return proc, err
 }
@@ -58,14 +58,9 @@ func waitForAliveFromPrimary(signalChan chan os.Signal, obsChan chan int) {
     }()
 
     for sig := range signalChan {
-
         _ = sig
-
-//        fmt.Println("WD: signal received from Primary: ", sig)
         timer.Reset(APP_TIMEOUT)
     }
-
-    //fmt.Println("WD: Exited waitForAliveFromPrimary, SWAG!!!")
 }
 
 func waitForAliveFromSecondary(signalChan chan os.Signal, obsChan chan int) {
@@ -82,7 +77,6 @@ func waitForAliveFromSecondary(signalChan chan os.Signal, obsChan chan int) {
 
         _ = sig
 
-//        fmt.Println("WD: signal received from Secondary: ", sig)
         timer.Reset(APP_TIMEOUT)
 
         // Open file and read PID so that we can 
@@ -103,8 +97,6 @@ func waitForAliveFromSecondary(signalChan chan os.Signal, obsChan chan int) {
         }
         defer file.Close()
     }
-
-    //fmt.Println("WD: Exited waitForAliveFromSecondary, YOLO!!!")
 }
 
 func notifyAlive(priPID int, ch chan bool) {
@@ -118,13 +110,6 @@ func notifyAlive(priPID int, ch chan bool) {
     go func() {
         <-ch
         halt = true
-//        halt <-ch
-        /*
-        for term := range ch {
-            halt = term
-            break
-        }
-        */
     }()
 
     for {
@@ -163,7 +148,7 @@ func main() {
         priSignalChan := make(chan os.Signal, 1)
         signal.Notify(priSignalChan, syscall.SIGHUP)
 
-        go notifyAlive(procIDs.Primary, haltChan) // Do we need a chan here? no?
+        go notifyAlive(procIDs.Primary, haltChan)
         go waitForAliveFromPrimary(priSignalChan, priChan)
         go waitForAliveFromSecondary(secSignalChan, secChan)
 
@@ -171,7 +156,6 @@ func main() {
             for {
                 select {
                 case primary := <-priChan:
-
                     _ = primary
 
                     // Primary timed out
@@ -192,8 +176,8 @@ func main() {
                         procIDs.Secondary = proc.Pid
                         go notifyAlive(procIDs.Primary, haltChan)
                     }
-                case secondary := <-secChan:
 
+                case secondary := <-secChan:
                     // Secondary terminated
                     if secondary == -1 {
 
@@ -209,8 +193,7 @@ func main() {
                             fmt.Println("Secondary was restarted successfully")
                             procIDs.Secondary = proc.Pid
                         }
-                    } else { // Set PID
-                        //fmt.Println("Setting secondary PID: ", secondary)
+                    } else { 
                         procIDs.Secondary = secondary
                     }
                 }
@@ -222,8 +205,7 @@ func main() {
         fmt.Println("WatchDog PID: ", procIDs.Self)
     }
 
-		// Debug code
-		for {
-			time.Sleep(time.Second * 2)
-		}
+    // Keep alive
+    ch := make(chan int)
+    <-ch
 }

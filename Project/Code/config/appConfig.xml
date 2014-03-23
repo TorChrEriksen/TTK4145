@@ -12,7 +12,6 @@
     <config key="FloorNumberBase" value="31" />
     <config key="StopButtonBase" value="10" />
     <config key="PacketSize" value="4096" />
-    <config key="ElevID" value="0" />
 </appcnf>
 
 <!-- End-of-File -->
