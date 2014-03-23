@@ -129,8 +129,10 @@ func cost(orderList []order, afterOrderList []order, currPos int, dir_now string
 
 	case dir_now == "DOWN" && new_order_dir == "UP":
 		return math.Pow(float64(currPos+new_order-orderList[0].Floor+len(orderList)), squared)
+	
+	default:	
+		return -1.0
 	}
-	return -1.0
 }
 
 func writeOrdersToFile(filename string, data []order) {
@@ -360,7 +362,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 						state("STOP")
 						driverInterface.SetButtonLamp(od.currentOrder.Dir, od.currentFloor-1, 0)
 						if od.currentOrder.Dir != "INT" {
-							setLights <- DataStore.ExtButtons_Message{Floor: od.currentFloor - 1, Dir: od.currentOrder.Dir, Value: 0}
+							setLights <- DataStore.ExtButtons_Message{Floor: od.currentFloor, Dir: od.currentOrder.Dir, Value: 0}
 							sendGlobal <- DataStore.Global_OrderData{Floor:od.currentFloor, Dir:od.currentOrder.Dir,HandlingIP:od.myIP, Clear:true}
 						}
 						state("OPEN")
@@ -428,11 +430,12 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 						toAll <- req
 						go func() {
 							got := <-costResponsInternal
-//								fmt.Println("GOT A RESPONSE!!")
+							fmt.Println("GOT A RESPONSE!!")
 							if got.Cost < min.Cost {
-								fmt.Println("New cost: ",got.cost, "Old cost: ", min.cost)
+								fmt.Println("New cost: ",got.Cost, "Old cost: ", min.Cost)
 								min = got
 							}
+							
 						}()
 
 						time.Sleep(time.Second * 2)
