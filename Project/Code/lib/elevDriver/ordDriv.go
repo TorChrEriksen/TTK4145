@@ -441,7 +441,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 
 						} else {
 //							min.What min.RecipientIP, min.OriginIP = "O_REQ", min.OriginIP, min.RecipientIP
-							toOne <- DataStore.Order_Message{Floor: min.Floor, Dir: min.Dir, RecipientIP:min.OriginIP, What: min.What}
+							toOne <- DataStore.Order_Message{Floor: min.Floor, Dir: min.Dir, RecipientIP: min.OriginIP, What: min.What}
 
 						}
 					} else if od.commDisabled {
