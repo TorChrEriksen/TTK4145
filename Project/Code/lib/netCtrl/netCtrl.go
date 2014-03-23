@@ -201,6 +201,7 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
             // Received data
             case orderMsg := <-nc.orderChan :
                 go func() {
+                    fmt.Println("Received a message")
                     convData, errInt := nc.unmarshal(orderMsg)
                     if errInt == -1 {
                         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Cannot read message, somrthing went wrong unmarshaling."))
