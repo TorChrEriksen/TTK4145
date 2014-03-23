@@ -12,6 +12,7 @@ type Broadcast_Message struct {
 
 // Order Message for the elevator logic
 type Order_Message struct {
+    MessageID   int
 	Floor       int
 	Dir         string
 	RecipientIP string
@@ -22,6 +23,7 @@ type Order_Message struct {
 
 // Global Order Data
 type Global_OrderData struct {
+    MessageID int
     Floor int
     Dir string
     HandlingIP string
@@ -36,6 +38,7 @@ type Received_OrderData struct {
 
 // Message describes the state of the external buttons
 type ExtButtons_Message struct {
+    MessageID int
 	Floor int
 	Dir   string
 	Value int

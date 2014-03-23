@@ -14,7 +14,6 @@ import (
     "strings"
     "encoding/json"
     "net"
-    "reflect"
 )
 
 type NetController struct {
@@ -141,7 +140,7 @@ func (nc *NetController) connectUDP(udpAddr string) int {
     return udpErr
 }
 
-func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan DataStore.Order_Message, processGOLChan chan string, extButtonCallbackChan chan DataStore.ExtButtons_Message, globalOrderListCallbackChan chan DataStore.Received_OrderData) {
+func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan DataStore.Order_Message, processGOLChan chan string, extButtonCallbackChan chan DataStore.ExtButtons_Message, globalOrderListCallbackChan chan DataStore.Global_OrderData) {
 
     UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort, nc.PacketSize)
     UDP_BroadcastClient.Run(nc.bcChan, nc.BroadcastPort)
@@ -209,27 +208,55 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
 
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client"))
 
-                    //m := convData.(map[string]interface{})
+                    m := convData.(map[string]interface{})
 
-                    fmt.Println(reflect.TypeOf(convData))
-                    fmt.Println(convData.(DataStore.Order_Message))
-
-                    switch convData.(type) {
-                        case DataStore.Order_Message :
-                            orderCallbackChan <- convData.(DataStore.Order_Message)
-                        case DataStore.ExtButtons_Message :
-                            extButtonCallbackChan <- convData.(DataStore.ExtButtons_Message)
-                        case DataStore.Received_OrderData :
-                            globalOrderListCallbackChan <- convData.(DataStore.Received_OrderData)
-                        default:
-                            fmt.Println(convData, " is of type i dont know how to handle.")
+                    switch m["MessageID"] {
+                    // Order message
+                    case 0:
+                        var result DataStore.Order_Message
+                        for k, v := range m {
+                            switch k {
+                            case "MessageID" :
+                                result.MessageID = v.(int)
+                            case "Floor" :
+                                result.Floor = v.(int)
+                            case "Dir" :
+                                result.Dir = v.(string)
+                            case "RecipientIP" :
+                                result.RecipientIP = v.(string)
+                            case "OriginIP" :
+                                result.OriginIP = v.(string)
+                            case "Cost" :
+                                result.Cost = v.(float64)
+                            case "What" :
+                                result.What = v.(string)
+                            }
+                        }
+                        fmt.Println(result)
+                        orderCallbackChan <- result
+                    // Lights message
+                    case 1:
+                        return
+                    // Global orderlist message
+                    case 2:
+                        return
+                    default:
+                        fmt.Println("Crash and burn!")
                     }
-
-                    /*
+/*
                     for k, v := range map {
                         switch v.(type) {
+                        case DataStore.Order_Message :
+                            orderCallbackChan <- v.(DataStore.Order_Message)
+                        case DataStore.ExtButtons_Message :
+                            extButtonCallbackChan <-v.(DataStore.ExtButtons_Message)
+                        case DataStore.Received_OrderData :
+                            globalOrderListCallbackChan <- v.(DataStore.Received_OrderData)
+                        default:
+                            fmt.Println(k, " is of type i dont know how to handle", v)
                         }
-                    }*/
+                    }
+                    */
                 }()
             }
         }
@@ -371,7 +398,7 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
     }
 }
 
-func (nc *NetController) SendGlobalOrderList(data DataStore.Received_OrderData) {
+func (nc *NetController) SendGlobalOrderList(data DataStore.Global_OrderData) {
     convData := nc.marshal(data)
     if convData != nil {
         for _, client := range nc.tcpClients {

@@ -185,7 +185,7 @@ func run() {
     notifyCommChan := make(chan bool)
     processGOLChan := make(chan string)
     extButtonCallbackChan := make(chan DataStore.ExtButtons_Message)
-    globalOrderListCallbackChan := make(chan DataStore.Received_OrderData)
+    globalOrderListCallbackChan := make(chan DataStore.Global_OrderData)
 
     // Start elev logic part
     sendOrderToOne := make(chan DataStore.Order_Message)
@@ -194,8 +194,8 @@ func run() {
     commStatusChan := make(chan bool)
     sendLightsChan := make(chan DataStore.ExtButtons_Message)
     recvLightsChan := make(chan DataStore.ExtButtons_Message)
-    sendGlobalChan := make(chan DataStore.Received_OrderData)
-    recvGlobalChan := make(chan DataStore.Received_OrderData)
+    sendGlobalChan := make(chan DataStore.Global_OrderData)
+    recvGlobalChan := make(chan DataStore.Global_OrderData)
 
     elevLogic := elevDriver.OrderDriver{N_FLOOR: config.Floors}
     //elevLogic.Create(localIP)
@@ -225,12 +225,14 @@ func run() {
 
             case sendToOne := <-sendOrderToOne:
                 go func() {
+                    sendToOne.MessageID = 0
                     netCtrl.SendData_SingleRecepient(sendToOne, sendToOne.RecipientIP)
                     fmt.Println("Send to single Recepient: ", sendToOne)
                 }()
 
             case sendToAll := <-sendOrderToAll:
                 go func() {
+                    sendToAll.MessageID = 0
                     sendToAll.OriginIP = localIP // Validate
                     netCtrl.SendData(sendToAll)
                     fmt.Println("Send To All: ", sendToAll)
@@ -244,6 +246,7 @@ func run() {
 
             case sendLights := <-sendLightsChan:
                 go func() {
+                    sendLights.MessageID = 1
                     fmt.Println("Send Lights: ", sendLights)
                     netCtrl.SendLights(sendLights)
                 }()
@@ -256,6 +259,7 @@ func run() {
         
             case sendGlobalOrderList := <- sendGlobalChan:
                 go func() {
+                    sendGlobalOrderList.MessageID = 2
                     fmt.Println("Send Global Order List: ", sendGlobalOrderList)
                     netCtrl.SendGlobalOrderList(sendGlobalOrderList)
                 }()
