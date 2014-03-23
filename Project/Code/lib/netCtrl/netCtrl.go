@@ -36,6 +36,7 @@ type NetController struct {
     bcChan chan int
     timeoutChan chan string
     monitorConnectionsChan chan int
+    iAmTheMaster bool
 }
 
 func (nc *NetController) Debug() {
@@ -76,6 +77,8 @@ func (nc *NetController) Create(a *logger.AppLogger) string {
     nc.timeoutChan = make(chan string)
 
     nc.monitorConnectionsChan = make(chan int)
+
+    nc.iAmTheMaster = false
 
     return nc.localIP
 }
@@ -300,6 +303,9 @@ func (nc *NetController) monitorCommStatus(ch chan int, notifyChan chan bool) {
     for {
         value := <-ch
 
+        // See if we are the master
+
+
         if value == -1 {
             numberOfConnections -= 1
         } else if value == 1 {
@@ -475,14 +481,16 @@ func (nc *NetController) SendData_SingleRecepient(data DataStore.Order_Message, 
 
         // See if we are connected to the client
         for _, tcpClient := range nc.tcpClients {
-            host, _, err := net.SplitHostPort(tcpClient.GetTCPConn().RemoteAddr().String())
-            if err != nil {
-                nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error spliting TCP IP: ", err.Error()))
-                return
-            }
+            if tcpClient.GetTCPConn() != nil {
+                host, _, err := net.SplitHostPort(tcpClient.GetTCPConn().RemoteAddr().String())
+                if err != nil {
+                    nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error spliting TCP IP: ", err.Error()))
+                    return
+                }
 
-            if strings.EqualFold(destIP, host) {
-                tcpClient.SendData(convData)
+                if strings.EqualFold(destIP, host) {
+                    tcpClient.SendData(convData)
+                }
             }
         }
         return
