@@ -430,7 +430,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 							got := <-costResponsInternal
 //								fmt.Println("GOT A RESPONSE!!")
 							if got.Cost < min.Cost {
-								fmt.Println("New cost: ",got.cost, "Old cost: ", min.cost)
+								fmt.Println("New cost: ",got.Cost, "Old cost: ", min.Cost)
 								min = got
 							}
 						}()
@@ -458,7 +458,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 					if input.What == "COST_REQ" {
 //						fmt.Println("Getting a cost request", input)
 						price := cost(od.orderList, od.afterOrders, od.lastFloor, od.status, input.Floor, input.Dir)
-						fmt.Println("Cost: "price)
+						fmt.Println("Cost: ",price)
 						toOne <- DataStore.Order_Message{Floor: input.Floor, Dir: input.Dir, RecipientIP: input.OriginIP, OriginIP: input.RecipientIP, Cost: price, What: "COST_RES"}
 					} else if input.What == "COST_RES" {
 //						fmt.Println("Getting a cost respons")
