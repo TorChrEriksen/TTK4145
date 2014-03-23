@@ -445,11 +445,13 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 						time.Sleep(time.Second * 2)
 						*/
 
+						fmt.Println("    Request phase start")
 						abort := time.After(2*time.Second)
+						loop:
 						for {
 							select {
 							case <-abort:
-								break
+								break loop
 							case got := <-costResponsInternal:
 								if got.Cost < min.Cost {
 									fmt.Println("New cost: ",got.Cost, "Old cost: ", min.Cost)
@@ -460,6 +462,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 								}
 							}
 						}
+						fmt.Println("    Request phase over")
 
 
 
