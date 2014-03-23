@@ -433,8 +433,10 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 							fmt.Println("GOT A RESPONSE!!")
 							if got.Cost < min.Cost {
 								fmt.Println("New cost: ",got.Cost, "Old cost: ", min.Cost)
-								min.Cost, min.OriginIP = got.Cost, got.OriginIP
-								fmt.Println("min")
+								min.Cost 	= got.Cost
+								min.OriginIP = got.OriginIP
+
+								fmt.Println(min)
 							}
 							
 						}()
@@ -450,7 +452,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 
 						} else {
 //							min.What min.RecipientIP, min.OriginIP = "O_REQ", min.OriginIP, min.RecipientIP
-							fmt.Println("Someone else is doin this")
+							fmt.Println("Someone else doin this")
 							toOne <- DataStore.Order_Message{Floor: min.Floor, Dir: min.Dir, RecipientIP: min.OriginIP, What: "O_REQ"}
 
 						}
