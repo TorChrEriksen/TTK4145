@@ -98,7 +98,8 @@ func (sc *SocketClient) SendData(data []byte) {
 }
 
 func (sc *SocketClient) waitForInput() {
-    for order := range sc.orderChan {
+    for {
+        order := <- sc.orderChan
         if sc.tcpConn != nil {
             n := TCPConn.SendData(sc.tcpConn, order)
             _ = n
