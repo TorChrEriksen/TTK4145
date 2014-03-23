@@ -426,6 +426,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 						toAll <- req
 						go func() {
 							got := <-costResponsInternal
+								fmt.Println("GOT A RESPONSE!!")
 							if got.Cost < min.Cost {
 								min = got
 							}
