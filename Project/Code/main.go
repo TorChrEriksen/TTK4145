@@ -563,7 +563,7 @@ func importConfig(filePath string) *ImportedConfig {
 
     impCnf := &ImportedConfig{}
 
-    // Nasty conversion, check out xml.unmarshall and that stuff....
+    // Nasty conversion (><)
     for n, element := range appConfig {
         switch n {
         case 0:

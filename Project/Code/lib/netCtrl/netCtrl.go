@@ -552,8 +552,6 @@ func (nc *NetController) unmarshal(data []byte) (interface{}, int) {
 }
 
 func (nc *NetController) Exit() {
-    // TODO Save stuff to file for the last time?
-
     // Close TCP connections
     for _, tcpClient := range nc.tcpClients {
         if tcpClient.GetTCPConn() != nil {
