@@ -31,10 +31,10 @@ type Global_OrderData struct {
 }
 
 // Global Order List
-type Received_OrderData struct {
-    OriginIP string
-    OrderList []Global_OrderData
-}
+//type Received_OrderData struct {
+//    OriginIP string
+//    OrderList []Global_OrderData
+//}
 
 // Message describes the state of the external buttons
 type ExtButtons_Message struct {

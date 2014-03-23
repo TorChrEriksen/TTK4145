@@ -36,7 +36,6 @@ func TerminateConn(conn net.TCPConn) error {
 }
 
 func SendData(conn *net.TCPConn, data []byte) int {
-    fmt.Println("Writing to TCP connection")
 	n, err := conn.Write(data)
 	if err != nil {
 		fmt.Println("Error writing to connection: (TCP)", err.Error())

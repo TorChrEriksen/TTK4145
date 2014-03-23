@@ -31,8 +31,6 @@ func acceptConn(conn net.Conn, l log.Logger, ch chan []byte, packetSize int) {
             l.Println("ALERT: Connection probably terminated???")
             return
         }
-
-        fmt.Println("Received ", n, " bytes.")
         ch <- data[:n]
 	}
 }
