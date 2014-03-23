@@ -14,6 +14,7 @@ import (
     "strings"
     "encoding/json"
     "net"
+    "reflect"
 )
 
 type NetController struct {
@@ -211,10 +212,12 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                     m := convData.(map[string]interface{})
 
                     fmt.Println(m["MessageID"])
+                    id := m["MessageID"]
+                    fmt.Println("Type of message id: ", reflect.TypeOf(id))
 
-                    switch m["MessageID"] {
+                    switch id {
                     // Order message
-                    case "0":
+                    case 0:
                         var result DataStore.Order_Message
                         for k, v := range m {
                             switch k {
@@ -237,10 +240,10 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                         fmt.Println(result)
                         orderCallbackChan <- result
                     // Lights message
-                    case "1":
+                    case 1:
                         return
                     // Global orderlist message
-                    case "2":
+                    case 2:
                         return
                     default:
                         fmt.Println("Crash and burn!")
