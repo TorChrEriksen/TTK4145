@@ -213,10 +213,10 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
 
                     fmt.Println(m["MessageID"])
                     id := m["MessageID"].(float64)
-                    newid := int(id)
-                    fmt.Println("Type of message id: ", reflect.TypeOf(id))
+                    newId := int(id)
+                    fmt.Println("Type of message id: ", reflect.TypeOf(newId))
 
-                    switch newid {
+                    switch newId {
                     // Order message
                     case 0:
                         var result DataStore.Order_Message
@@ -238,7 +238,8 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                                 result.What = v.(string)
                             }
                         }
-                        fmt.Println(result)
+                        fmt.Println("Im here")
+                        fmt.Println("Result: ", result)
                         orderCallbackChan <- result
                     // Lights message
                     case 1:
