@@ -32,6 +32,7 @@ func acceptConn(conn net.Conn, l log.Logger, ch chan []byte, packetSize int) {
             return
         }
 
+        fmt.Println("Received ", n, " bytes.")
         ch <- data[:n]
 	}
 }

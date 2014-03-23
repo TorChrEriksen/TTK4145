@@ -140,7 +140,7 @@ func (nc *NetController) connectUDP(udpAddr string) int {
     return udpErr
 }
 
-func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan DataStore.Order_Message, processGOLChan chan string, extButtonCallbackChan chan DataStore.ExtButtons_Message, globalOrderListCallbackChan chan DataStore.Received_OrderData) {
+func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan DataStore.Order_Message, processGOLChan chan string, extButtonCallbackChan chan DataStore.ExtButtons_Message, globalOrderListCallbackChan chan DataStore.Global_OrderData) {
 
     UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort, nc.PacketSize)
     UDP_BroadcastClient.Run(nc.bcChan, nc.BroadcastPort)
@@ -200,17 +200,89 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
             // Received data
             case orderMsg := <-nc.orderChan :
                 go func() {
+                    fmt.Println("Received a message")
                     convData, errInt := nc.unmarshal(orderMsg)
                     if errInt == -1 {
                         nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Cannot read message, somrthing went wrong unmarshaling."))
                         return
                     }
-
                     nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Message received from a client"))
 
                     m := convData.(map[string]interface{})
 
-                    for k, v := range m {
+                    id := int(m["MessageID"].(float64))
+
+                    if id == 1 {
+                        fmt.Println("Order message")
+                        var result DataStore.Order_Message
+                        for k, v := range m {
+                            switch k {
+                            case "MessageID" :
+                                result.MessageID = int(v.(float64))
+                            case "Floor" :
+                                result.Floor = int(v.(float64))
+                            case "Dir" :
+                                result.Dir = v.(string)
+                            case "RecipientIP" :
+                                result.RecipientIP = v.(string)
+                            case "OriginIP" :
+                                result.OriginIP = v.(string)
+                            case "Cost" :
+                                result.Cost = v.(float64)
+                            case "What" :
+                                result.What = v.(string)
+                            default :
+                                fmt.Println(k, " | ", v)
+                            }
+                        }
+
+                        fmt.Println("Result: ", result)
+                        orderCallbackChan <- result
+
+                    } else if id == 2 {
+                        fmt.Println("Lights message")
+                        var result DataStore.ExtButtons_Message
+                        for k,v := range m {
+                            switch k {
+                            case "MessageID" :
+                                result.MessageID = int(v.(float64))
+                            case "Floor" :
+                                result.Floor = int(v.(float64))
+                            case "Dir" :
+                                result.Dir = v.(string)
+                            case "Value" :
+                                result.Value = int(v.(float64))
+                            default :
+                                fmt.Println(k, " | ", v)
+                            }
+                        }
+
+                        fmt.Println("Result: ", result)
+                        extButtonCallbackChan <- result
+
+                    } else if id == 3 {
+                        fmt.Println("Global order queue message")
+
+                    } else {
+                        fmt.Println("unknown type")
+                    }
+/*
+                    switch newId {
+                    // Order message
+                    case 0:
+
+                    // Lights message
+                    case 1:
+                        return
+                    // Global orderlist message
+                    case 2:
+                        return
+                    default:
+                        fmt.Println("Crash and burn!")
+                    }
+                    */
+/*
+                    for k, v := range map {
                         switch v.(type) {
                         case DataStore.Order_Message :
                             orderCallbackChan <- v.(DataStore.Order_Message)
@@ -222,6 +294,7 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                             fmt.Println(k, " is of type i dont know how to handle", v)
                         }
                     }
+                    */
                 }()
             }
         }
@@ -363,7 +436,7 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
     }
 }
 
-func (nc *NetController) SendGlobalOrderList(data DataStore.Received_OrderData) {
+func (nc *NetController) SendGlobalOrderList(data DataStore.Global_OrderData) {
     convData := nc.marshal(data)
     if convData != nil {
         for _, client := range nc.tcpClients {
