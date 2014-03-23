@@ -212,11 +212,11 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                     m := convData.(map[string]interface{})
 
                     fmt.Println(m["MessageID"])
-                    id := m["MessageID"]
-                    id = id.(int)
+                    id := m["MessageID"].(float64)
+                    newid := int(id)
                     fmt.Println("Type of message id: ", reflect.TypeOf(id))
 
-                    switch id {
+                    switch newid {
                     // Order message
                     case 0:
                         var result DataStore.Order_Message
