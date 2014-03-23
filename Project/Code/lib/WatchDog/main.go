@@ -54,6 +54,12 @@ func waitForAliveFromPrimary(signalChan chan os.Signal, obsChan chan int) {
         <-timer.C
 
         // Primary timed out.
+        fmt.Print("Primary is going for a restart in ")
+        for i := 10; i > 0; i-- {
+            fmt.Print(i, " .. ")
+            time.Sleep(time.Second)
+        }
+        fmt.Println("Restarting")
         obsChan <- 1
     }()
 

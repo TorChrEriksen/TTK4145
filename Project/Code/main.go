@@ -165,15 +165,11 @@ func run() {
     config := importConfig("config/appConfig.xml")
     fmt.Println("Loaded application config: ", *config)
 
-    // Fire up interrupt catcher|
+    // Fire up interrupt catcher
     killChan := make(chan int)
     if config.CatchInterrupt {
         go catchKill(appLogger, killChan)
     }
-
-    notifyCommChan := make(chan bool)
-
-    // TODO: Use redundant config flag
 
     // Declaring and setting up net controller
     netCtrl := netCtrl.NetController{Identifier: "NETCONTROLLER",
@@ -186,6 +182,8 @@ func run() {
     localIP := netCtrl.Create(&appLogger)
 
     orderChanCallback := make(chan DataStore.Order_Message)
+    notifyCommChan := make(chan bool)
+    processGOLChan := make(chan string)
 
     // Start elev logic part
     sendOrderToOne := make(chan DataStore.Order_Message)
@@ -198,8 +196,8 @@ func run() {
     // End elev logic part
 
     // Fire up goroutines
-    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan)
-    go netCtrl.Run(notifyCommChan, orderChanCallback)
+    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan) // TODO use processGOLChan
+    go netCtrl.Run(notifyCommChan, orderChanCallback, processGOLChan)
 
     // Application Control
     go func() {

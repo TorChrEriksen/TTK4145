@@ -20,23 +20,14 @@ type Order_Message struct {
 	What		string
 }
 
-// Data received by socket server
-//type Received_OrderData struct {
-//    originIP string
-//    data []byte
-//}
+// Global Order List
+type Received_OrderData struct {
+    OriginIP string
+    OrderList []Order_Message
+}
 
 // Message describes the state of the external buttons
 type ExtButtons_Message struct {
     UpButton [3]bool
     DownButton [3]bool
 }
-
-/*
-type Client struct {
-    IP string
-    ID int
-}
-*/
-
-// Need a type or way to get FT data
