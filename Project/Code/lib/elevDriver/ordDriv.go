@@ -128,7 +128,7 @@ func cost(orderList []order, afterOrderList []order, currPos int, dir_now string
 		return math.Pow(float64(currPos+new_order-orderList[0].Floor+len(orderList)), squared)
 
 	default:
-		return math.Pow(float64(math.Abs(currPos-new_order)))
+		return math.Pow(math.Abs(float64(currPos-new_order)), squared)
 	}
 }
 

@@ -94,6 +94,7 @@ func waitForAliveFromSecondary(signalChan chan os.Signal, obsChan chan int) {
             val, _ := reader.ReadString('\n')
             val = strings.Trim(val, "\n")
             pid, err := strconv.Atoi(val)
+            file.Close()
 
             if err != nil {
                 fmt.Println("There was an error converting the data to an int")
@@ -101,7 +102,6 @@ func waitForAliveFromSecondary(signalChan chan os.Signal, obsChan chan int) {
                 obsChan <- pid
             }
         }
-        defer file.Close()
     }
 }
 

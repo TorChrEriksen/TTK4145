@@ -424,6 +424,7 @@ func waitForFailure(wdChan chan int, wdSignalChan chan os.Signal, haltChan chan 
             val, _ := reader.ReadString('\n')
             val = strings.Trim(val, "\n")
             pid, err := strconv.Atoi(val)
+            file.Close()
 
             if err != nil {
                 fmt.Println("There was an error converting the data to an int")
@@ -444,7 +445,6 @@ func waitForFailure(wdChan chan int, wdSignalChan chan os.Signal, haltChan chan 
                 }
             }
         }
-        defer file.Close()
 
         // Restart WD
         wd, err := spawnWD(os.Getpid())
