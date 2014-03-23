@@ -23,6 +23,7 @@ type OrderDriver struct {
 	commDisabled bool
 	GOL			map[string][]DataStore.Global_OrderData
 	myIP		string
+
 }
 
 type ByFloor []order
@@ -43,6 +44,9 @@ func (od *OrderDriver) Create(ip string) {
 	od.commDisabled = true
 	od.GOL = make(map[string][]DataStore.Global_OrderData)
 	od.myIP = ip
+
+
+
 }
 
 func (p order) String() string {
@@ -227,15 +231,15 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 			}
 		}
 	}()
-	
+
 	od.orderList, _ = readOrdersFromFile("orderList.txt")
-	
 	od.afterOrders, _ = readOrdersFromFile("afterOrders.txt")
 
 	if od.currentFloor != 1 && (len(od.orderList)+len(od.afterOrders)) == 0{
 		state("DOWN")
+		fmt.Println("Going")
 		for od.currentFloor != 1 {
-			if od.currentFloor != 0 {
+			if od.currentFloor != 1 {
 				time.Sleep(time.Millisecond * 200)
 			}
 		}
@@ -243,12 +247,11 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 		od.status = "IDLE"
 	} else if od.currentFloor==0{
 		state("DOWN")
-		for od.currentFloor !=0{time.Sleep(time.Millisecond*250)}
-		updateCurrentOrder <- true
+		for od.currentFloor ==0{time.Sleep(time.Millisecond*250)}
+			updateCurrentOrder <- true
 	}else {
 		updateCurrentOrder <- true
 	}
-
 	//SIGNAL HANDLING
 	go func() {
 		for {

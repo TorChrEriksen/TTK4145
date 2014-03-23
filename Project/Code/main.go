@@ -98,10 +98,11 @@ func notifyPrimaryAlive(p *os.Process, ch chan bool) {
     }()
     for {
         if halt {
+            fmt.Println("Breaking")
             break
         }
         time.Sleep(time.Second)
-        p.Signal(syscall.SIGHUP) // Signal from primary
+        p.Signal(syscall.SIGHUP)
     }
 }
 
@@ -202,7 +203,7 @@ func run() {
     // End elev logic part
 
     // Fire up goroutines
-    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan, sendLightsChan, recvLightsChan, sendGlobalChan, recvGlobalChan, processGOLChan) // TODO use processGOLChan
+    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan, sendLightsChan, recvLightsChan, sendGlobalChan, recvGlobalChan, processGOLChan) 
     go netCtrl.Run(notifyCommChan, orderCallbackChan, processGOLChan, extButtonCallbackChan, globalOrderListCallbackChan)
 
     // Application Control
