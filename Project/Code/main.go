@@ -181,12 +181,14 @@ func run() {
                                      Timeout: NET_TIMEOUT}
     
     localIP := netCtrl.Create(&appLogger)
+    mastah_question_mark := false
 
     orderCallbackChan := make(chan DataStore.Order_Message)
     notifyCommChan := make(chan bool)
     processGOLChan := make(chan string)
     extButtonCallbackChan := make(chan DataStore.ExtButtons_Message)
     globalOrderListCallbackChan := make(chan DataStore.Global_OrderData)
+    masterChan := make(chan bool)
 
     // Start elev logic part
     sendOrderToOne := make(chan DataStore.Order_Message)
@@ -197,14 +199,15 @@ func run() {
     recvLightsChan := make(chan DataStore.ExtButtons_Message)
     sendGlobalChan := make(chan DataStore.Global_OrderData)
     recvGlobalChan := make(chan DataStore.Global_OrderData)
+    doProcessGOLChan := make(chan string)
 
     elevLogic := elevDriver.OrderDriver{N_FLOOR: config.Floors}
     elevLogic.Create(localIP)
     // End elev logic part
 
     // Fire up goroutines
-    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan, sendLightsChan, recvLightsChan, sendGlobalChan, recvGlobalChan, processGOLChan) 
-    go netCtrl.Run(notifyCommChan, orderCallbackChan, processGOLChan, extButtonCallbackChan, globalOrderListCallbackChan)
+    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan, sendLightsChan, recvLightsChan, sendGlobalChan, recvGlobalChan, doProcessGOLChan) 
+    go netCtrl.Run(notifyCommChan, orderCallbackChan, processGOLChan, extButtonCallbackChan, globalOrderListCallbackChan, masterChan)
 
     // Application Control
     go func() {
@@ -217,6 +220,22 @@ func run() {
                 elevLogic.Exit()
                 fmt.Println("Done cleaning up, exiting...")
                 os.Exit(0)
+
+            case mastah := <-masterChan :
+                go func() {
+                    mastah_question_mark = mastah
+                    fmt.Println(mastah_question_mark)
+                }()
+
+            case clientTimedOut := <-processGOLChan :
+                go func() {
+                    if mastah_question_mark {
+                        fmt.Println("We are the master, processing the GOL")
+                        doProcessGOLChan <- clientTimedOut
+                    } else {
+                        fmt.Println("We are not the master, someone else is processing the GOL")
+                    }
+                }()
 
             case commStatusChanged := <-notifyCommChan :
                 go func() {

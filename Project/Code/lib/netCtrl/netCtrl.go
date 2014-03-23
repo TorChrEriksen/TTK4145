@@ -12,6 +12,7 @@ import (
     "fmt"
     "time"
     "strings"
+    "strconv"
     "encoding/json"
     "net"
 )
@@ -143,13 +144,13 @@ func (nc *NetController) connectUDP(udpAddr string) int {
     return udpErr
 }
 
-func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan DataStore.Order_Message, processGOLChan chan string, extButtonCallbackChan chan DataStore.ExtButtons_Message, globalOrderListCallbackChan chan DataStore.Global_OrderData) {
+func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan DataStore.Order_Message, processGOLChan chan string, extButtonCallbackChan chan DataStore.ExtButtons_Message, globalOrderListCallbackChan chan DataStore.Global_OrderData, masterChan chan bool) {
 
     UDP_BroadcastServer.Run(nc.broadcastChan, nc.BroadcastPort, nc.PacketSize)
     UDP_BroadcastClient.Run(nc.bcChan, nc.BroadcastPort)
     SocketServer.Run(nc.orderChan, nc.heartbeatChan, nc.TCPPort, nc.PacketSize)
     go nc.validateConnections(nc.timeoutChan, nc.monitorConnectionsChan, processGOLChan)
-    go nc.monitorCommStatus(nc.monitorConnectionsChan, notifyCommChan)
+    go nc.monitorCommStatus(nc.monitorConnectionsChan, notifyCommChan, masterChan)
 
     go func() {
         for {
@@ -296,7 +297,7 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
 }
 
 // Checks if we have any connections available, if not we are "offline"
-func (nc *NetController) monitorCommStatus(ch chan int, notifyChan chan bool) {
+func (nc *NetController) monitorCommStatus(ch chan int, notifyChan chan bool, masterChan chan bool) {
 
     numberOfConnections := 0
 
@@ -304,7 +305,32 @@ func (nc *NetController) monitorCommStatus(ch chan int, notifyChan chan bool) {
         value := <-ch
 
         // See if we are the master
+        me, err := strconv.Atoi(nc.localIP[strings.LastIndex(nc.localIP, ".") + 1:])
+        if err != nil {
+            fmt.Println("Error converting local IP last segment to int", err.Error())
+        } else {
+             for _, candidate := range nc.hostList {
+                if candidate != "" {
+                    a, err := strconv.Atoi(candidate[strings.LastIndex(candidate, ".") + 1:])
+                    if err != nil {
+                        fmt.Println("Error converting host IP last segment to int", err.Error())
+                    } else {
+                        if me < a {
+                            nc.iAmTheMaster = false
+                            fmt.Println("im not longer ZE MASTAH :<<<<<<<<<<")
+                            masterChan <- nc.iAmTheMaster
+                            break;
+                        } else {
+                            nc.iAmTheMaster = true
+                            fmt.Println("I AM ZE MASTAAAAAH!")
+                        }
+                    }
+                }
+            }
 
+            // Notify that we are the master
+            masterChan <- nc.iAmTheMaster
+        }
 
         if value == -1 {
             numberOfConnections -= 1
