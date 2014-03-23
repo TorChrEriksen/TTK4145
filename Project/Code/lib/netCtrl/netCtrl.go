@@ -438,7 +438,7 @@ func (nc *NetController) SendLights(data DataStore.ExtButtons_Message) {
     if convData != nil {
         for _, client := range nc.tcpClients {
             if client.GetTCPConn() != nil {
-                client.SendData(convData)
+                go client.SendData(convData)
             }
         }
         return
@@ -452,7 +452,7 @@ func (nc *NetController) SendData(data DataStore.Order_Message) {
     if convData != nil {
         for _, client := range nc.tcpClients {
             if client.GetTCPConn() != nil {
-                client.SendData(convData)
+                go client.SendData(convData)
             }
         }
         return
