@@ -217,11 +217,11 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                     newId := int(id)
                     fmt.Println("Type of message id: ", reflect.TypeOf(newId))
 
-                    if newId == 0 {
+                    if newId == 1 {
                         fmt.Println("Order message")
-                    } else if newId == 1 {
-                        fmt.Println("Lights message")
                     } else if newId == 2 {
+                        fmt.Println("Lights message")
+                    } else if newId == 3 {
                         fmt.Println("Global order queue message")
                     } else {
                         fmt.Println("unknown type")

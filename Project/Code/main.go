@@ -225,14 +225,14 @@ func run() {
 
             case sendToOne := <-sendOrderToOne:
                 go func() {
-                    sendToOne.MessageID = 0
+                    sendToOne.MessageID = 1
                     netCtrl.SendData_SingleRecepient(sendToOne, sendToOne.RecipientIP)
                     fmt.Println("Send to single Recepient: ", sendToOne)
                 }()
 
             case sendToAll := <-sendOrderToAll:
                 go func() {
-                    sendToAll.MessageID = 0
+                    sendToAll.MessageID = 1
                     sendToAll.OriginIP = localIP // Validate
                     netCtrl.SendData(sendToAll)
                     fmt.Println("Send To All: ", sendToAll)
@@ -246,7 +246,7 @@ func run() {
 
             case sendLights := <-sendLightsChan:
                 go func() {
-                    sendLights.MessageID = 1
+                    sendLights.MessageID = 2
                     fmt.Println("Send Lights: ", sendLights)
                     netCtrl.SendLights(sendLights)
                 }()
@@ -259,7 +259,7 @@ func run() {
         
             case sendGlobalOrderList := <- sendGlobalChan:
                 go func() {
-                    sendGlobalOrderList.MessageID = 2
+                    sendGlobalOrderList.MessageID = 3
                     fmt.Println("Send Global Order List: ", sendGlobalOrderList)
                     netCtrl.SendGlobalOrderList(sendGlobalOrderList)
                 }()
