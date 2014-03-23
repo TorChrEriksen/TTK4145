@@ -113,24 +113,24 @@ func cost(orderList []order, afterOrderList []order, currPos int, dir_now string
 	var squared float64
 	squared = 2.0
 	switch {
-	case dir_now == "UP" && new_order_dir == "UP":
+	case dir_now == "UP" && new_order_dir == "UP" && len(orderList)!=0:
 		if currPos < new_order {
 			return math.Pow(float64((new_order-currPos)+len(orderList)), squared)
 		} else {
 			return math.Pow(float64(((2*orderList[len(orderList)-1].Floor)-new_order-currPos)+len(orderList)), squared)
 		}
 
-	case dir_now == "DOWN" && new_order_dir == "DOWN":
+	case dir_now == "DOWN" && new_order_dir == "DOWN" && len(orderList)!=0:
 		if new_order < currPos {
 			return math.Pow(float64((currPos-new_order)+len(orderList)), squared)
 		} else {
 			return math.Pow(float64(new_order+currPos-orderList[0].Floor+len(orderList)), squared)
 		}
 
-	case dir_now == "UP" && new_order_dir == "DOWN":
+	case dir_now == "UP" && new_order_dir == "DOWN" && len(orderList)!=0:
 		return math.Pow(float64(2*orderList[len(orderList)-1].Floor-currPos-new_order+len(orderList)), squared)
 
-	case dir_now == "DOWN" && new_order_dir == "UP":
+	case dir_now == "DOWN" && new_order_dir == "UP" && len(orderList)!=0:
 		return math.Pow(float64(currPos+new_order-orderList[0].Floor+len(orderList)), squared)
 
 	default:
@@ -361,7 +361,7 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 					} else if len(od.orderList) == 0 && len(od.afterOrders) == 0 {
 						state("IDLE")
 					} else if od.currentOrder.Floor == od.currentFloor {
-						if od.currentOrder.Dir==od.status || od.currentOrder.Dir=="INT"{
+						if od.currentOrder.Dir==od.status || od.currentOrder.Dir=="INT" || len(od.orderList)==1{
 							state("STOP")
 						
 							driverInterface.SetButtonLamp(od.currentOrder.Dir, od.currentFloor-1, 0)

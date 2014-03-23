@@ -361,7 +361,7 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 					} else if len(od.orderList) == 0 && len(od.afterOrders) == 0 {
 						state("IDLE")
 					} else if od.currentOrder.Floor == od.currentFloor {
-						if od.currentOrder.Dir==od.status || od.currentOrder.Dir=="INT"{
+						if od.currentOrder.Dir==od.status || od.currentOrder.Dir=="INT" || len(od.orderList)==1{
 							state("STOP")
 						
 							driverInterface.SetButtonLamp(od.currentOrder.Dir, od.currentFloor-1, 0)
@@ -480,7 +480,7 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 
 			case ipDown := <-processGOL:
 				go func() {
-					if commDisabled{
+					if od.commDisabled{
 						for _, i := range od.GOL[ipDown] {
 							ordersChann <- order{Floor: i.Floor, Dir: i.Dir, Clear: false}
 						}
