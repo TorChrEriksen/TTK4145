@@ -428,6 +428,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 					if !contains(acosting, od.orderList) && !od.commDisabled {
 
 						toAll <- req
+						/*
 						go func() {
 							got := <-costResponsInternal
 							fmt.Println("GOT A RESPONSE!!")
@@ -442,6 +443,25 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 						}()
 
 						time.Sleep(time.Second * 2)
+						*/
+
+						abort := time.After(2*time.Second)
+						for {
+							select {
+							case <-abort:
+								break
+							case got := <-costResponsInternal:
+								if got.Cost < min.Cost {
+									fmt.Println("New cost: ",got.Cost, "Old cost: ", min.Cost)
+									min.Cost 	= got.Cost
+									min.OriginIP = got.OriginIP
+
+									fmt.Println(min)
+								}
+							}
+						}
+
+
 
 						sendGlobal <- DataStore.Global_OrderData{Floor:min.Floor, Dir:min.Dir, HandlingIP:min.OriginIP, Clear:false}
 
@@ -467,7 +487,7 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 //						fmt.Println("Getting a cost request", input)
 						price := cost(od.orderList, od.afterOrders, od.lastFloor, od.status, input.Floor, input.Dir)
 						fmt.Println("Cost: ",price)
-						toOne <- DataStore.Order_Message{Floor: input.Floor, Dir: input.Dir, RecipientIP: input.OriginIP, OriginIP: input.RecipientIP, Cost: price, What: "COST_RES"}
+						toOne <- DataStore.Order_Message{Floor: input.Floor, Dir: input.Dir, RecipientIP: input.OriginIP, OriginIP: od.myIP, Cost: price, What: "COST_RES"}
 					} else if input.What == "COST_RES" {
 //						fmt.Println("Getting a cost respons")
 						costResponsInternal <- input
@@ -494,11 +514,6 @@ func (od *OrderDriver) Run( toOne chan DataStore.Order_Message, toAll chan DataS
 			
 			case updateGOL := <- recvGlobal:
 				go func(){
-//					_, exists := od.GOL[updateGOL.HandlingIP]					
-	//				if !exists{
-		//				od.GOL[updateGOL.HandlingIP] = DataStore.Received_OrderData{}
-			//			od.GOL[updateGOL.HandlingIP].OrderList = make([]DataStore.Global_OrderData,0)
-				//	}	else
 					if !updateGOL.Clear{
 						od.GOL[updateGOL.HandlingIP] = append(od.GOL[updateGOL.HandlingIP], DataStore.Global_OrderData{Floor: updateGOL.Floor, Dir:updateGOL.Dir, HandlingIP: updateGOL.HandlingIP})
 					} else {
