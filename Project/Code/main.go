@@ -241,6 +241,7 @@ func run() {
             case commStatusChanged := <-notifyCommChan :
                 go func() {
                     commStatusChan <- commStatusChanged
+                    netCtrl.Exit()
                 }()
 
             case sendToOne := <-sendOrderToOne:
