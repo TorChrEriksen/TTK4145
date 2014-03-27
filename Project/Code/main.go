@@ -206,7 +206,7 @@ func run() {
     // End elev logic part
 
     // Fire up goroutines
-    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan, sendLightsChan, recvLightsChan, sendGlobalChan, recvGlobalChan, doProcessGOLChan) 
+    go elevLogic.Run(sendOrderToOne, sendOrderToAll, receivedOrder, commStatusChan, sendLightsChan, recvLightsChan, sendGlobalChan, recvGlobalChan, doProcessGOLChan)
     go netCtrl.Run(notifyCommChan, orderCallbackChan, processGOLChan, extButtonCallbackChan, globalOrderListCallbackChan, masterChan)
 
     // Application Control
@@ -219,7 +219,7 @@ func run() {
                 netCtrl.Exit()
                 elevLogic.Exit()
                 fmt.Println("Done cleaning up, exiting...")
-                os.Exit(1)
+                os.Exit(0)
 
             case mastah := <-masterChan :
                 go func() {
@@ -231,18 +231,12 @@ func run() {
                 go func() {
                     time.Sleep(time.Millisecond * 250)
                     if mastah_question_mark {
-                        fmt.Println("We are the master, processing the GOL")
                         doProcessGOLChan <- clientTimedOut
-                    } else {
-                        fmt.Println("We are not the master, someone else is processing the GOL")
                     }
                 }()
 
             case commStatusChanged := <-notifyCommChan :
                 go func() {
-                    if commStatusChanged == true {
-                        netCtrl.Exit()
-                    }
                     commStatusChan <- commStatusChanged
                 }()
 
@@ -250,7 +244,6 @@ func run() {
                 go func() {
                     sendToOne.MessageID = 1
                     netCtrl.SendData_SingleRecepient(sendToOne, sendToOne.RecipientIP)
-                    fmt.Println("Send to single Recepient: ", sendToOne)
                 }()
 
             case sendToAll := <-sendOrderToAll:
@@ -258,38 +251,32 @@ func run() {
                     sendToAll.MessageID = 1
                     sendToAll.OriginIP = localIP // Validate
                     netCtrl.SendData(sendToAll)
-                    fmt.Println("Send To All: ", sendToAll)
                 }()
 
             case recvOrder := <-orderCallbackChan:
                 go func() {
-                    fmt.Println("Received: ", recvOrder)
                     receivedOrder <- recvOrder
                 }()
 
             case sendLights := <-sendLightsChan:
                 go func() {
                     sendLights.MessageID = 2
-                    fmt.Println("Send Lights: ", sendLights)
                     netCtrl.SendLights(sendLights)
                 }()
                 
             case recvLights := <-extButtonCallbackChan:
                 go func() {
-                    fmt.Println("Recv Lights: ", recvLights)
-                    recvLightsChan <- recvLights 
+                    recvLightsChan <- recvLights
                 }()
         
             case sendGlobalOrderList := <- sendGlobalChan:
                 go func() {
                     sendGlobalOrderList.MessageID = 3
-                    fmt.Println("Send Global Order List: ", sendGlobalOrderList)
                     netCtrl.SendGlobalOrderList(sendGlobalOrderList)
                 }()
 
             case recvGlobalOrderList := <-globalOrderListCallbackChan:
                 go func() {
-                    fmt.Println("Recv Global Order List: ", recvGlobalOrderList)
                     recvGlobalChan <- recvGlobalOrderList
                 }()
             }
@@ -314,9 +301,9 @@ func main() {
             if arg1 == START_PRIMARY {
 
                 /**
-                 * Here we want to start the secondary application and
-                 * start the watch dog. The watch dog will get the PID of both
-                 */
+* Here we want to start the secondary application and
+* start the watch dog. The watch dog will get the PID of both
+*/
 
                  // Start watch dog
                  wd, err := spawnWD(os.Getpid())
@@ -421,7 +408,7 @@ func waitForFailure(wdChan chan int, wdSignalChan chan os.Signal, haltChan chan 
         file, err := os.Open("secondaryPID")
         if err != nil {
             fmt.Println("There was an error opening the SECONDARY PID file")
-            os.Exit(0) 
+            os.Exit(0)
         } else {
             reader := bufio.NewReader(file)
             val, _ := reader.ReadString('\n')
@@ -443,7 +430,7 @@ func waitForFailure(wdChan chan int, wdSignalChan chan os.Signal, haltChan chan 
                 // Kill secondary
                 err = proc.Kill()
                 if err != nil {
-                    fmt.Println("Error killing secondary process: ",  err.Error())
+                    fmt.Println("Error killing secondary process: ", err.Error())
                     os.Exit(0)
                 }
             }
@@ -453,7 +440,7 @@ func waitForFailure(wdChan chan int, wdSignalChan chan os.Signal, haltChan chan 
         wd, err := spawnWD(os.Getpid())
         if err != nil {
             fmt.Println("Error restarting Watch Dog: ", err.Error())
-            os.Exit(0) 
+            os.Exit(0)
         }
         fmt.Println("Primary: Watch Dog RESTARTED")
 
