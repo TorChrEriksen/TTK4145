@@ -184,14 +184,7 @@ func readOrdersFromFile(filename string) ([]order, int) {
 
 // Clean exit, remove file, go to nearest floor, stop and open the door
 func (od *OrderDriver) Exit() {
-	if od.currentFloor == 0 {
-		if od.status == "IDLE" {
-			state("DOWN")
-			for od.currentFloor == 0 {
-				time.Sleep(time.Millisecond * 250)
-			}
-		}
-	}
+	driverInterface.SetSpeed(0)
 	os.Remove("orderList.txt")
 	os.Remove("afterOrders.txt")
 }
@@ -214,6 +207,7 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 
 	driverInterface.Create(intButtonChannel, floorChannel, stopChannel, extButtonChannel, timeoutChannel)
 
+	oldOrders := false
 	// Reading Floor and communication status
 	go func() {
 		for {
@@ -246,23 +240,129 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 		state("DOWN")
 		fmt.Println("Going")
 		for od.currentFloor != 1 {
-			if od.currentFloor != 1 {
-				time.Sleep(time.Millisecond * 200)
-			}
+			time.Sleep(time.Millisecond * 10)
 		}
 		state("STOP")
 		od.status = "IDLE"
 
 	//else go to nearest floor and update order.
 	} else if od.currentFloor == 0 {
+		oldOrders = true
 		state("DOWN")
 		for od.currentFloor == 0 {
-			time.Sleep(time.Millisecond * 250)
+			time.Sleep(time.Millisecond * 10)
 		}
-		updateCurrentOrder <- true
+		state("STOP")
 	} else {
-		updateCurrentOrder <- true
+		oldOrders = true
+		state("STOP")
+		
 	}
+
+	go func() {
+		for{
+			new_order := <-ordersChann
+				test := order{-1, "NO", false}
+				if len(od.afterOrders) != 0 && len(od.orderList) == 0 && new_order==test {
+
+					od.orderList = od.afterOrders
+					od.afterOrders = []order(nil)
+					writeOrdersToFile("orderList.txt", od.orderList)
+					writeOrdersToFile("afterOrders.txt", od.afterOrders)
+
+					updateCurrentOrder <- true
+				} else if new_order.Clear {
+					od.orderList = remove(order{new_order.Floor, new_order.Dir, false}, od.orderList)
+					writeOrdersToFile("orderList.txt", od.orderList)
+
+					updateCurrentOrder <- true
+
+				} else if !contains(new_order, od.orderList) && !contains(new_order, od.afterOrders) && new_order.Dir != "NO" {
+					if od.status == "UP" {
+						if (new_order.Floor < od.currentFloor && od.currentFloor == od.lastFloor) || (new_order.Floor < od.lastFloor+1 && od.currentFloor == 0) || new_order.Dir == "DOWN" {
+							od.afterOrders = append(od.afterOrders, new_order)
+							sort.Sort(ByFloor(od.afterOrders))
+							writeOrdersToFile("afterOrders.txt", od.afterOrders)
+							updateCurrentOrder <- true
+
+						} else {
+							od.orderList = append(od.orderList, new_order)
+							sort.Sort(ByFloor(od.orderList))
+							writeOrdersToFile("orderList.txt", od.orderList)
+							updateCurrentOrder <- true
+
+						}
+					} else if od.status == "DOWN" {
+						if (new_order.Floor > od.currentFloor && od.currentFloor == od.lastFloor) || (new_order.Floor > od.lastFloor-1 && od.currentFloor == 0) || new_order.Dir == "UP" {
+							od.afterOrders = append(od.afterOrders, new_order)
+							sort.Sort(ByFloor(od.afterOrders))
+							writeOrdersToFile("afterOrders.txt", od.afterOrders)
+							updateCurrentOrder <- true
+						} else {
+							od.orderList = append(od.orderList, new_order)
+							sort.Sort(ByFloor(od.orderList))
+							writeOrdersToFile("orderList.txt", od.orderList)
+							updateCurrentOrder <- true
+						}
+					} else {
+
+						od.orderList = append(od.orderList, new_order)
+						sort.Sort(ByFloor(od.orderList))
+						writeOrdersToFile("orderList.txt", od.orderList)
+						updateCurrentOrder <- true
+					}
+				}
+		}	
+	} ()
+
+	go func() {
+		for {
+			new_stuff := <-updatePos
+				if !new_stuff.Clear || new_stuff.Dir != "NO" {
+					od.currentOrder = new_stuff
+				}
+				if new_stuff.Dir == "NO" {
+					for od.currentFloor == 0 {
+						time.Sleep(time.Millisecond * 250)
+					}
+					od.status = "IDLE"
+					//							state("STOP")
+				} else if len(od.orderList) == 0 && len(od.afterOrders) == 0 {
+					state("IDLE")
+				} else if od.currentOrder.Floor == od.currentFloor {
+					if od.currentOrder.Dir==od.status || od.currentOrder.Dir=="INT" || len(od.orderList)==1{
+						state("STOP")
+					
+						driverInterface.SetButtonLamp(od.currentOrder.Dir, od.currentFloor-1, 0)
+						if od.currentOrder.Dir != "INT" {
+							setLights <- DataStore.ExtButtons_Message{Floor: od.currentFloor, Dir: od.currentOrder.Dir, Value: 0}
+							sendGlobal <- DataStore.Global_OrderData{Floor: od.currentFloor, Dir: od.currentOrder.Dir, HandlingIP: od.myIP, Clear: true}
+						}
+						state("OPEN")
+						ordersChann <- order{od.currentOrder.Floor, od.currentOrder.Dir, true}
+						} else {
+							ordersChann <- order{od.currentOrder.Floor, od.currentOrder.Dir, true}
+							ordersChann <- order{od.currentOrder.Floor, od.currentOrder.Dir, false}
+						}
+/*
+					if od.currentFloor == 1 {
+						od.status = "UP"
+					} else if od.currentFloor == od.N_FLOOR {
+						od.status = "DOWN"
+					}*/
+					updateCurrentOrder <- true
+
+				} else if od.currentOrder.Floor > od.lastFloor && od.currentFloor != od.N_FLOOR {
+					state("UP")
+					od.status = "UP"
+
+				} else if od.currentOrder.Floor < od.lastFloor && od.currentOrder.Floor != 0 {
+					state("DOWN")
+					od.status = "DOWN"
+				}
+
+		}
+	} ()
 
 	go func() {
 		for {
@@ -278,7 +378,7 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 						ordersChann <- order{-1, "NO", false}
 
 					} else if (od.status == "IDLE" && od.lastFloor<3) || (od.status == "UP") {
-						sort.Sort(ByFloor(od.afterOrders))
+//						sort.Sort(ByFloor(od.afterOrders)) // TODO
 						updatePos <- od.orderList[0]
 					} else if (od.status == "IDLE" && od.lastFloor>=3) || (od.status == "DOWN") {
 						updatePos <- od.orderList[len(od.orderList)-1]
@@ -291,61 +391,7 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 					driverInterface.SetButtonLamp(incommingInternal.Dir, incommingInternal.Floor-1, 1) 
 					ordersChann <- incommingInternal
 				}()
-
-			case new_order := <-ordersChann:
-				go func() {
-					test := order{-1, "NO", false}
-					if len(od.afterOrders) != 0 && len(od.orderList) == 0 && new_order==test {
-
-						od.orderList = od.afterOrders
-						od.afterOrders = nil
-						writeOrdersToFile("orderList.txt", od.orderList)
-						writeOrdersToFile("afterOrders.txt", od.afterOrders)
-
-						updateCurrentOrder <- true
-					} else if new_order.Clear {
-						od.orderList = remove(order{new_order.Floor, new_order.Dir, false}, od.orderList)
-						writeOrdersToFile("orderList.txt", od.orderList)
-
-						updateCurrentOrder <- true
-
-					} else if !contains(new_order, od.orderList) && !contains(new_order, od.afterOrders) && new_order.Dir != "NO" {
-						if od.status == "UP" {
-							if (new_order.Floor < od.currentFloor && od.currentFloor == od.lastFloor) || (new_order.Floor < od.lastFloor+1 && od.currentFloor == 0) || new_order.Dir == "DOWN" {
-								od.afterOrders = append(od.afterOrders, new_order)
-								sort.Sort(ByFloor(od.afterOrders))
-								writeOrdersToFile("afterOrders.txt", od.afterOrders)
-								updateCurrentOrder <- true
-
-							} else {
-								od.orderList = append(od.orderList, new_order)
-								sort.Sort(ByFloor(od.orderList))
-								writeOrdersToFile("orderList.txt", od.orderList)
-								updateCurrentOrder <- true
-
-							}
-						} else if od.status == "DOWN" {
-							if (new_order.Floor > od.currentFloor && od.currentFloor == od.lastFloor) || (new_order.Floor > od.lastFloor-1 && od.currentFloor == 0) || new_order.Dir == "UP" {
-								od.afterOrders = append(od.afterOrders, new_order)
-								sort.Sort(ByFloor(od.afterOrders))
-								writeOrdersToFile("afterOrders.txt", od.afterOrders)
-								updateCurrentOrder <- true
-							} else {
-								od.orderList = append(od.orderList, new_order)
-								sort.Sort(ByFloor(od.orderList))
-								writeOrdersToFile("orderList.txt", od.orderList)
-								updateCurrentOrder <- true
-							}
-						} else {
-
-							od.orderList = append(od.orderList, new_order)
-							sort.Sort(ByFloor(od.orderList))
-							writeOrdersToFile("orderList.txt", od.orderList)
-							updateCurrentOrder <- true
-						}
-					}
-				}()
-
+/*
 			case new_stuff := <-updatePos:
 				go func() {
 
@@ -393,7 +439,7 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 					}
 
 				}()
-
+*/
 			case extSig := <-extButtonChannel:
 				go func() {
 					var extOrder order
@@ -416,7 +462,8 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 					req := min
 					if !contains(acosting, od.orderList) && !od.commDisabled {
 						toAll <- req
-						abort := time.After(500 * time.Millisecond)
+						fmt.Println("MASSE CAPS")
+						abort := time.After(50 * time.Millisecond)
 					loop:
 						for {
 							select {
@@ -424,11 +471,8 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 								break loop
 							case got := <-costResponsInternal:
 								if got.Cost < min.Cost {
-									fmt.Println("New cost: ", got.Cost, "Old cost: ", min.Cost)
 									min.Cost = got.Cost
 									min.OriginIP = got.OriginIP
-
-									fmt.Println(min)
 								}
 							}
 						}
@@ -438,11 +482,9 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 
 						if min.OriginIP == od.myIP {
 							ordersChann <- order{min.Floor, min.Dir, false}
-							fmt.Println("I'm taking this")
 
 						} else {
 						
-							fmt.Println("Someone else doin this")
 							toOne <- DataStore.Order_Message{Floor: min.Floor, Dir: min.Dir, RecipientIP: min.OriginIP, What: "O_REQ"}
 
 						}
@@ -456,7 +498,6 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 					if input.What == "COST_REQ" {
 
 						price := cost(od.orderList, od.afterOrders, od.lastFloor, od.status, input.Floor, input.Dir)
-						fmt.Println("Cost: ", price)
 						toOne <- DataStore.Order_Message{Floor: input.Floor, Dir: input.Dir, RecipientIP: input.OriginIP, OriginIP: od.myIP, Cost: price, What: "COST_RES"}
 					
 					} else if input.What == "COST_RES" {
@@ -465,7 +506,6 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 
 					} else if input.What == "O_REQ" {
 
-						fmt.Println(("Getting an Order from OUTSIDE"))
 						ordersChann <- order{input.Floor, input.Dir, false}
 
 					}
@@ -506,4 +546,9 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 			}
 		}
 	}()
+
+	if oldOrders{
+	fmt.Println("YAY!")
+		updateCurrentOrder <- true
+	}
 }

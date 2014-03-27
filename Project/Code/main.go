@@ -219,7 +219,7 @@ func run() {
                 netCtrl.Exit()
                 elevLogic.Exit()
                 fmt.Println("Done cleaning up, exiting...")
-                os.Exit(0)
+                os.Exit(1)
 
             case mastah := <-masterChan :
                 go func() {
