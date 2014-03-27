@@ -112,6 +112,7 @@ func startUDPServ(ch chan DataStore.Heartbeat_Message, packetSize int) {
 	listener, err := net.ListenUDP("udp", addr)
 	if err != nil {
         l.Println("Error: ", err.Error())
+        return
 	}
 	defer listener.Close()
 

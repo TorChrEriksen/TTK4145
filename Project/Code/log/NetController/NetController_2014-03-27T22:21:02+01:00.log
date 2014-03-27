@@ -1,0 +1,258 @@
+2014/03/27 22:21:02.233579 logger.go:87: ========== New log ==========
+2014/03/27 22:21:02.233754 logger.go:87: Local IP found: 129.241.187.144
+2014/03/27 22:21:02.234699 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:02.234741 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:21:07.234862 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:07.234908 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:21:12.234976 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:12.235012 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:21:17.235095 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:17.235168 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:21:22.235208 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:22.235260 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:21:27.235317 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:27.235384 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:21:32.235427 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:32.235482 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:21:37.235536 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:37.235591 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:21:42.235643 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:42.235700 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:21:47.235751 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:47.235813 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:21:52.235874 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:52.235924 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:21:57.235989 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:21:57.236045 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:02.236124 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:02.236225 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:07.236214 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:07.236259 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:12.236322 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:12.236376 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:17.236439 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:17.236498 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:22.236547 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:22.236599 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:27.236661 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:27.236724 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:32.236763 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:32.236810 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:37.236872 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:37.236921 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:42.236985 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:42.237040 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:47.237110 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:47.237162 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:52.237206 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:52.237267 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:22:57.237318 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:22:57.237375 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:02.237434 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:02.237485 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:07.237542 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:07.237605 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:12.237648 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:12.237712 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:17.237791 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:17.237882 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:22.237890 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:22.237938 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:27.238011 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:27.238135 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:32.238122 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:32.238188 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:37.238234 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:37.238300 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:42.238320 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:42.238372 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:47.238447 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:47.238517 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:52.238567 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:52.238629 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:23:57.238687 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:23:57.238746 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:02.238794 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:02.238855 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:07.238908 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:07.238971 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:12.239014 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:12.239065 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:17.239129 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:17.239189 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:22.239243 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:22.239299 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:27.239353 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:27.239410 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:32.239457 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:32.239514 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:37.239561 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:37.239607 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:42.239679 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:42.239731 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:47.239784 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:47.239843 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:52.239896 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:52.239952 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:24:57.240005 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:24:57.240055 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:02.240137 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:02.240192 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:07.240238 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:07.240290 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:12.240341 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:12.240388 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:17.240455 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:17.240516 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:22.240571 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:22.240620 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:27.240684 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:27.240739 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:32.240803 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:32.240864 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:37.240917 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:37.240969 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:42.241034 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:42.241092 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:47.241142 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:47.241208 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:52.241243 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:52.241294 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:25:57.241372 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:25:57.241408 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:02.241471 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:02.241523 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:07.241583 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:07.241643 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:12.241706 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:12.241748 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:17.241826 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:17.241884 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:22.241922 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:22.241983 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:27.242034 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:27.242092 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:32.242145 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:32.242201 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:37.242252 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:37.242303 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:42.242353 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:42.242408 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:47.242461 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:47.242506 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:52.242566 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:52.242615 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:26:57.242673 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:26:57.242719 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:02.242792 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:02.242839 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:07.242893 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:07.242947 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:12.242995 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:12.243045 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:17.243109 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:17.243160 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:22.243215 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:22.243260 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:27.243328 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:27.243378 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:32.243432 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:32.243486 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:37.243538 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:37.243586 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:42.243642 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:42.243690 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:47.243753 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:47.243804 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:52.243870 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:52.243900 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:27:57.243992 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:27:57.244045 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:02.244109 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:02.244216 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:07.244215 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:07.244261 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:12.244321 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:12.244370 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:17.244438 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:17.244492 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:22.244553 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:22.244609 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:27.244657 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:27.244712 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:32.244767 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:32.244816 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:37.244875 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:37.244925 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:42.244993 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:42.245052 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:47.245096 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:47.245146 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:52.245202 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:52.245261 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:28:57.245309 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:28:57.245367 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:02.245426 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:02.245477 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:07.245528 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:07.245584 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:12.245630 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:12.245684 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:17.245747 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:17.245802 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:22.245861 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:22.245922 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:27.245970 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:27.246028 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:32.246077 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:32.246124 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:37.246182 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:37.246227 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:42.246295 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:42.246346 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:47.246409 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:47.246468 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:52.246537 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:52.246593 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:29:57.246631 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:29:57.246690 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:02.246745 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:02.246799 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:07.246839 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:07.246873 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:12.246960 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:12.247016 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:17.247074 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:17.247130 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:22.247177 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:22.247226 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:27.247290 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:27.247341 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:32.247402 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:32.247454 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:37.247508 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:37.247557 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:42.247623 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:42.247688 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:47.247725 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:47.247781 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:52.247863 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:52.247931 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:30:57.247989 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:30:57.248041 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:31:02.248092 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:31:02.248151 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:31:07.248198 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:31:07.248250 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:31:12.248332 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:31:12.248385 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:31:17.248431 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:31:17.248500 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:31:22.248529 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:31:22.248578 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:31:27.248636 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:31:27.248694 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:31:32.248743 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:31:32.248790 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
+2014/03/27 22:31:37.248869 logger.go:87: Sent a broadcast message with 48 bytes.
+2014/03/27 22:31:37.248920 logger.go:87: Ignoring broadcast from local IP: 129.241.187.144
