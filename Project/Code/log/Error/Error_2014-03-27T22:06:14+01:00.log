@@ -1,2 +1,0 @@
-2014/03/27 22:06:14.329185 logger.go:87: ========== New log ==========
-2014/03/27 22:07:21.849347 logger.go:94: ERROR:    :  Catched a killsignal:, interrupt
