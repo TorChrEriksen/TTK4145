@@ -103,7 +103,7 @@ func (nc *NetController) connectTCP(tcpAddr string) int {
 
     // Add tcp connection to tcp slice.
     if tcpErr == 1 {
-        nc.tcpClients = append(nc.tcpClients, tcpClient) 
+        nc.tcpClients = append(nc.tcpClients, tcpClient)
         result := fmt.Sprint("Added connection to TCP slice: ", tcpClient.GetTCPConn().RemoteAddr().String())
         nc.al.Send_To_Log(nc.Identifier, logger.INFO, result)
         nc.monitorConnectionsChan <- 1
@@ -177,15 +177,15 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                     nc.hostList = append(nc.hostList, broadcastMessage.IP)
 
 
-                    nc.connectTCP(fmt.Sprint(broadcastMessage.IP, ":", nc.TCPPort)) 
-                    nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":", nc.UDPPort)) 
+                    nc.connectTCP(fmt.Sprint(broadcastMessage.IP, ":", nc.TCPPort))
+                    nc.connectUDP(fmt.Sprint(broadcastMessage.IP, ":", nc.UDPPort))
                 }()
 
             // Received a heartbeat
             case heartbeat := <-nc.heartbeatChan :
                 go func() {
                     for _, client := range nc.clientList {
-                        if strings.EqualFold(client.GetIP(), heartbeat.IP) { 
+                        if strings.EqualFold(client.GetIP(), heartbeat.IP) {
                             nc.al.Send_To_Log(nc.Identifier, logger.INFO, fmt.Sprint("Already part of UDP client list: ", heartbeat.IP))
 
                             // Reset timer for this connection
@@ -216,7 +216,6 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                     id := int(m["MessageID"].(float64))
 
                     if id == 1 {
-                        fmt.Println("Order message")
                         var result DataStore.Order_Message
                         for k, v := range m {
                             switch k {
@@ -235,15 +234,13 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                             case "What" :
                                 result.What = v.(string)
                             default :
-                                fmt.Println("Error: ", k, " | ", v)
+                                continue
                             }
                         }
 
-                        fmt.Println("Result: ", result)
                         orderCallbackChan <- result
 
                     } else if id == 2 {
-                        fmt.Println("Lights message")
                         var result DataStore.ExtButtons_Message
                         for k,v := range m {
                             switch k {
@@ -256,15 +253,13 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                             case "Value" :
                                 result.Value = int(v.(float64))
                             default :
-                                fmt.Println("Error: ", k, " | ", v)
+                                continue
                             }
                         }
 
-                        fmt.Println("Result: ", result)
                         extButtonCallbackChan <- result
 
                     } else if id == 3 {
-                        fmt.Println("Global order queue message")
                         var result DataStore.Global_OrderData
                         for k,v := range m {
                             switch k {
@@ -279,15 +274,13 @@ func (nc *NetController) Run(notifyCommChan chan bool, orderCallbackChan chan Da
                             case "Clear" :
                                 result.Clear = v.(bool)
                             default :
-                                fmt.Println("Error: ", k, " | ", v)
+                                continue
                             }
                         }
 
-                        fmt.Println("Result: ", result)
                         globalOrderListCallbackChan <- result
 
                     } else {
-                        fmt.Println("Unknown message received")
                         return
                     }
                 }()
@@ -312,7 +305,6 @@ func (nc *NetController) monitorCommStatus(ch chan int, notifyChan chan bool, ma
             continue
         }
 
-        fmt.Println("Number of connections: ", numberOfConnections)
 
         if numberOfConnections > 0 {
             nc.CommDisabled = false
@@ -325,26 +317,23 @@ func (nc *NetController) monitorCommStatus(ch chan int, notifyChan chan bool, ma
         // See if we are the master
         me, err := strconv.Atoi(nc.localIP[strings.LastIndex(nc.localIP, ".") + 1:])
         if err != nil {
-            fmt.Println("Error converting local IP last segment to int", err.Error())
+            continue
         } else if numberOfConnections == 0 {
             nc.iAmTheMaster = false
-            fmt.Println("im no longer ZE MASTAH! No connections :<<<")
             masterChan <- nc.iAmTheMaster
         } else {
              for _, candidate := range nc.hostList {
                 if candidate != "" {
                     a, err := strconv.Atoi(candidate[strings.LastIndex(candidate, ".") + 1:])
                     if err != nil {
-                        fmt.Println("Error converting host IP last segment to int", err.Error())
+                        break
                     } else {
                         if me < a {
                             nc.iAmTheMaster = false
-                            fmt.Println("im not longer ZE MASTAH :<<<<<<<<<<")
                             masterChan <- nc.iAmTheMaster
                             break;
                         } else {
                             nc.iAmTheMaster = true
-                            fmt.Println("I AM ZE MASTAAAAAH!")
                         }
                     }
                 }
@@ -364,17 +353,12 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
 
         for n, client := range nc.clientList {
             if strings.EqualFold(client.GetIP(), timedOutClient) {
-                fmt.Println("Found a client in our list that has timed out: ", timedOutClient)
-
-                fmt.Println("Client list: ", nc.clientList)
 
                 // Grow the slice by one
                 nc.clientList = append(nc.clientList, ClientCtrl.ClientInfo{})
-                fmt.Println("Client list: ", nc.clientList)
 
                 // Swap the element that timed out with the last element (always nil), and delete shrink slice
                 nc.clientList = append(nc.clientList[:n], nc.clientList[n + 1])
-                fmt.Println("Client list: ", nc.clientList)
 
                 // Remove the connection from TCP client list
                 go func() {
@@ -386,23 +370,17 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
                                 nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error spliting TCP IP: ", err.Error()))
                                 return
                             }
-
-                            fmt.Println("TCP IP: ", host)
-
                             if strings.EqualFold(timedOutClient, host) {
 
                                 // Kill TCP connection
                                 nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill tcp connection")
                                 tcpClient.KillTCPConnection()
-                                fmt.Println("TCP clients: ", nc.tcpClients)
 
                                 // Grow the slice by one
                                 nc.tcpClients = append(nc.tcpClients, SocketClient.SocketClient{})
-                                fmt.Println("TCP clients: ", nc.tcpClients)
 
                                 // Swap the element that timed out with the last element (always nil), and delete shrink slice
                                 nc.tcpClients = append(nc.tcpClients[:k], nc.tcpClients[k + 1])
-                                fmt.Println("TCP clients: ", nc.tcpClients)
                             }
                         }
                     }
@@ -411,30 +389,24 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
                 // Remove the connection from UDP client list
                 go func() {
                     for j, udpClient := range nc.udpClients {
-                        if udpClient.GetUDPConn() != nil { 
+                        if udpClient.GetUDPConn() != nil {
                             
                             host, _, err := net.SplitHostPort(udpClient.GetUDPConn().RemoteAddr().String())
                             if err != nil {
                                 nc.al.Send_To_Log(nc.Identifier, logger.ERROR, fmt.Sprint("Error spliting UDP IP: ", err.Error()))
                                 return
                             }
-
-                            fmt.Println("UDP IP: ", host)
-
                             if strings.EqualFold(timedOutClient, host) {
 
                                 // Kill UDP connection
                                 nc.al.Send_To_Log(nc.Identifier, logger.INFO, "Attempting to kill udp connection")
                                 udpClient.KillUDPConnection()
-                                fmt.Println("UDP clients: ", nc.udpClients)
 
                                 // Grow the slice by one
                                 nc.udpClients = append(nc.udpClients, SocketClient.SocketClient{})
-                                fmt.Println("UDP clients: ", nc.udpClients)
 
                                 // Swap the element that timed out with the last element (always nil), and delete shrink slice
                                 nc.udpClients = append(nc.udpClients[:j], nc.udpClients[j + 1])
-                                fmt.Println("UDP clients: ", nc.udpClients)
                             }
                         }
                     }
@@ -447,11 +419,9 @@ func (nc *NetController) validateConnections(timeoutChan chan string, monitorCon
 
                             // Grow the slice by one
                             nc.hostList = append(nc.hostList, "")
-                            fmt.Println("Host list: ", nc.hostList)
 
                             // Swap the element that timed out with the last element (always nil), and delete shrink slice
                             nc.hostList = append(nc.hostList[:m], nc.hostList[m + 1])
-                            fmt.Println("Host list: ", nc.hostList)
 
                             // Update our connection monitor
                             monitorConnectionsChan <- -1
