@@ -29,7 +29,6 @@ func acceptConn(conn net.Conn, l log.Logger, ch chan []byte, packetSize int) {
         if err != nil {
             l.Println("Error while reading from connection: ", err.Error(), " I read ", n, " bytes.")
             l.Println("ALERT: Connection probably terminated, closing socket.")
-            conn.Close()
             return
         }
         ch <- data[:n]
