@@ -463,7 +463,7 @@ func (od *OrderDriver) Run(toOne chan DataStore.Order_Message, toAll chan DataSt
 					if !contains(acosting, od.orderList) && !od.commDisabled {
 						toAll <- req
 						fmt.Println("MASSE CAPS")
-						abort := time.After(50 * time.Millisecond)
+						abort := time.After(100 * time.Millisecond)
 					loop:
 						for {
 							select {
